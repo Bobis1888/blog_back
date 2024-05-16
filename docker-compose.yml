@@ -1,0 +1,37 @@
+version: '3.8'
+services:
+  eureka:
+    container_name: eureka
+    network_mode: host
+    build:
+      context: .
+      args:
+        APP_NAME: eureka
+
+  balancer:
+    container_name: balancer
+    network_mode: host
+    depends_on:
+      eureka:
+        condition: service_started
+    build:
+      context: .
+      args:
+        APP_NAME: balancer
+    #    restart: always
+
+  config:
+    container_name: config
+    network_mode: host
+    depends_on:
+      eureka:
+        condition: service_started
+    build:
+      context: .
+      args:
+        APP_NAME: config
+#    restart: always
+
+volumes:
+  cache:
+    driver: local

@@ -1,0 +1,80 @@
+
+server:
+  port: 8082
+  address: 0.0.0.0
+
+eureka:
+  client.serviceUrl.defaultZone: http://127.0.0.1:8761/eureka/
+  instance.prefer-ip-address: true
+
+spring:
+  application:
+    name: auth
+
+  config.import: 'optional:configserver:'
+  cloud:
+    config:
+      discovery:
+        enabled: true
+        service-id: configserver
+      fail-fast: false
+      username: user
+      password: change.me
+
+
+#  artemis:
+#    broker-url: tcp://localhost:61616
+#    embedded:
+#      enabled: false
+#    mode: native
+#    password: change.me
+#    spammer:
+#      queue: spammer.queue
+#    user: isfront
+  datasource:
+# PosgreSQL
+#    driver-class-name: org.postgresql.Driver
+#    url: jdbc:postgresql://localhost:5432/web_site
+#    username: user
+#    password: change.me
+    # H2
+    driverClassName: org.h2.Driver
+    url: jdbc:h2:mem:testdb
+    username: sa
+    password: password
+  jpa:
+# H2
+    database-platform: org.hibernate.dialect.H2Dialect
+# PosgreSQL
+#    properties.hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
+#    database-platform: org.hibernate.dialect.PostgreSQLDialect
+  #    hibernate.ddl-auto: none
+  #  liquibase.changeLog: 'classpath:db/liquibase.xml'
+  #show-sql: true
+  session:
+    timeout: 60000
+  data:
+    redis:
+      host: 127.0.0.1
+      password: 123456
+      port: 6379
+  mail:
+    emulator: true #disable spam
+    host: 'smtp.gmail.com'
+    port: 587
+    username: '' #chat.private@gmail.com
+    password: '' #pass
+    properties.mail.smtp.auth: true
+    properties.mail.smtp.starttls.enable: true
+
+auth.max.attempts: 3
+auth.block.time: 120 #minutes
+
+
+logging:
+  pattern:
+    console: "%blue(%d) %highlight(%-5level) %green(%t) %yellow(%c{1.}): %msg%n"
+    file: "%d %-5level %t %c{1.}: %msg%n"
+  level:
+    org.springframework.web.filter.CommonsRequestLoggingFilter: DEBUG
+    root: INFO

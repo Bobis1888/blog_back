@@ -1,0 +1,25 @@
+rootProject.name = 'back'
+
+ArrayList<String> listScanDirectory = ['micro-services', 'lib']
+System.err.println("Processing settings.gradle try search in ${listScanDirectory}")
+
+listScanDirectory.forEach(dir -> {
+    System.err.println("Scanning dir $dir ...")
+    Arrays.asList(file("./$dir").listFiles()).forEach( it -> {
+
+        if (it.isDirectory()) {
+            System.err.println("Add module ${it.name} in gradle project")
+            include(":${dir}:${it.name}")
+            it.listFiles().each(childFile -> {
+
+                if (childFile.name == "${it.name}-api") {
+                    include(":${dir}:${it.name}:api")
+                    findProject(":${dir}:${it.name}:api")?.projectDir = childFile
+                } else if (childFile.isDirectory() && new File(childFile.canonicalPath+"/build.gradle").exists()) {
+                    include(":${dir}:${it.name}:${childFile.name}")
+                    findProject(":${dir}:${it.name}:${childFile.name}")?.projectDir = childFile
+                }
+            })
+        }
+    })
+})
