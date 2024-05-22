@@ -1,4 +1,4 @@
-package ru.infosysco.balancer.configure;
+package ru.infosysco.balancer.config;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;

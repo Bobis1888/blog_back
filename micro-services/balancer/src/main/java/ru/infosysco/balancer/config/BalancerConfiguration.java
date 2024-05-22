@@ -1,4 +1,4 @@
-package ru.infosysco.balancer;
+package ru.infosysco.balancer.config;
 
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;

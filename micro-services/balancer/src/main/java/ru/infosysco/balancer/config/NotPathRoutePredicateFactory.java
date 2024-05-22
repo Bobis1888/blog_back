@@ -1,4 +1,4 @@
-package ru.infosysco.balancer;
+package ru.infosysco.balancer.config;
 
 import org.springframework.cloud.gateway.handler.predicate.PathRoutePredicateFactory;
 import org.springframework.stereotype.Component;

@@ -62,7 +62,8 @@ public class RegistrationService {
         var userName = cache.get("registration_uuid_" + uuid, String.class);
 
         if (!StringUtils.hasText(userName)) {
-            throw new InvalidUUIDException();
+            log.warn("Invalid UUID {}", uuid);
+            return false;
         }
 
         var user = userRepository
@@ -72,7 +73,8 @@ public class RegistrationService {
         // Already confirmed
         if (user.isEnabled()) {
             cache.evictIfPresent("registration_uuid_" + uuid);
-            throw new InvalidUUIDException();
+            log.warn("User already enabled {}", user.getId());
+            return false;
         }
 
         user.setEnabled(true);
@@ -90,13 +92,29 @@ public class RegistrationService {
         return true;
     }
 
-    // TODO
     private void sendEmail(String email, String uud) {
         String link = serverAddress + "/auth/confirm?uuid=" + uud;
         log.info("Link : {}", link);
 
         mailService.sendMail(email,
-                "Подтвердите регистрацию",
-                "Здравствуйте Ссылка для подтверждения регистрации : " + link);
+                "Подтвердите регистрацию на сайте",
+                buildEmailHtml(link));
+    }
+
+    // TODO template
+    String buildEmailHtml(String url) {
+        var builder = new StringBuilder();
+
+        builder.append("<html>");
+        builder.append("<body>");
+        builder.append("<h4>Здравствуйте для подтверждения регистрации на сайте необходимо пройти по ссылке</h4>");
+        builder.append("<div>");
+        builder.append("<a href=\"");
+        builder.append(url);
+        builder.append("\">Ссылка для подтверждения</a>");
+        builder.append("</div>");
+        builder.append("</body>");
+        builder.append("</html>");
+        return builder.toString();
     }
 }

@@ -1,11 +1,11 @@
-FROM openjdk:17.0.2-slim as builder
+FROM gradle:8.7-jdk17-alpine as builder
 ARG APP_NAME=app
 
 ADD . /project
 
 WORKDIR /project
 
-RUN ./gradlew micro-services:${APP_NAME}:build --info
+RUN gradle micro-services:${APP_NAME}:build --info
 
 FROM openjdk:17.0.2-slim
 ARG APP_NAME=app

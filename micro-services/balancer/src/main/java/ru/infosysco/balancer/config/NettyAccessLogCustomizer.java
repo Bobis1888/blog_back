@@ -1,4 +1,4 @@
-package ru.infosysco.balancer.configure;
+package ru.infosysco.balancer.config;
 
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.core.rolling.RollingFileAppender;

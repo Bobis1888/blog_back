@@ -1,4 +1,4 @@
-package ru.infosysco.balancer.configure;
+package ru.infosysco.balancer.config;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;

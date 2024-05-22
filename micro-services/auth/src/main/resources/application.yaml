@@ -1,7 +1,7 @@
 
 server:
   port: 8082
-  address: 0.0.0.0
+  address: 192.168.1.10
 
 eureka:
   client.serviceUrl.defaultZone: http://127.0.0.1:8761/eureka/
@@ -10,6 +10,9 @@ eureka:
 spring:
   profiles:
     active: dev
+    include:
+      - dev
+      - prod
   application:
     name: auth
 
@@ -61,11 +64,11 @@ spring:
       password: 123456
       port: 6379
   mail:
-    emulator: true #disable spam
+    emulator: false #disable spam
     host: 'smtp.gmail.com'
     port: 587
-    username: '' #chat.private@gmail.com
-    password: '' #pass
+    #username: 'test@gmail.com'
+    #password: 'pass'
     properties.mail.smtp.auth: true
     properties.mail.smtp.starttls.enable: true
 

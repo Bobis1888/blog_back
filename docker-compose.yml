@@ -44,6 +44,12 @@ services:
         APP_NAME: auth
     #    restart: always
 
+  angular:
+    container_name: angular
+    network_mode: host
+    build:
+      context: ../front/.
+
 volumes:
   cache:
     driver: local
