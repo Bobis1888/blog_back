@@ -121,6 +121,15 @@ public class AuthService {
             }
         }
     }
+
+    public void logout() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null) {
+            log.info("User {} logged out", authentication.getName());
+        }
+
+        SecurityContextHolder.clearContext();
+    }
 }
 
 

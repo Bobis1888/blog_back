@@ -31,6 +31,18 @@ services:
       args:
         APP_NAME: config
 #    restart: always
+   
+  auth:
+    container_name: auth
+    network_mode: host
+    depends_on:
+      eureka:
+        condition: service_started
+    build:
+      context: .
+      args:
+        APP_NAME: auth
+    #    restart: always
 
 volumes:
   cache:

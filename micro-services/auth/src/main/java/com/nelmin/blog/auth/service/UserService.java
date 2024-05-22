@@ -21,9 +21,9 @@ public class UserService {
     @PostConstruct
     private void init() {
         var user = new User();
-        user.setUsername("test");
+        user.setUsername("test@test.com");
         user.setNickName("test");
-        user.setPassword(passwordEncoder.encode("123456"));
+        user.setPassword(passwordEncoder.encode("12345678AA@@aa"));
         userRepository.save(user);
     }
 

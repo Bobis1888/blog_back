@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -61,9 +62,12 @@ public class SecurityConfiguration {
                         .permitAll())
                 .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class)
                 .logout(it -> it
+                        .permitAll()
                         .deleteCookies("Authorization", "Refresh")
                         .logoutUrl("/logout")
-                        .logoutSuccessUrl("/")
+                        .logoutSuccessHandler((req, resp, auth) -> {
+                            resp.setStatus(HttpStatus.OK.value());
+                        })
                         .clearAuthentication(true)
                         .invalidateHttpSession(true))
                 .build();

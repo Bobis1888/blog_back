@@ -6,6 +6,7 @@ import com.nelmin.blog.auth.dto.AuthResponseDto;
 import com.nelmin.blog.auth.dto.LoginDto;
 import com.nelmin.blog.auth.dto.StateResponseDto;
 import com.nelmin.blog.auth.service.AuthService;
+import com.nelmin.blog.common.dto.SuccessDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -45,5 +46,9 @@ public class AuthController {
         return ResponseEntity.ok(new StateResponseDto(userInfo.isAuthorized()));
     }
 
+//    @GetMapping(value = "/logout")
+//    public ResponseEntity<SuccessDto> logout() {
+//        return ResponseEntity.ok(new SuccessDto(!userInfo.isAuthorized()));
+//    }
 
 }
