@@ -21,7 +21,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class RegistrationService {
 
-    @Value("${server.address:http://127.0.0.1:8081}")
+    @Value("${server.address:127.0.0.1}")
     private String serverAddress;
 
     private final User.Repo userRepository;
