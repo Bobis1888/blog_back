@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -95,10 +96,11 @@ public class AuthService {
             blockedUser.setBlocked(true);
             blockedUser.setBlockDateTime(LocalDateTime.now());
             blockedUser.setReason("Max attempts");
-            authResponse.reject("block", "login", String.valueOf(blockTime));
+            authResponse.clearErrors();
+            authResponse.reject("block", "login", Map.of("time", blockTime));
             log.info("User {} blocked {} minutes", blockedUser.getLogin(), blockTime);
         } else {
-            authResponse.reject("attempts", "credentials", String.valueOf(maxAttempts - blockedUser.getAttempts()));
+            authResponse.reject("attempts", "credentials", Map.of("value" , maxAttempts - blockedUser.getAttempts()));
         }
 
         authResponse.reject("invalid", "password");
@@ -116,7 +118,8 @@ public class AuthService {
             if (blockMinutes <= 0) {
                 cache.evictIfPresent("blocked_cache_" + loginDto.getLogin());
             } else {
-                authResponse.reject("blocked", "login", String.valueOf(blockMinutes));
+                authResponse.clearErrors();
+                authResponse.reject("blocked", "login", Map.of("time", blockMinutes));
                 authResponse.setSuccess(false);
             }
         }

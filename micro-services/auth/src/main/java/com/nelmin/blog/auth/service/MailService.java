@@ -1,7 +1,6 @@
 package com.nelmin.blog.auth.service;
 
 import jakarta.mail.MessagingException;
-import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,7 +36,7 @@ public class MailService {
         var message = javaMailSender.createMimeMessage();
 
         try {
-            message.setFrom(new InternetAddress(senderName));
+            message.setFrom(senderName);
             message.setRecipients(MimeMessage.RecipientType.TO,destination);
             message.setSubject(subject);
             message.setContent(content, CONTENT_TYPE);

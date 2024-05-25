@@ -37,12 +37,12 @@ public class RegistrationController {
         return new ModelAndView("redirect:" + resolveRedirectAddress(), map);
     }
 
-    @PostMapping(value = "/resend_email")
-    public ResponseEntity<Object> resend(@RequestBody String userName) {
-        return ResponseEntity.ok(new SuccessDto(registrationService.resend(userName)));
+    @PostMapping(value = "/reset-password")
+    public ResponseEntity<Object> resend(@RequestBody String email) {
+        return ResponseEntity.ok(new SuccessDto(registrationService.resetPassword(email)));
     }
 
     private String resolveRedirectAddress() {
-        return "http://" + serverAddress + ":4433/";
+        return "http://" + serverAddress + "/";
     }
 }

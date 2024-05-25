@@ -1,18 +1,18 @@
 package com.nelmin.blog.common.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.Map;
+
 @Getter
 @Setter
-@AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Error {
     private String code;
     private String field;
-    private String message;
+    private Map<String, Object> args;
 
     public Error() {}
 
@@ -23,5 +23,11 @@ public class Error {
     public Error(String code, String field) {
         this.code = code;
         this.field = field;
+    }
+
+    public Error(String code, String field, Map<String, Object> args) {
+        this.code = code;
+        this.field = field;
+        this.args = args;
     }
 }

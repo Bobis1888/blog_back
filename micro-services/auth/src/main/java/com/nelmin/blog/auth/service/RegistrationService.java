@@ -83,8 +83,8 @@ public class RegistrationService {
         return true;
     }
 
-    public Boolean resend(String username) {
-        User user = userRepository.findUserByUsername(username).orElseThrow(UserNotFoundException::new);
+    public Boolean resetPassword(String email) {
+        User user = userRepository.findUserByUsername(email).orElseThrow(UserNotFoundException::new);
         var uuid = UUID.randomUUID().toString();
         cache.put("registration_uuid_" + uuid, user.getUsername());
         userRepository.save(user);

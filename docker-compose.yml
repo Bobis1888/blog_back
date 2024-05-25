@@ -3,6 +3,12 @@ services:
   eureka:
     container_name: eureka
     network_mode: host
+    healthcheck:
+      test: "curl 127.0.0.1:8761/actuator/health || exit 1"
+      interval: 20s
+      timeout: 5s
+      retries: 2
+      start_period: 20s
     build:
       context: .
       args:

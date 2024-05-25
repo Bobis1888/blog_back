@@ -6,6 +6,7 @@ import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Getter
 @Setter
@@ -29,7 +30,11 @@ public abstract class HasError {
         errors.add(new Error(code, field));
     }
 
-    public void reject(String code, String field, String message) {
-        errors.add(new Error(code, field, message));
+    public void reject(String code, String field, Map<String, Object> args) {
+        errors.add(new Error(code, field, args));
+    }
+
+    public void clearErrors() {
+        errors.clear();
     }
 }
