@@ -83,6 +83,8 @@ public class AuthService {
 
     private void countAttempts(LoginDto loginDto, AuthResponseDto authResponse) {
         authResponse.setSuccess(false);
+        authResponse.reject("invalid", "password");
+        authResponse.reject("invalid", "login");
 
         var blockedUser = cache.get("blocked_cache_" + loginDto.getLogin(), BlockedUser.class);
 
@@ -102,9 +104,6 @@ public class AuthService {
         } else {
             authResponse.reject("attempts", "credentials", Map.of("value" , maxAttempts - blockedUser.getAttempts()));
         }
-
-        authResponse.reject("invalid", "password");
-        authResponse.reject("invalid", "login");
 
         cache.put("blocked_cache_" + loginDto.getLogin(), blockedUser);
     }
