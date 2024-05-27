@@ -1,13 +1,13 @@
 package com.nelmin.blog.auth.service;
 
 import com.nelmin.blog.auth.dto.AuthResponseDto;
-import com.nelmin.blog.auth.dto.RegistrationDto;
+import com.nelmin.blog.auth.dto.ChangePasswordRequestDto;
+import com.nelmin.blog.auth.dto.RegistrationRequestDto;
+import com.nelmin.blog.auth.dto.ResetPasswordResponse;
 import com.nelmin.blog.auth.exceptions.InvalidUUIDException;
-import com.nelmin.blog.auth.exceptions.UserNotFoundException;
 import com.nelmin.blog.auth.model.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.Cache;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -21,19 +21,17 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class RegistrationService {
 
-    @Value("${server.address:127.0.0.1}")
-    private String serverAddress;
-
-    private final User.Repo userRepository;
-    private final PasswordEncoder passwordEncoder;
-    private final MailService mailService;
     private final Cache cache;
+    private final User.Repo userRepository;
+    private final UserService userService;
+    private final PasswordEncoder passwordEncoder;
+    private final RegistrationEmailService registrationEmailService;
 
     @Transactional
-    public AuthResponseDto registration(RegistrationDto registrationDto) {
+    public AuthResponseDto registration(RegistrationRequestDto registrationRequestDto) {
         var response = new AuthResponseDto();
 
-        if (userRepository.findUserByUsername(registrationDto.getEmail()).isPresent()) {
+        if (userRepository.findUserByUsername(registrationRequestDto.email()).isPresent()) {
             response.setSuccess(false);
             response.reject("alreadyRegistered", "email");
             return response;
@@ -41,14 +39,14 @@ public class RegistrationService {
 
         var uuid = UUID.randomUUID().toString();
         var user = new User();
-        user.setUsername(registrationDto.getEmail());
+        user.setUsername(registrationRequestDto.email());
         user.setNickName(user.getUsername().split("@")[0]);
-        user.setPassword(passwordEncoder.encode(registrationDto.getPassword()));
+        user.setPassword(passwordEncoder.encode(registrationRequestDto.password()));
         user.setEnabled(false);
 
         userRepository.save(user);
 
-        sendEmail(user.getUsername(), uuid);
+        registrationEmailService.sendConfirmEmail(user.getUsername(), uuid);
 
         response.setSuccess(true);
         cache.put("registration_uuid_" + uuid, user.getUsername());
@@ -83,38 +81,57 @@ public class RegistrationService {
         return true;
     }
 
-    public Boolean resetPassword(String email) {
-        User user = userRepository.findUserByUsername(email).orElseThrow(UserNotFoundException::new);
+    @Transactional
+    public ResetPasswordResponse resetPassword(String email) {
+        var response = new ResetPasswordResponse();
+
+        if (!StringUtils.hasText(email)) {
+            response.reject("nullable", "email");
+            return response;
+        }
+
+        var user = userRepository.findUserByUsername(email);
+
+        if (user.isEmpty()) {
+            response.reject("invalid", "email");
+            return response;
+        }
+
         var uuid = UUID.randomUUID().toString();
-        cache.put("registration_uuid_" + uuid, user.getUsername());
-        userRepository.save(user);
-        sendEmail(user.getUsername(), uuid);
-        return true;
+        cache.put("reset_uuid_" + uuid, user.get().getUsername());
+        registrationEmailService.sendResetEmail(user.get().getUsername(), uuid);
+        response.setSuccess(true);
+        return response;
     }
 
-    private void sendEmail(String email, String uud) {
-        String link = serverAddress + "/auth/confirm?uuid=" + uud;
-        log.info("Link : {}", link);
+    public ResetPasswordResponse changePassword(ChangePasswordRequestDto dto) {
+        var response = new ResetPasswordResponse();
 
-        mailService.sendMail(email,
-                "Подтвердите регистрацию на сайте",
-                buildEmailHtml(link));
-    }
+        if (!StringUtils.hasText(dto.uuid())) {
+            response.reject("nullable", "uuid");
+            return response;
+        }
 
-    // TODO template
-    String buildEmailHtml(String url) {
-        var builder = new StringBuilder();
+        if (!StringUtils.hasText(dto.password())) {
+            response.reject("nullable", "password");
+            return response;
+        }
 
-        builder.append("<html>");
-        builder.append("<body>");
-        builder.append("<h4>Здравствуйте для подтверждения регистрации на сайте необходимо пройти по ссылке</h4>");
-        builder.append("<div>");
-        builder.append("<a href=\"");
-        builder.append(url);
-        builder.append("\">Ссылка для подтверждения</a>");
-        builder.append("</div>");
-        builder.append("</body>");
-        builder.append("</html>");
-        return builder.toString();
+        var userName = cache.get("reset_uuid_" + dto.uuid(), String.class);
+
+        if (!StringUtils.hasText(userName)) {
+            response.reject("invalid", "uuid");
+            return response;
+        }
+
+        var user = userRepository.findUserByUsername(userName);
+
+        if (user.isPresent()) {
+            userService.changePassword(user.get(), dto.password());
+            cache.evictIfPresent("reset_uuid_" + dto.uuid());
+            response.setSuccess(true);
+        }
+
+        return response;
     }
 }

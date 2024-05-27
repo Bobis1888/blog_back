@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/user")
 @RequiredArgsConstructor
-public class UsersController {
+public class UserController {
 
     private final UserInfo userInfo;
     private final UserService userService;
@@ -31,7 +31,6 @@ public class UsersController {
         User user = (User) userInfo.getCurrentUser();
         return ResponseEntity.ok(user.buildDto());
     }
-
 
     @PostMapping(value = "/edit")
     public ResponseEntity<Object> editUserSettings(@Valid @RequestBody UserInfoDto dto) {

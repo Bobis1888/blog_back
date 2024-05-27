@@ -1,7 +1,8 @@
 package com.nelmin.blog.auth.controller;
 
-import com.nelmin.blog.common.dto.SuccessDto;
-import com.nelmin.blog.auth.dto.RegistrationDto;
+import com.nelmin.blog.auth.dto.ResetPasswordResponse;
+import com.nelmin.blog.auth.dto.RegistrationRequestDto;
+import com.nelmin.blog.auth.dto.ChangePasswordRequestDto;
 import com.nelmin.blog.auth.service.RegistrationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +23,7 @@ public class RegistrationController {
     private final RegistrationService registrationService;
 
     @PostMapping(value = "/registration")
-    public ResponseEntity<?> register(@Valid @RequestBody RegistrationDto registerDto) {
+    public ResponseEntity<?> register(@Valid @RequestBody RegistrationRequestDto registerDto) {
         var result = registrationService.registration(registerDto);
 
         return ResponseEntity
@@ -37,9 +38,29 @@ public class RegistrationController {
         return new ModelAndView("redirect:" + resolveRedirectAddress(), map);
     }
 
-    @PostMapping(value = "/reset-password")
-    public ResponseEntity<Object> resend(@RequestBody String email) {
-        return ResponseEntity.ok(new SuccessDto(registrationService.resetPassword(email)));
+    @GetMapping(value = "/reset-password")
+    public ResponseEntity<ResetPasswordResponse> resend(@RequestParam(value = "email") String email) {
+        var response = registrationService.resetPassword(email);
+
+        return ResponseEntity
+                .status(response.hasErrors() ? HttpStatus.BAD_REQUEST : HttpStatus.OK)
+                .body(response);
+    }
+
+    @GetMapping(value = "/to-change-password")
+    public ModelAndView toChangePassword(@RequestParam(value = "uuid") String uuid, ModelMap map) {
+        map.addAttribute("uuid", uuid);
+        map.addAttribute("reset-password-result", true);
+        return new ModelAndView("redirect:" + resolveRedirectAddress(), map);
+    }
+
+    @PostMapping(value = "/change-password")
+    public ResponseEntity<ResetPasswordResponse> changePassword(@Valid @RequestBody ChangePasswordRequestDto dto) {
+        var response = registrationService.changePassword(dto);
+
+        return ResponseEntity
+                .status(response.hasErrors() ? HttpStatus.BAD_REQUEST : HttpStatus.OK)
+                .body(response);
     }
 
     private String resolveRedirectAddress() {

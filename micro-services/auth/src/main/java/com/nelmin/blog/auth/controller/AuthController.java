@@ -3,9 +3,10 @@ package com.nelmin.blog.auth.controller;
 import com.nelmin.blog.common.bean.UserInfo;
 import com.nelmin.blog.common.conf.JwtTokenUtils;
 import com.nelmin.blog.auth.dto.AuthResponseDto;
-import com.nelmin.blog.auth.dto.LoginDto;
+import com.nelmin.blog.auth.dto.LoginRequestDto;
 import com.nelmin.blog.auth.dto.StateResponseDto;
 import com.nelmin.blog.auth.service.AuthService;
+import com.nelmin.blog.common.dto.SuccessDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -22,8 +23,8 @@ public class AuthController {
     private final UserInfo userInfo;
 
     @PostMapping(value = "/login")
-    public ResponseEntity<AuthResponseDto> login(@Valid @RequestBody LoginDto loginDto) {
-        var result = authService.authenticate(loginDto);
+    public ResponseEntity<AuthResponseDto> login(@Valid @RequestBody LoginRequestDto loginRequestDto) {
+        var result = authService.authenticate(loginRequestDto);
 
         if (result.getErrors().isEmpty()) {
             HttpHeaders headers = jwtTokenUtils.createTokenHeaders(result.getToken());
@@ -38,6 +39,12 @@ public class AuthController {
                     .badRequest()
                     .body(result);
         }
+    }
+
+    // TODO
+    @PostMapping(value = "/confirm")
+    public ResponseEntity<SuccessDto> confirm() {
+        return ResponseEntity.ok(new SuccessDto(true));
     }
 
     @GetMapping(value = "/state")
