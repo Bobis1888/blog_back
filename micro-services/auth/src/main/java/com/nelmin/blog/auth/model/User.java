@@ -21,7 +21,7 @@ import java.util.Optional;
 @NoArgsConstructor
 @AllArgsConstructor
 @EntityListeners({AuditingEntityListener.class})
-@Table(name = "users")
+@Table(name = "\"user\"")
 public class User implements IUser {
 
     @Id
@@ -34,7 +34,7 @@ public class User implements IUser {
     @Column(nullable = false)
     private String nickName;
 
-    // TODO пароль убрать отсюда
+    // TODO remove
     @Column(nullable = false)
     private String password;
 

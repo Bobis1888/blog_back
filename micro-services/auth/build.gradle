@@ -33,7 +33,8 @@ dependencies {
     implementation 'org.springframework.session:spring-session-core'
 
     implementation 'org.postgresql:postgresql'
-    runtimeOnly 'com.h2database:h2'
+    implementation 'org.liquibase:liquibase-core'
+//    runtimeOnly 'com.h2database:h2'
 
     implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client:4.1.1'
     implementation 'org.springframework.cloud:spring-cloud-starter-config:4.1.1'
