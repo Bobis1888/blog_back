@@ -50,6 +50,18 @@ services:
         APP_NAME: auth
     #    restart: always
 
+  content:
+    container_name: content
+    network_mode: host
+    depends_on:
+      eureka:
+        condition: service_started
+    build:
+      context: .
+      args:
+        APP_NAME: content
+    #    restart: always
+
   email:
     container_name: email
     network_mode: host
