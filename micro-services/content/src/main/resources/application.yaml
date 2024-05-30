@@ -1,0 +1,39 @@
+server:
+  port: 8084
+  address: 0.0.0.0
+
+eureka:
+  client.serviceUrl.defaultZone: http://127.0.0.1:8761/eureka/
+  instance.prefer-ip-address: true
+
+spring:
+  profiles:
+    active: dev
+    include:
+      - dev
+      - prod
+  application:
+    name: content
+
+  config.import: 'optional:configserver:'
+  cloud:
+    config:
+      discovery:
+        enabled: true
+        service-id: configserver
+      fail-fast: false
+      username: user
+      password: change.me
+  jpa:
+      #    show-sql: true
+    properties.hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate.ddl-auto: none
+  liquibase.changeLog: 'classpath:db/liquibase.xml'
+logging:
+  pattern:
+    console: "%blue(%d) %highlight(%-5level) %green(%t) %yellow(%c{1.}): %msg%n"
+    file: "%d %-5level %t %c{1.}: %msg%n"
+  level:
+    org.springframework.web.filter.CommonsRequestLoggingFilter: DEBUG
+    root: INFO

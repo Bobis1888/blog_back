@@ -1,9 +1,11 @@
 package com.nelmin.blog.common.conf;
 
 import com.nelmin.blog.common.abstracts.AnonymousUser;
+import com.nelmin.blog.common.abstracts.ProtectedPathsResolver;
 import com.nelmin.blog.common.filer.JwtTokenFilter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
@@ -27,11 +29,10 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 @EnableMethodSecurity(securedEnabled = true, jsr250Enabled = true)
 public class SecurityConfiguration {
-    private final static String [] PROTECTED_PATHS = {"/user/info"};
 
     @Bean
     public AuthenticationManager authenticationManager(HttpSecurity http, UserDetailsService userDetailsService, PasswordEncoder passwordEncoder) throws Exception {
-
+        // TODO refactor
         return http
                 .getSharedObject(AuthenticationManagerBuilder.class)
                 .userDetailsService(userDetailsService)
@@ -45,10 +46,17 @@ public class SecurityConfiguration {
         return new BCryptPasswordEncoder();
     }
 
-
+    @Bean
+    @ConditionalOnMissingBean
+    public ProtectedPathsResolver protectedPathsResolver() {
+        return () -> new String[0];
+    }
 
     @Bean
-    public SecurityFilterChain configure(HttpSecurity http, JwtAuthEntryPoint jwtAuthEntryPoint, JwtTokenFilter jwtTokenFilter) throws Exception {
+    public SecurityFilterChain configure(HttpSecurity http,
+                                         JwtAuthEntryPoint jwtAuthEntryPoint,
+                                         JwtTokenFilter jwtTokenFilter,
+                                         ProtectedPathsResolver protectedPathsResolver) throws Exception {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(Customizer.withDefaults())
@@ -56,7 +64,7 @@ public class SecurityConfiguration {
                 .sessionManagement(it -> it.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .anonymous(it -> it.principal(new AnonymousUser()))
                 .authorizeHttpRequests(reg -> reg
-                        .requestMatchers(PROTECTED_PATHS)
+                        .requestMatchers(protectedPathsResolver.getProtectedPaths())
                         .authenticated()
                         .anyRequest()
                         .permitAll())
@@ -64,6 +72,7 @@ public class SecurityConfiguration {
                 .logout(it -> it
                         .permitAll()
                         .deleteCookies("Authorization", "Refresh")
+                        // todo configure logout url for specific service
                         .logoutUrl("/logout")
                         .logoutSuccessHandler((req, resp, auth) -> {
                             resp.setStatus(HttpStatus.OK.value());

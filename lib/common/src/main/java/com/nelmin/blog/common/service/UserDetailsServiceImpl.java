@@ -1,7 +1,7 @@
-package com.nelmin.blog.auth.service;
+package com.nelmin.blog.common.service;
 
 import com.nelmin.blog.common.bean.UserInfo;
-import com.nelmin.blog.auth.model.User;
+import com.nelmin.blog.common.model.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

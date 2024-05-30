@@ -1,7 +1,6 @@
-package com.nelmin.blog.auth.model;
+package com.nelmin.blog.common.model;
 
 import com.nelmin.blog.common.abstracts.IUser;
-import com.nelmin.blog.auth.dto.UserInfoDto;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -10,7 +9,7 @@ import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -87,16 +86,6 @@ public class User implements IUser {
         return registrationDate.equals(user.registrationDate);
     }
 
-    public UserInfoDto buildDto() {
-        return UserInfoDto.builder()
-                .id(getId())
-                .registrationDate(getRegistrationDate())
-                .enabled(getEnabled())
-                .nickname(getNickName())
-                .email(getUsername())
-                .build();
-    }
-
     @Override
     public int hashCode() {
         int result = id.hashCode();
@@ -108,11 +97,7 @@ public class User implements IUser {
     }
 
     @Repository
-    public interface Repo extends PagingAndSortingRepository<User, Long> {
-
-        void save(User user);
-
+    public interface Repo extends JpaRepository<User, Long> {
         Optional<User> findUserByUsername(String username);
     }
-
 }

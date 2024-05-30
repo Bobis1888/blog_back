@@ -1,14 +1,16 @@
-package com.nelmin.blog.auth.service;
+package com.nelmin.blog.common.service;
 
 import com.nelmin.blog.common.bean.UserInfo;
-import com.nelmin.blog.auth.dto.UserInfoDto;
-import com.nelmin.blog.auth.model.User;
+import com.nelmin.blog.common.dto.UserInfoDto;
+import com.nelmin.blog.common.model.User;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+// TODO user library
 
 @Slf4j
 @Service

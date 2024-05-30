@@ -1,7 +1,6 @@
-package com.nelmin.blog.auth.dto;
+package com.nelmin.blog.common.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.nelmin.blog.common.dto.HasError;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import java.time.LocalDateTime;

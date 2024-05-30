@@ -5,7 +5,7 @@ import com.nelmin.blog.auth.dto.AuthResponseDto;
 import com.nelmin.blog.auth.dto.BlockedUser;
 import com.nelmin.blog.auth.dto.LoginRequestDto;
 import com.nelmin.blog.auth.exceptions.UserNotFoundException;
-import com.nelmin.blog.auth.model.User;
+import com.nelmin.blog.common.model.User;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
