@@ -1,8 +1,10 @@
 package com.nelmin.blog.auth.service;
 
+import com.nelmin.blog.auth.dto.EmailMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Service;
 
 // TODO refactor / rewrite
@@ -14,24 +16,34 @@ public class RegistrationEmailService {
     @Value("${server.address:127.0.0.1}")
     private String serverAddress;
 
-    private final MailService mailService;
+    //TODO config
+    private final String emailQueue = "blog.email.send";
+
+    private final JmsTemplate jmsTemplate;
 
     // TODO refactor
     public void sendResetEmail(String email, String uud) {
         String link = serverAddress + "/auth/to-change-password?uuid=" + uud;
-
-        mailService.sendMail(email,
-                "Ссылка для сброса пароля",
-                buildResetPasswordHtml(link));
+        jmsTemplate.convertAndSend(
+                emailQueue,
+                new EmailMessage(
+                        "Ссылка для сброса пароля",
+                        buildResetPasswordHtml(link),
+                        email)
+        );
     }
 
     // TODO refactor
     public void sendConfirmEmail(String email, String uud) {
         String link = serverAddress + "/auth/confirm?uuid=" + uud;
 
-        mailService.sendMail(email,
-                "Подтвердите регистрацию на сайте",
-                buildConfirmEmailHtml(link));
+        jmsTemplate.convertAndSend(
+                emailQueue,
+                new EmailMessage(
+                        "Подтвердите регистрацию на сайте",
+                        buildConfirmEmailHtml(link),
+                        email)
+        );
     }
 
     // TODO template

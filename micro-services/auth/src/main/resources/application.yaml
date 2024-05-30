@@ -65,14 +65,6 @@ spring:
       host: 127.0.0.1
       password: 123456
       port: 6379
-  mail:
-    emulator: false #disable spam
-    host: 'smtp.gmail.com'
-    port: 587
-    #username: 'test@gmail.com'
-    #password: 'pass'
-    properties.mail.smtp.auth: true
-    properties.mail.smtp.starttls.enable: true
 
 auth.max.attempts: 3
 auth.block.time: 120 #minutes
