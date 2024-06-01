@@ -23,48 +23,8 @@ spring:
         enabled: true
         service-id: configserver
       fail-fast: false
-      username: user
-      password: change.me
-
-
-#  artemis:
-#    broker-url: tcp://localhost:61616
-#    embedded:
-#      enabled: false
-#    mode: native
-#    password: change.me
-#    spammer:
-#      queue: spammer.queue
-#    user: user
-#  datasource:
-# PosgreSQL
-#    driver-class-name: org.postgresql.Driver
-#    url: jdbc:postgresql://localhost:5432/blog
-#    username: test
-#    password: test
-    # H2
-#    driverClassName: org.h2.Driver
-#    url: jdbc:h2:mem:testdb
-#    username: sa
-#    password: password
-
-# H2
-#    database-platform: org.hibernate.dialect.H2Dialect
-# PosgreSQL
-  jpa:
-#    show-sql: true
-    properties.hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
-    hibernate.ddl-auto: none
-  liquibase.changeLog: 'classpath:db/liquibase.xml'
-
-  session:
-    timeout: 60000
-  data:
-    redis:
-      host: 127.0.0.1
-      password: 123456
-      port: 6379
+#      username: user
+#      password: change.me
 
 auth.max.attempts: 3
 auth.block.time: 120 #minutes

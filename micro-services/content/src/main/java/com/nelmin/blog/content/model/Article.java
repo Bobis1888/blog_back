@@ -35,6 +35,10 @@ public class Article {
     @Column(name = "content", nullable = false, columnDefinition = "TEXT")
     private String content;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private Status status = Status.DRAFT;
+
     @CreatedDate
     private LocalDateTime createdDate;
 
@@ -42,5 +46,12 @@ public class Article {
     private LocalDateTime updatedDate;
 
     @Repository
-    public interface Repo extends JpaRepository<Article, Long> {}
+    public interface Repo extends JpaRepository<Article, Long> {
+        Optional<Article> findByIdAndUserId(Long id, Long userId);
+    }
+
+    public enum Status {
+        DRAFT,
+        PUBLISHED
+    }
 }
