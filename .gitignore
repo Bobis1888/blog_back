@@ -7,6 +7,7 @@ build/
 *.log
 
 application-dev.properties
+application-prod.properties
 
 ### STS ###
 .apt_generated
