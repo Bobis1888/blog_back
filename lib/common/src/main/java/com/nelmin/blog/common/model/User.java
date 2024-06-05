@@ -24,7 +24,8 @@ import java.util.Optional;
 public class User implements IUser {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @SequenceGenerator(name = "hibernate", sequenceName = "hibernate_sequence", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "hibernate")
     private Long id;
 
     @Column(unique = true, nullable = false)
@@ -79,10 +80,6 @@ public class User implements IUser {
             return false;
         }
 
-        if (!password.equals(user.password)) {
-            return false;
-        }
-
         return registrationDate.equals(user.registrationDate);
     }
 
@@ -91,7 +88,6 @@ public class User implements IUser {
         int result = id.hashCode();
         result = 31 * result + username.hashCode();
         result = 31 * result + nickName.hashCode();
-        result = 31 * result + password.hashCode();
         result = 31 * result + registrationDate.hashCode();
         return result;
     }
@@ -99,5 +95,10 @@ public class User implements IUser {
     @Repository
     public interface Repo extends JpaRepository<User, Long> {
         Optional<User> findUserByUsername(String username);
+        Optional<NickName> getNickNameById(Long id);
+    }
+
+    public interface NickName {
+        String getNickName();
     }
 }

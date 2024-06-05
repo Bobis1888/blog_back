@@ -6,11 +6,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreateContentResponseDto extends HasError {
-    private Boolean success;
-    private Long id;
+public class ListContentResponseDto extends HasError {
+    private List<ArticleDto> list;
 }

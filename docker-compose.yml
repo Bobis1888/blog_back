@@ -4,22 +4,29 @@ services:
     container_name: eureka
     network_mode: host
     healthcheck:
-      test: "curl 127.0.0.1:8761/actuator/health || exit 1"
+      test: curl --fail --silent localhost:8761/actuator/health | grep UP || exit 1
       interval: 20s
       timeout: 5s
-      retries: 2
-      start_period: 20s
+      retries: 3
+      start_period: 25s
     build:
       context: .
       args:
         APP_NAME: eureka
+    #    restart: always
+    volumes:
+      - type: volume
+        source: gradleCache
+        target: /home/gradle/.gradle
 
   balancer:
     container_name: balancer
     network_mode: host
     depends_on:
       eureka:
-        condition: service_started
+        condition: service_healthy
+      config:
+        condition: service_healthy
     build:
       context: .
       args:
@@ -31,7 +38,13 @@ services:
     network_mode: host
     depends_on:
       eureka:
-        condition: service_started
+        condition: service_healthy
+    healthcheck:
+      test: curl --fail --silent localhost:8761/actuator/health | grep UP || exit 1
+      interval: 20s
+      timeout: 5s
+      retries: 3
+      start_period: 25s
     build:
       context: .
       args:
@@ -42,8 +55,8 @@ services:
     container_name: auth
     network_mode: host
     depends_on:
-      eureka:
-        condition: service_started
+      config:
+        condition: service_healthy
     build:
       context: .
       args:
@@ -54,8 +67,8 @@ services:
     container_name: content
     network_mode: host
     depends_on:
-      eureka:
-        condition: service_started
+      config:
+        condition: service_healthy
     build:
       context: .
       args:
@@ -66,20 +79,24 @@ services:
     container_name: email
     network_mode: host
     depends_on:
-      eureka:
-        condition: service_started
+      config:
+        condition: service_healthy
     build:
       context: .
       args:
         APP_NAME: email
     #    restart: always
 
-  angular:
-    container_name: angular
-    network_mode: host
-    build:
-      context: ../front/.
+#  angular:
+#    container_name: angular
+#    network_mode: host
+#    build:
+#      context: ../front/.
 
 volumes:
-  cache:
+  gradleCache:
     driver: local
+    driver_opts:
+        type: none
+        o: bind
+        device: /home/nelmin/.gradle

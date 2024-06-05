@@ -3,12 +3,18 @@
 
 CREATE TABLE if not exists public.article
 (
-    id           bigserial    NOT NULL,
-    user_id      bigserial    NOT NULL,
-    title        varchar(255) NOT NULL,
-    content      text         NULL,
-    created_date timestamp    NULL,
-    updated_date timestamp    NULL,
+    id             bigserial    NOT NULL,
+    user_id        bigserial    NOT NULL references "user",
+    title          varchar(255) NOT NULL,
+    pre_view       varchar(255) NULL,
+    content        text         NULL,
+    created_date   timestamp    NOT NULL,
+    updated_date   timestamp    NULL,
+    published_date timestamp    NULL,
+    status         varchar(255) NULL,
 
     CONSTRAINT article_pkey primary key (id)
 );
+
+--changeset nelmin:2024-07-03-23-00
+CREATE SEQUENCE IF NOT EXISTS hibernate_sequence START WITH 1;

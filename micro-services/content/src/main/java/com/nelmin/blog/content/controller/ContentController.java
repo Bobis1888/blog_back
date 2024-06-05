@@ -11,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Slf4j
 @RestController
 @RequiredArgsConstructor
@@ -38,7 +40,7 @@ public class ContentController {
                 .body(response);
     }
 
-    @GetMapping("/view/{id}")
+    @GetMapping("/get/{id}")
     public ResponseEntity<ArticleDto> view(@Valid @PathVariable Long id) {
         ArticleDto response = contentService.view(id);
 
@@ -61,6 +63,15 @@ public class ContentController {
     @GetMapping("/unpublish/{id}")
     public ResponseEntity<PublishContentResponseDto> unpublish(@Valid @PathVariable Long id) {
         PublishContentResponseDto response = contentService.changeStatus(id, Article.Status.DRAFT);
+
+        return ResponseEntity
+                .status(response.hasErrors() ? HttpStatus.BAD_REQUEST : HttpStatus.OK)
+                .body(response);
+    }
+
+    @PostMapping("/list")
+    public ResponseEntity<ListContentResponseDto> list(@Valid @RequestBody ListContentRequestDto dto) {
+        ListContentResponseDto response = contentService.list(dto);
 
         return ResponseEntity
                 .status(response.hasErrors() ? HttpStatus.BAD_REQUEST : HttpStatus.OK)
