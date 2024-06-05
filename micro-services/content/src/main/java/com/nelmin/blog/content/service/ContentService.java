@@ -1,14 +1,22 @@
 package com.nelmin.blog.content.service;
 
 import com.nelmin.blog.common.bean.UserInfo;
+import com.nelmin.blog.common.model.User;
 import com.nelmin.blog.content.dto.*;
 import com.nelmin.blog.content.model.Article;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.repository.util.ClassUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 @Slf4j
@@ -17,6 +25,7 @@ import java.util.Objects;
 public class ContentService {
 
     private final Article.Repo articleRepo;
+    private final User.Repo userRepo;
     private final UserInfo userInfo;
 
     @Transactional
@@ -26,7 +35,10 @@ public class ContentService {
         Article article = null;
 
         if (dto.id() != null) {
-            article = (Article) articleRepo.findById(dto.id()).orElseGet(Article::new);
+            article = articleRepo
+                    .findByIdAndUserId(dto.id(), userInfo.getCurrentUser()
+                            .getId())
+                    .orElseGet(Article::new);
         }
 
         if (article == null) {
@@ -35,11 +47,13 @@ public class ContentService {
 
         article.setUserId(userInfo.getCurrentUser().getId());
         article.setContent(dto.content());
+        article.setPreView(dto.preView());
         article.setTitle(dto.title());
 
         try {
             articleRepo.save(article);
             response.setSuccess(true);
+            response.setId(article.getId());
         } catch (Exception ex) {
             log.error("Error save article", ex);
             response.setSuccess(false);
@@ -100,7 +114,13 @@ public class ContentService {
 
             try {
                 article.get().setStatus(status);
+
+                if (status == Article.Status.PUBLISHED) {
+                    article.get().setPublishedDate(LocalDateTime.now());
+                }
+
                 articleRepo.save(article.get());
+
                 response.setSuccess(true);
             } catch (Exception ex) {
                 log.error("Error publish article", ex);
@@ -108,9 +128,79 @@ public class ContentService {
                 response.reject("saveError", "article");
             }
         } else {
+            response.reject("notFound", "article");
             response.setSuccess(false);
         }
 
         return response;
+    }
+
+    @Transactional
+    public ListContentResponseDto list(ListContentRequestDto requestDto) {
+        List<ArticleDto> resList = new ArrayList<>();
+        List<Article.Status> statuses = new ArrayList<>();
+        String[] sortBy = null;
+        Long userId = null;
+
+        if (requestDto.getSortBy() != null && !requestDto.getSortBy().isEmpty()) {
+            sortBy = requestDto
+                    .getSortBy()
+                    .stream()
+                    .filter(it -> ClassUtils.hasProperty(Article.class, it))
+                    .toArray(String[]::new);
+        }
+
+        if (sortBy == null || sortBy.length == 0) {
+            sortBy = new String[]{"id"};
+        }
+
+        if (requestDto.getUserId() == null || !Objects.equals(userInfo.getCurrentUser().getId(), requestDto.getUserId())) {
+            statuses.add(Article.Status.PUBLISHED);
+        } else if (Objects.equals(userInfo.getCurrentUser().getId(), requestDto.getUserId())) {
+            statuses.add(Article.Status.DRAFT);
+            statuses.add(Article.Status.PUBLISHED);
+            userId = requestDto.getUserId();
+        }
+
+        var pageRequest = PageRequest.of(
+                requestDto.getPage(),
+                requestDto.getMax(),
+                Sort.by(
+                        requestDto.getDirection(),
+                        sortBy
+                )
+        );
+
+        // TODO
+        Page<Article> page;
+
+        if (userId != null) {
+            page = articleRepo.findAllByStatusInAndUserId(statuses, userId, pageRequest);
+        } else {
+            page = articleRepo.findAllByStatusIn(statuses, pageRequest);
+        }
+
+        if (!page.isEmpty()) {
+            resList.addAll(page
+                    .getContent()
+                    .stream()
+                    .map(it -> new ArticleDto(
+                            it.getId(),
+                            it.getTitle(),
+                            it.getPreView(),
+                            it.getContent(),
+                            it.getPublishedDate(),
+                            resolveUserName(it.getUserId()),
+                            it.getStatus().name().toLowerCase())
+                    )
+                    .toList()
+            );
+        }
+
+        return new ListContentResponseDto(resList);
+    }
+
+    private String resolveUserName(Long id) {
+        return userRepo.getNickNameById(id).orElseGet(() -> (User.NickName) () -> "unknown").getNickName();
     }
 }

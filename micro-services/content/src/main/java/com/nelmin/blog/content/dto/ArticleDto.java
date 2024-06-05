@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -13,5 +15,9 @@ import lombok.Setter;
 public class ArticleDto extends HasError {
     private Long id;
     private String title;
+    private String preView;
     private String content;
+    private LocalDateTime publishedDate;
+    private String authorName;
+    private String status;
 }
