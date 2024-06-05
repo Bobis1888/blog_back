@@ -18,3 +18,6 @@ CREATE TABLE if not exists public.article
 
 --changeset nelmin:2024-07-03-23-00
 CREATE SEQUENCE IF NOT EXISTS hibernate_sequence START WITH 1;
+
+--changeset nelmin:2024-07-05-23-00
+ALTER TABLE article ADD COLUMN IF NOT EXISTS tags text;

@@ -42,7 +42,7 @@ public class ContentController {
 
     @GetMapping("/get/{id}")
     public ResponseEntity<ArticleDto> view(@Valid @PathVariable Long id) {
-        ArticleDto response = contentService.view(id);
+        ArticleDto response = contentService.get(id);
 
         return ResponseEntity
                 .status(response.hasErrors() ? HttpStatus.BAD_REQUEST : HttpStatus.OK)
@@ -75,6 +75,15 @@ public class ContentController {
 
         return ResponseEntity
                 .status(response.hasErrors() ? HttpStatus.BAD_REQUEST : HttpStatus.OK)
+                .body(response);
+    }
+
+    @PostMapping("/tags")
+    public ResponseEntity<TagsResponseDto> tags(@Valid @RequestBody TagsRequestDto dto) {
+        var response = contentService.tags(dto);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
                 .body(response);
     }
 }

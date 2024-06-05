@@ -27,7 +27,7 @@ public class UserService {
         if (userRepository.findUserByUsername("test@test.com").isEmpty()) {
             var user = new User();
             user.setUsername("test@test.com");
-            user.setNickName("test");
+            user.setNickName("@test");
             user.setPassword(passwordEncoder.encode("12345678AA@@aa"));
             userRepository.save(user);
         }

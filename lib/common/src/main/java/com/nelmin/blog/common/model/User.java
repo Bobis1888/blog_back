@@ -95,10 +95,15 @@ public class User implements IUser {
     @Repository
     public interface Repo extends JpaRepository<User, Long> {
         Optional<User> findUserByUsername(String username);
-        Optional<NickName> getNickNameById(Long id);
+        Optional<UserNickName> getNickNameById(Long id);
+        Optional<UserId> getIdByNickName(String nickName);
     }
 
-    public interface NickName {
+    public interface UserNickName {
         String getNickName();
+    }
+
+    public interface UserId {
+        Long getId();
     }
 }

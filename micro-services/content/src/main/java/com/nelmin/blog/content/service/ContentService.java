@@ -13,9 +13,11 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.repository.util.ClassUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -46,9 +48,12 @@ public class ContentService {
         }
 
         article.setUserId(userInfo.getCurrentUser().getId());
+
+        // TODO validate html/sql injection
         article.setContent(dto.content());
         article.setPreView(dto.preView());
         article.setTitle(dto.title());
+        article.setTags(dto.tags());
 
         try {
             articleRepo.save(article);
@@ -88,7 +93,7 @@ public class ContentService {
     }
 
     @Transactional
-    public ArticleDto view(@NonNull Long id) {
+    public ArticleDto get(@NonNull Long id) {
         var res = new ArticleDto();
         var article = articleRepo.findById(id);
 
@@ -98,8 +103,9 @@ public class ContentService {
             res.setId(article.get().getId());
             res.setContent(article.get().getContent());
             res.setTitle(article.get().getTitle());
-        } else {
-            res.reject("notFound", "article");
+            res.setStatus(article.get().getStatus().name().toLowerCase());
+            res.setPublishedDate(article.get().getPublishedDate());
+            res.setAuthorName(resolveUserName(article.get().getUserId()));
         }
 
         return res;
@@ -141,12 +147,15 @@ public class ContentService {
         List<Article.Status> statuses = new ArrayList<>();
         String[] sortBy = null;
         Long userId = null;
+        String query = null;
+        String tags = null;
 
         if (requestDto.getSortBy() != null && !requestDto.getSortBy().isEmpty()) {
             sortBy = requestDto
                     .getSortBy()
                     .stream()
                     .filter(it -> ClassUtils.hasProperty(Article.class, it))
+                    .map(ContentService::camelToSnake)
                     .toArray(String[]::new);
         }
 
@@ -154,12 +163,26 @@ public class ContentService {
             sortBy = new String[]{"id"};
         }
 
-        if (requestDto.getUserId() == null || !Objects.equals(userInfo.getCurrentUser().getId(), requestDto.getUserId())) {
+        if (StringUtils.hasText(requestDto.getQuery())) {
+
+            if (requestDto.getQuery().startsWith("@")) {
+                userId = resolveUserId(requestDto.getQuery());
+                requestDto.setQuery(null);
+            }
+
+            if (requestDto.getQuery() != null && requestDto.getQuery().startsWith("#")) {
+                tags = requestDto.getQuery().toLowerCase();
+                requestDto.setQuery(null);
+            }
+
+            query = requestDto.getQuery();
+        }
+
+        if (!Objects.equals(userInfo.getCurrentUser().getId(), userId)) {
             statuses.add(Article.Status.PUBLISHED);
-        } else if (Objects.equals(userInfo.getCurrentUser().getId(), requestDto.getUserId())) {
+        } else if (Objects.equals(userInfo.getCurrentUser().getId(), userId)) {
             statuses.add(Article.Status.DRAFT);
             statuses.add(Article.Status.PUBLISHED);
-            userId = requestDto.getUserId();
         }
 
         var pageRequest = PageRequest.of(
@@ -171,10 +194,14 @@ public class ContentService {
                 )
         );
 
-        // TODO
         Page<Article> page;
 
-        if (userId != null) {
+        // TODO refactor
+        if (StringUtils.hasText(tags)) {
+            page = articleRepo.findAllByTags(statuses.stream().map(Article.Status::name).toList(), tags, pageRequest);
+        } else if (StringUtils.hasText(query)) {
+            page = articleRepo.findAllByContent(statuses.stream().map(Article.Status::name).toList(), query, pageRequest);
+        } else if (userId != null) {
             page = articleRepo.findAllByStatusInAndUserId(statuses, userId, pageRequest);
         } else {
             page = articleRepo.findAllByStatusIn(statuses, pageRequest);
@@ -191,16 +218,59 @@ public class ContentService {
                             it.getContent(),
                             it.getPublishedDate(),
                             resolveUserName(it.getUserId()),
+                            it.getTags(),
                             it.getStatus().name().toLowerCase())
                     )
                     .toList()
             );
         }
 
-        return new ListContentResponseDto(resList);
+        return new ListContentResponseDto(resList, page.getTotalPages());
+    }
+
+    @Transactional
+    public TagsResponseDto tags(@NonNull TagsRequestDto requestDto) {
+        var pageRequest = PageRequest.of(requestDto.getPage(), requestDto.getMax());
+
+        Page<String> page = null;
+
+        if (StringUtils.hasText(requestDto.getQuery())) {
+            page = articleRepo.getTags(List.of(Article.Status.PUBLISHED.name()), requestDto.getQuery(), pageRequest);
+        } else {
+            page = articleRepo.getTags(List.of(Article.Status.PUBLISHED.name()), pageRequest);
+        }
+
+        List<String> list = page.isEmpty() ? Collections.emptyList() : page.getContent();
+
+        return new TagsResponseDto(list, page.getTotalPages());
     }
 
     private String resolveUserName(Long id) {
-        return userRepo.getNickNameById(id).orElseGet(() -> (User.NickName) () -> "unknown").getNickName();
+        return userRepo.getNickNameById(id).orElseGet(() -> () -> "unknown").getNickName();
+    }
+
+    private Long resolveUserId(String nickName) {
+        return userRepo.getIdByNickName(nickName).orElseGet(() -> () -> -1L).getId();
+    }
+
+    private static String camelToSnake(String str) {
+        StringBuilder result = new StringBuilder();
+
+        char c = str.charAt(0);
+        result.append(Character.toLowerCase(c));
+
+        for (int i = 1; i < str.length(); i++) {
+
+            char ch = str.charAt(i);
+
+            if (Character.isUpperCase(ch)) {
+                result.append('_');
+                result.append(Character.toLowerCase(ch));
+            } else {
+                result.append(ch);
+            }
+        }
+
+        return result.toString();
     }
 }

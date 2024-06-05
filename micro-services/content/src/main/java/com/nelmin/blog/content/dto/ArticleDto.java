@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -19,5 +21,6 @@ public class ArticleDto extends HasError {
     private String content;
     private LocalDateTime publishedDate;
     private String authorName;
+    private List<String> tags = new ArrayList<>();
     private String status;
 }
