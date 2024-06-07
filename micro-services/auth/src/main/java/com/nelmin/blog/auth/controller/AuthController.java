@@ -1,5 +1,6 @@
 package com.nelmin.blog.auth.controller;
 
+import com.nelmin.blog.auth.dto.ChangeInfoRequestDto;
 import com.nelmin.blog.common.bean.UserInfo;
 import com.nelmin.blog.common.conf.JwtTokenUtils;
 import com.nelmin.blog.auth.dto.AuthResponseDto;
@@ -12,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -41,15 +43,18 @@ public class AuthController {
         }
     }
 
-    // TODO
-    @PostMapping(value = "/confirm")
-    public ResponseEntity<SuccessDto> confirm() {
-        return ResponseEntity.ok(new SuccessDto(true));
-    }
-
     @GetMapping(value = "/state")
     public ResponseEntity<StateResponseDto> state() {
         return ResponseEntity.ok(new StateResponseDto(userInfo.isAuthorized()));
     }
 
+    @Secured("ROLE_USER")
+    @PostMapping(value = "/change-info")
+    public ResponseEntity<SuccessDto> changePassword(@Valid @RequestBody ChangeInfoRequestDto dto) {
+        var response = authService.changeInfo(dto);
+
+        return ResponseEntity
+                .status(response.hasErrors() ? HttpStatus.BAD_REQUEST : HttpStatus.OK)
+                .body(response);
+    }
 }

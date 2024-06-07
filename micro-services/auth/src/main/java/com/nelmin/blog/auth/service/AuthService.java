@@ -1,11 +1,15 @@
 package com.nelmin.blog.auth.service;
 
+import com.nelmin.blog.auth.dto.ChangeInfoRequestDto;
+import com.nelmin.blog.common.bean.UserInfo;
 import com.nelmin.blog.common.conf.JwtTokenUtils;
 import com.nelmin.blog.auth.dto.AuthResponseDto;
 import com.nelmin.blog.auth.dto.BlockedUser;
 import com.nelmin.blog.auth.dto.LoginRequestDto;
 import com.nelmin.blog.auth.exceptions.UserNotFoundException;
+import com.nelmin.blog.common.dto.SuccessDto;
 import com.nelmin.blog.common.model.User;
+import com.nelmin.blog.common.service.UserService;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,6 +20,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -36,8 +42,11 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtTokenUtils jwtTokenUtils;
     private final Cache cache;
+    private final UserService userService;
+    private final UserInfo userInfo;
 
     // TODO защита от перебора
+    @Transactional
     public AuthResponseDto authenticate(LoginRequestDto loginRequestDto) {
         var authResponse = new AuthResponseDto(false);
 
@@ -81,6 +90,36 @@ public class AuthService {
         return authResponse;
     }
 
+    @Transactional
+    public SuccessDto changeInfo(@NonNull ChangeInfoRequestDto dto) {
+        var res = new SuccessDto(false);
+
+        if (!StringUtils.hasText(dto.nickName()) && !StringUtils.hasText(dto.password())) {
+            res.reject("invalid", "changeInfo");
+            return res;
+        }
+
+        try {
+            User user = (User) userInfo.getCurrentUser();
+
+
+            if (StringUtils.hasText(dto.nickName())) {
+                userService.changeNickName(user, dto.nickName());
+                res.setSuccess(true);
+            }
+
+            if (StringUtils.hasText(dto.password())) {
+                userService.changePassword(user, dto.password());
+                res.setSuccess(true);
+            }
+        } catch (Exception ex) {
+            log.error("Error change info", ex);
+            res.setSuccess(false);
+        }
+
+        return res;
+    }
+
     private void countAttempts(LoginRequestDto loginRequestDto, AuthResponseDto authResponse) {
         authResponse.setSuccess(false);
         authResponse.reject("invalid", "password");
@@ -102,11 +141,12 @@ public class AuthService {
             authResponse.reject("block", "login", Map.of("time", blockTime));
             log.info("User {} blocked {} minutes", blockedUser.getLogin(), blockTime);
         } else {
-            authResponse.reject("attempts", "credentials", Map.of("value" , maxAttempts - blockedUser.getAttempts()));
+            authResponse.reject("attempts", "credentials", Map.of("value", maxAttempts - blockedUser.getAttempts()));
         }
 
         cache.put("blocked_cache_" + loginRequestDto.login(), blockedUser);
     }
+
 
     private void checkBlock(LoginRequestDto loginRequestDto, AuthResponseDto authResponse) {
         var blockedUser = cache.get("blocked_cache_" + loginRequestDto.login(), BlockedUser.class);

@@ -7,6 +7,6 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
-public class SuccessDto {
+public class SuccessDto extends HasError {
     private Boolean success;
 }

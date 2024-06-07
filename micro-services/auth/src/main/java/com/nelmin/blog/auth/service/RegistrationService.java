@@ -76,8 +76,7 @@ public class RegistrationService {
             return false;
         }
 
-        user.setEnabled(true);
-        userRepository.save(user);
+        userService.activateUser(user);
         cache.evictIfPresent("registration_uuid_" + uuid);
         return true;
     }
@@ -105,6 +104,7 @@ public class RegistrationService {
         return response;
     }
 
+    @Transactional
     public ResetPasswordResponse changePassword(ChangePasswordRequestDto dto) {
         var response = new ResetPasswordResponse();
 
