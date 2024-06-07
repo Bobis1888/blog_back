@@ -22,6 +22,12 @@ services:
   balancer:
     container_name: balancer
     network_mode: host
+    healthcheck:
+      test: curl --fail --silent localhost:4433/actuator/health | grep UP || exit 1
+      interval: 20s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
     depends_on:
       eureka:
         condition: service_healthy
@@ -55,7 +61,7 @@ services:
     container_name: auth
     network_mode: host
     depends_on:
-      config:
+      balancer:
         condition: service_healthy
     build:
       context: .
@@ -67,7 +73,7 @@ services:
     container_name: content
     network_mode: host
     depends_on:
-      config:
+      balancer:
         condition: service_healthy
     build:
       context: .
@@ -79,7 +85,7 @@ services:
     container_name: email
     network_mode: host
     depends_on:
-      config:
+      balancer:
         condition: service_healthy
     build:
       context: .
