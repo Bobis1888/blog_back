@@ -58,8 +58,8 @@ public class ContentController {
 
     @Secured("ROLE_USER")
     @PostMapping("/change-status/{id}")
-    public ResponseEntity<PublishContentResponseDto> changeStatus(@Valid @PathVariable Long id, @RequestBody @Valid Article.Status status) {
-        PublishContentResponseDto response = contentService.changeStatus(id, status);
+    public ResponseEntity<PublishContentResponseDto> changeStatus(@Valid @PathVariable Long id, @RequestBody @Valid ChangeStatusRequestDto requestDto) {
+        PublishContentResponseDto response = contentService.changeStatus(id, requestDto.status());
 
         return ResponseEntity
                 .status(response.hasErrors() ? HttpStatus.BAD_REQUEST : HttpStatus.OK)
