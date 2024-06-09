@@ -49,6 +49,7 @@ public class ContentController {
                 .body(response);
     }
 
+    @Deprecated
     @Secured("ROLE_USER")
     @GetMapping("/publish/{id}")
     public ResponseEntity<PublishContentResponseDto> publish(@Valid @PathVariable Long id) {
@@ -59,6 +60,7 @@ public class ContentController {
                 .body(response);
     }
 
+    @Deprecated
     @Secured("ROLE_USER")
     @GetMapping("/unpublish/{id}")
     public ResponseEntity<PublishContentResponseDto> unpublish(@Valid @PathVariable Long id) {
@@ -72,6 +74,16 @@ public class ContentController {
     @PostMapping("/list")
     public ResponseEntity<ListContentResponseDto> list(@Valid @RequestBody ListContentRequestDto dto) {
         ListContentResponseDto response = contentService.list(dto);
+
+        return ResponseEntity
+                .status(response.hasErrors() ? HttpStatus.BAD_REQUEST : HttpStatus.OK)
+                .body(response);
+    }
+
+    @Secured("ROLE_USER")
+    @GetMapping("/change-status/{id}")
+    public ResponseEntity<PublishContentResponseDto> changeStatus(@Valid @PathVariable Long id, @RequestBody Article.Status status) {
+        PublishContentResponseDto response = contentService.changeStatus(id, status);
 
         return ResponseEntity
                 .status(response.hasErrors() ? HttpStatus.BAD_REQUEST : HttpStatus.OK)

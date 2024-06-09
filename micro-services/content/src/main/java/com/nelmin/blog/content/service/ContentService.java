@@ -105,6 +105,7 @@ public class ContentService {
             res.setTitle(article.get().getTitle());
             res.setStatus(article.get().getStatus().name().toLowerCase());
             res.setPublishedDate(article.get().getPublishedDate());
+            res.setTags(article.get().getTags());
             res.setAuthorName(resolveUserName(article.get().getUserId()));
         } else {
             res.reject("notFound", "article");
