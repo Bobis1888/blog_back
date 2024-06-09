@@ -105,4 +105,4 @@ volumes:
     driver_opts:
         type: none
         o: bind
-        device: /home/nelmin/.gradle
+        device: ${HOME}/.gradle

@@ -8,10 +8,7 @@ eureka:
 
 spring:
   profiles:
-    active: dev
-    include:
-      - dev
-      - prod
+    active: prod
   application:
     name: email
 

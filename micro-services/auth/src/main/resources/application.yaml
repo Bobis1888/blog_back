@@ -9,10 +9,7 @@ eureka:
 
 spring:
   profiles:
-    active: dev
-    include:
-      - dev
-      - prod
+    active: prod
   application:
     name: auth
 
@@ -28,7 +25,6 @@ spring:
 
 auth.max.attempts: 3
 auth.block.time: 120 #minutes
-
 
 logging:
   pattern:
