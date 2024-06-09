@@ -13,11 +13,9 @@ services:
       context: .
       args:
         APP_NAME: eureka
-    #    restart: always
+    restart: always
     volumes:
-      - type: volume
-        source: gradleCache
-        target: /home/gradle/.gradle
+      - ./.gradle:/root/.gradle
 
   balancer:
     container_name: balancer
@@ -37,7 +35,9 @@ services:
       context: .
       args:
         APP_NAME: balancer
-    #    restart: always
+    restart: always
+    volumes:
+      - ./.gradle:/root/.gradle
 
   config:
     container_name: config
@@ -55,7 +55,9 @@ services:
       context: .
       args:
         APP_NAME: config
-#    restart: always
+    restart: always
+    volumes:
+      - ./.gradle:/root/.gradle
    
   auth:
     container_name: auth
@@ -63,11 +65,19 @@ services:
     depends_on:
       balancer:
         condition: service_healthy
+    healthcheck:
+      test: curl --fail --silent localhost:8082/actuator/health | grep UP || exit 1
+      interval: 20s
+      timeout: 5s
+      retries: 3
+      start_period: 25s
     build:
       context: .
       args:
         APP_NAME: auth
-    #    restart: always
+    restart: always
+    volumes:
+      - ./.gradle:/root/.gradle
 
   content:
     container_name: content
@@ -75,11 +85,19 @@ services:
     depends_on:
       balancer:
         condition: service_healthy
+    healthcheck:
+      test: curl --fail --silent localhost:8084/actuator/health | grep UP || exit 1
+      interval: 20s
+      timeout: 5s
+      retries: 3
+      start_period: 25s
     build:
       context: .
       args:
         APP_NAME: content
-    #    restart: always
+    restart: always
+    volumes:
+      - ./.gradle:/root/.gradle
 
   email:
     container_name: email
@@ -87,22 +105,16 @@ services:
     depends_on:
       balancer:
         condition: service_healthy
+    healthcheck:
+      test: curl --fail --silent localhost:8083/actuator/health | grep UP || exit 1
+      interval: 20s
+      timeout: 5s
+      retries: 3
+      start_period: 25s
     build:
       context: .
       args:
         APP_NAME: email
-    #    restart: always
-
-#  angular:
-#    container_name: angular
-#    network_mode: host
-#    build:
-#      context: ../front/.
-
-volumes:
-  gradleCache:
-    driver: local
-    driver_opts:
-        type: none
-        o: bind
-        device: ${HOME}/.gradle
+    restart: always
+    volumes:
+      - ./.gradle:/root/.gradle
