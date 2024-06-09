@@ -35,7 +35,7 @@ public class RegistrationEmailService {
 
     // TODO refactor
     public void sendConfirmEmail(String email, String uud) {
-        String link = serverUrl + "api/auth/confirm?uuid=" + uud;
+        String link = resolveUrl("api/auth/confirm?uuid=" + uud);
 
         jmsTemplate.convertAndSend(
                 emailQueue,
