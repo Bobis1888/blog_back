@@ -17,8 +17,8 @@ import org.springframework.web.servlet.ModelAndView;
 @RequiredArgsConstructor
 public class RegistrationController {
 
-    @Value("${server.address:127.0.0.1}")
-    private String serverAddress;
+    @Value("${server.url:127.0.0.1}")
+    private String serverUrl;
 
     private final RegistrationService registrationService;
 
@@ -47,13 +47,6 @@ public class RegistrationController {
                 .body(response);
     }
 
-    @GetMapping(value = "/to-change-password")
-    public ModelAndView toChangePassword(@RequestParam(value = "uuid") String uuid, ModelMap map) {
-        map.addAttribute("uuid", uuid);
-        map.addAttribute("reset-password-result", true);
-        return new ModelAndView("redirect:" + resolveRedirectAddress(), map);
-    }
-
     @PostMapping(value = "/change-password")
     public ResponseEntity<ResetPasswordResponse> changePassword(@Valid @RequestBody ChangePasswordRequestDto dto) {
         var response = registrationService.changePassword(dto);
@@ -64,6 +57,6 @@ public class RegistrationController {
     }
 
     private String resolveRedirectAddress() {
-        return "http://" + serverAddress + "/";
+        return (serverUrl.endsWith("/") ? serverUrl : serverUrl  + "/");
     }
 }

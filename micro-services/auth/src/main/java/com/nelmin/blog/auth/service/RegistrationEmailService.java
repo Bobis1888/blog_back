@@ -13,8 +13,8 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class RegistrationEmailService {
 
-    @Value("${server.address:127.0.0.1}")
-    private String serverAddress;
+    @Value("${server.url:127.0.0.1}")
+    private String serverUrl;
 
     //TODO config
     private final String emailQueue = "blog.email.send";
@@ -23,7 +23,7 @@ public class RegistrationEmailService {
 
     // TODO refactor
     public void sendResetEmail(String email, String uud) {
-        String link = serverAddress + "/auth/to-change-password?uuid=" + uud;
+        String link = resolveUrl("?reset-password=" + uud);
         jmsTemplate.convertAndSend(
                 emailQueue,
                 new EmailMessage(
@@ -35,7 +35,7 @@ public class RegistrationEmailService {
 
     // TODO refactor
     public void sendConfirmEmail(String email, String uud) {
-        String link = serverAddress + "/auth/confirm?uuid=" + uud;
+        String link = serverUrl + "api/auth/confirm?uuid=" + uud;
 
         jmsTemplate.convertAndSend(
                 emailQueue,
@@ -78,5 +78,9 @@ public class RegistrationEmailService {
         builder.append("</body>");
         builder.append("</html>");
         return builder.toString();
+    }
+
+    private String resolveUrl(String paths) {
+        return (serverUrl.endsWith("/") ? serverUrl : serverUrl  + "/") + paths;
     }
 }

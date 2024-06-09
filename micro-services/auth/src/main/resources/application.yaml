@@ -8,8 +8,6 @@ eureka:
   instance.prefer-ip-address: true
 
 spring:
-  profiles:
-    active: prod
   application:
     name: auth
 

@@ -11,8 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @Slf4j
 @RestController
 @RequiredArgsConstructor
@@ -49,28 +47,6 @@ public class ContentController {
                 .body(response);
     }
 
-    @Deprecated
-    @Secured("ROLE_USER")
-    @GetMapping("/publish/{id}")
-    public ResponseEntity<PublishContentResponseDto> publish(@Valid @PathVariable Long id) {
-        PublishContentResponseDto response = contentService.changeStatus(id, Article.Status.PUBLISHED);
-
-        return ResponseEntity
-                .status(response.hasErrors() ? HttpStatus.BAD_REQUEST : HttpStatus.OK)
-                .body(response);
-    }
-
-    @Deprecated
-    @Secured("ROLE_USER")
-    @GetMapping("/unpublish/{id}")
-    public ResponseEntity<PublishContentResponseDto> unpublish(@Valid @PathVariable Long id) {
-        PublishContentResponseDto response = contentService.changeStatus(id, Article.Status.DRAFT);
-
-        return ResponseEntity
-                .status(response.hasErrors() ? HttpStatus.BAD_REQUEST : HttpStatus.OK)
-                .body(response);
-    }
-
     @PostMapping("/list")
     public ResponseEntity<ListContentResponseDto> list(@Valid @RequestBody ListContentRequestDto dto) {
         ListContentResponseDto response = contentService.list(dto);
@@ -81,8 +57,8 @@ public class ContentController {
     }
 
     @Secured("ROLE_USER")
-    @GetMapping("/change-status/{id}")
-    public ResponseEntity<PublishContentResponseDto> changeStatus(@Valid @PathVariable Long id, @RequestBody Article.Status status) {
+    @PostMapping("/change-status/{id}")
+    public ResponseEntity<PublishContentResponseDto> changeStatus(@Valid @PathVariable Long id, @RequestBody @Valid Article.Status status) {
         PublishContentResponseDto response = contentService.changeStatus(id, status);
 
         return ResponseEntity
