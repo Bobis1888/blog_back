@@ -6,7 +6,7 @@ import com.nelmin.blog.common.conf.JwtTokenUtils;
 import com.nelmin.blog.auth.dto.AuthResponseDto;
 import com.nelmin.blog.auth.dto.BlockedUser;
 import com.nelmin.blog.auth.dto.LoginRequestDto;
-import com.nelmin.blog.auth.exceptions.UserNotFoundException;
+import com.nelmin.blog.common.exception.UserNotFoundException;
 import com.nelmin.blog.common.dto.SuccessDto;
 import com.nelmin.blog.common.model.User;
 import com.nelmin.blog.common.service.UserService;
@@ -104,8 +104,14 @@ public class AuthService {
 
 
             if (StringUtils.hasText(dto.nickName())) {
-                userService.changeNickName(user, dto.nickName());
-                res.setSuccess(true);
+
+                if (userRepository.getIdByNickName(dto.nickName()).isPresent()) {
+                    res.reject("invalid", "nickName");
+                } else {
+                    userService.changeNickName(user, dto.nickName());
+                }
+
+                res.setSuccess(res.hasErrors());
             }
 
             if (StringUtils.hasText(dto.password())) {

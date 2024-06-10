@@ -11,15 +11,15 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.repository.util.ClassUtils;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Slf4j
 @Service
@@ -45,6 +45,18 @@ public class ContentService {
 
         if (article == null) {
             article = new Article();
+        }
+
+        if (article.getStatus() == Article.Status.PUBLISHED) {
+            response.setSuccess(false);
+            response.reject("notEditable", "status");
+            return response;
+        }
+
+        if (article.getStatus() == Article.Status.PENDING) {
+            response.setSuccess(false);
+            response.reject("notEditable", "status");
+            return response;
         }
 
         article.setUserId(userInfo.getCurrentUser().getId());
@@ -77,7 +89,8 @@ public class ContentService {
         if (article.isPresent()) {
 
             try {
-                articleRepo.deleteById(id);
+                article.get().setStatus(Article.Status.DELETED);
+                articleRepo.save(article.get());
                 response.setSuccess(true);
             } catch (Exception ex) {
                 log.error("Error delete article", ex);
@@ -122,11 +135,35 @@ public class ContentService {
         if (article.isPresent()) {
 
             try {
-                article.get().setStatus(status);
+
+                if (status == Article.Status.PUBLISHED &&
+                        List.of(Article.Status.PUBLISHED, Article.Status.PENDING).contains(article.get().getStatus())) {
+
+                    if (article.get().getStatus() == Article.Status.PENDING) {
+                        response.reject("pendingPublish", "status");
+                    } else {
+                        response.reject("alreadyPublished", "status");
+                    }
+                }
+
+                if (!StringUtils.hasText(article.get().getContent())) {
+                    response.reject("nullable", "content");
+                }
+
+                if (!StringUtils.hasText(article.get().getTitle())) {
+                    response.reject("nullable", "title");
+                }
+
+                if (response.hasErrors()) {
+                    response.setSuccess(false);
+                    return response;
+                }
 
                 if (status == Article.Status.PUBLISHED) {
-                    article.get().setPublishedDate(LocalDateTime.now());
+                    status = Article.Status.PENDING;
                 }
+
+                article.get().setStatus(status);
 
                 articleRepo.save(article.get());
 
@@ -144,6 +181,7 @@ public class ContentService {
         return response;
     }
 
+    //TODO refactor
     @Transactional
     public ListContentResponseDto list(ListContentRequestDto requestDto) {
         List<ArticleDto> resList = new ArrayList<>();
@@ -181,11 +219,14 @@ public class ContentService {
             query = requestDto.getQuery();
         }
 
+        // TODO refactor
         if (!Objects.equals(userInfo.getCurrentUser().getId(), userId)) {
             statuses.add(Article.Status.PUBLISHED);
         } else if (Objects.equals(userInfo.getCurrentUser().getId(), userId)) {
             statuses.add(Article.Status.DRAFT);
             statuses.add(Article.Status.PUBLISHED);
+            statuses.add(Article.Status.PENDING);
+            statuses.add(Article.Status.DELETED);
         }
 
         var pageRequest = PageRequest.of(
@@ -234,7 +275,7 @@ public class ContentService {
     @Transactional
     public TagsResponseDto tags(@NonNull TagsRequestDto requestDto) {
         var pageRequest = PageRequest.of(requestDto.getPage(), requestDto.getMax());
-
+        List<String> result = new ArrayList<>();
         Page<String> page = null;
 
         if (StringUtils.hasText(requestDto.getQuery())) {
@@ -245,7 +286,15 @@ public class ContentService {
 
         List<String> list = page.isEmpty() ? Collections.emptyList() : page.getContent();
 
-        return new TagsResponseDto(list, page.getTotalPages());
+        list.forEach(it -> {
+            if (it.contains(",")) {
+                result.addAll(Arrays.asList(it.split(",")));
+            } else {
+                result.add(it);
+            }
+        });
+
+        return new TagsResponseDto(result, page.getTotalPages());
     }
 
     private String resolveUserName(Long id) {
@@ -276,4 +325,21 @@ public class ContentService {
 
         return result.toString();
     }
+
+    @Transactional
+    @Scheduled(fixedDelay = 12L, timeUnit = TimeUnit.HOURS)
+    public void clearDeletedArticle() {
+        log.info("Start to clear deleted article");
+
+        try {
+            var pageRequest = PageRequest.of(0, 1000);
+            var ids = articleRepo.getIdsByStatusIn(List.of(Article.Status.DELETED), pageRequest).map(Article.ArticleId::getId).toList();
+            log.info("Ids to clear deleted article: {}", ids);
+            articleRepo.deleteAllByIdInBatch(ids);
+        } catch (Exception ex) {
+            log.error("Error clear deleted article", ex);
+        }
+
+        log.info("End to clear deleted article");
+    }`
 }

@@ -63,6 +63,10 @@ dependencies {
     testAnnotationProcessor 'org.projectlombok:lombok'
 }
 
+jar {
+    enabled = false
+}
+
 tasks.named('test') {
     useJUnitPlatform()
 }

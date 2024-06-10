@@ -67,6 +67,8 @@ public class Article {
 
         if (tags != null && !tags.isEmpty()) {
             this.tags = String.join(",", tags).toLowerCase();
+        } else {
+            this.tags = null;
         }
     }
 
@@ -84,6 +86,8 @@ public class Article {
         Optional<Article> findByIdAndUserId(Long id, Long userId);
 
         Page<Article> findAllByStatusIn(List<Status> status, Pageable pageable);
+
+        Page<ArticleId> getIdsByStatusIn(List<Status> status, Pageable pageable);
 
         Page<Article> findAllByStatusInAndUserId(List<Status> status, Long userId, Pageable pageable);
 
@@ -116,8 +120,14 @@ public class Article {
         Page<String> getTags(@Param("status") Collection<String> status, @Param("query") String query, PageRequest of);
     }
 
+    public interface ArticleId {
+        Long getId();
+    }
+
     public enum Status {
         DRAFT,
-        PUBLISHED
+        PUBLISHED,
+        PENDING,
+        DELETED
     }
 }

@@ -14,8 +14,8 @@ services:
       args:
         APP_NAME: eureka
     restart: always
-    volumes:
-      - ./.gradle:/root/.gradle
+    environment:
+      - APP_NAME=eureka
 
   balancer:
     container_name: balancer
@@ -36,8 +36,8 @@ services:
       args:
         APP_NAME: balancer
     restart: always
-    volumes:
-      - ./.gradle:/root/.gradle
+    environment:
+      - APP_NAME=balancer
 
   config:
     container_name: config
@@ -56,9 +56,9 @@ services:
       args:
         APP_NAME: config
     restart: always
-    volumes:
-      - ./.gradle:/root/.gradle
-   
+    environment:
+      - APP_NAME=config
+
   auth:
     container_name: auth
     network_mode: host
@@ -76,8 +76,8 @@ services:
       args:
         APP_NAME: auth
     restart: always
-    volumes:
-      - ./.gradle:/root/.gradle
+    environment:
+      - APP_NAME=auth
 
   content:
     container_name: content
@@ -96,8 +96,8 @@ services:
       args:
         APP_NAME: content
     restart: always
-    volumes:
-      - ./.gradle:/root/.gradle
+    environment:
+      - APP_NAME=content
 
   email:
     container_name: email
@@ -116,5 +116,5 @@ services:
       args:
         APP_NAME: email
     restart: always
-    volumes:
-      - ./.gradle:/root/.gradle
+    environment:
+      - APP_NAME=email

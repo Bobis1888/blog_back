@@ -1,6 +1,5 @@
-package com.nelmin.blog.auth.exceptions;
+package com.nelmin.blog.common.exception;
 
-import com.nelmin.blog.common.exception.CommonException;
 import org.springframework.http.HttpStatus;
 
 public class UserNotFoundException extends CommonException {

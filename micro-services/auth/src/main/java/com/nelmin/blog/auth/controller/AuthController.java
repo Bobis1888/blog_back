@@ -8,6 +8,8 @@ import com.nelmin.blog.auth.dto.LoginRequestDto;
 import com.nelmin.blog.auth.dto.StateResponseDto;
 import com.nelmin.blog.auth.service.AuthService;
 import com.nelmin.blog.common.dto.SuccessDto;
+import com.nelmin.blog.common.dto.UserInfoDto;
+import com.nelmin.blog.common.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -21,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+    private final UserService userService;
     private final JwtTokenUtils jwtTokenUtils;
     private final UserInfo userInfo;
 
@@ -46,6 +49,16 @@ public class AuthController {
     @GetMapping(value = "/state")
     public ResponseEntity<StateResponseDto> state() {
         return ResponseEntity.ok(new StateResponseDto(userInfo.isAuthorized()));
+    }
+
+    @Secured("ROLE_USER")
+    @PostMapping(value = "/info")
+    public ResponseEntity<UserInfoDto> info() {
+        var response = userService.info(userInfo.getCurrentUser().getId());
+
+        return ResponseEntity
+                .status(response.hasErrors() ? HttpStatus.BAD_REQUEST : HttpStatus.OK)
+                .body(response);
     }
 
     @Secured("ROLE_USER")
