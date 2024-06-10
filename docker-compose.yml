@@ -49,8 +49,8 @@ services:
       test: curl --fail --silent localhost:8761/actuator/health | grep UP || exit 1
       interval: 20s
       timeout: 5s
-      retries: 3
-      start_period: 25s
+      retries: 5
+      start_period: 30s
     build:
       context: .
       args:
