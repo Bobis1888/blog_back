@@ -341,5 +341,5 @@ public class ContentService {
         }
 
         log.info("End to clear deleted article");
-    }`
+    }
 }
