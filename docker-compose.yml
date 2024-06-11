@@ -16,6 +16,8 @@ services:
     restart: always
     environment:
       - APP_NAME=eureka
+      - SPRING_SECURITY_USERNAME=$SPRING_SECURITY_USERNAME
+      - SPRING_SECURITY_PASSWORD=$SPRING_SECURITY_PASSWORD
 
   balancer:
     container_name: balancer
@@ -38,6 +40,8 @@ services:
     restart: always
     environment:
       - APP_NAME=balancer
+      - SPRING_SECURITY_USERNAME=$SPRING_SECURITY_USERNAME
+      - SPRING_SECURITY_PASSWORD=$SPRING_SECURITY_PASSWORD
 
   config:
     container_name: config
@@ -63,6 +67,8 @@ services:
       - SPRING_CLOUD_CONFIG_USERNAME=$SPRING_CLOUD_CONFIG_USERNAME
       - SPRING_CLOUD_CONFIG_PASSWORD=$SPRING_CLOUD_CONFIG_PASSWORD
       - SPRING_CLOUD_CONFIG_LABEL=$SPRING_CLOUD_CONFIG_LABEL
+      - SPRING_SECURITY_USERNAME=$SPRING_SECURITY_USERNAME
+      - SPRING_SECURITY_PASSWORD=$SPRING_SECURITY_PASSWORD
 
   auth:
     container_name: auth
@@ -83,6 +89,8 @@ services:
     restart: always
     environment:
       - APP_NAME=auth
+      - SPRING_SECURITY_USERNAME=$SPRING_SECURITY_USERNAME
+      - SPRING_SECURITY_PASSWORD=$SPRING_SECURITY_PASSWORD
 
   content:
     container_name: content
@@ -103,6 +111,8 @@ services:
     restart: always
     environment:
       - APP_NAME=content
+      - SPRING_SECURITY_USERNAME=$SPRING_SECURITY_USERNAME
+      - SPRING_SECURITY_PASSWORD=$SPRING_SECURITY_PASSWORD
 
   email:
     container_name: email
@@ -123,3 +133,5 @@ services:
     restart: always
     environment:
       - APP_NAME=email
+      - SPRING_SECURITY_USERNAME=$SPRING_SECURITY_USERNAME
+      - SPRING_SECURITY_PASSWORD=$SPRING_SECURITY_PASSWORD

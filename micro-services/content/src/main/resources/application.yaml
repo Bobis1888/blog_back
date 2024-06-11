@@ -17,8 +17,8 @@ spring:
         enabled: true
         service-id: configserver
       fail-fast: false
-      username: user
-      password: change.me
+      username: ${SPRING_SECURITY_USERNAME}
+      password: ${SPRING_SECURITY_PASSWORD}
 logging:
   pattern:
     console: "%blue(%d) %highlight(%-5level) %green(%t) %yellow(%c{1.}): %msg%n"

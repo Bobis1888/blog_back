@@ -21,10 +21,11 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
 
 //	implementation 'org.springframework.cloud:spring-cloud-config-monitor'
 //	implementation 'org.springframework.boot:spring-boot-starter-artemis'
-//	implementation 'org.springframework.boot:spring-boot-starter-security'
+
 //	implementation "org.springframework.vault:spring-vault-core"
 //	implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
 //	implementation 'org.postgresql:postgresql'

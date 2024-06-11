@@ -17,8 +17,9 @@ spring:
         enabled: true
         service-id: configserver
       fail-fast: false
-      username: user
-      password: change.me
+      username: ${SPRING_SECURITY_USERNAME}
+      password: ${SPRING_SECURITY_PASSWORD}
+
   mail:
     emulator: false #disable spam
     host: 'smtp.gmail.com'
