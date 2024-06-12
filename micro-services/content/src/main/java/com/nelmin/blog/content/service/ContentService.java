@@ -160,6 +160,10 @@ public class ContentService {
                     status = Article.Status.PENDING;
                 }
 
+                if (status == Article.Status.DRAFT) {
+                    article.get().setPublishedDate(null);
+                }
+
                 article.get().setStatus(status);
 
                 articleRepo.save(article.get());

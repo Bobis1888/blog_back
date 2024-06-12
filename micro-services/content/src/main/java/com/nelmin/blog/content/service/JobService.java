@@ -8,6 +8,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -52,6 +53,7 @@ public class JobService {
                     try {
                         // TODO send to checker service and send email after checking
                         it.setStatus(Article.Status.PUBLISHED);
+                        it.setPublishedDate(LocalDateTime.now());
                         articleRepo.save(it);
                     } catch (Exception ex) {
                         log.error("Error process article", ex);
