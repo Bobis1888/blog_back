@@ -13,6 +13,6 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ListContentResponseDto extends HasError {
-    private List<ArticleDto> list;
+    private List<ShortArticleDto> list;
     private Integer totalPages;
 }

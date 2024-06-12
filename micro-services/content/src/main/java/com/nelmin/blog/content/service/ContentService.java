@@ -118,6 +118,7 @@ public class ContentService {
             res.setPublishedDate(article.get().getPublishedDate());
             res.setTags(article.get().getTags());
             res.setAuthorName(resolveUserName(article.get().getUserId()));
+            res.setActions(calculateActions(article.get()));
         } else {
             res.reject("notFound", "article");
         }
@@ -182,7 +183,7 @@ public class ContentService {
     //TODO refactor
     @Transactional
     public ListContentResponseDto list(ListContentRequestDto requestDto) {
-        List<ArticleDto> resList = new ArrayList<>();
+        List<ShortArticleDto> resList = new ArrayList<>();
         String[] sortBy = null;
 
         List<String> statuses = new ArrayList<>();
@@ -254,15 +255,14 @@ public class ContentService {
             resList.addAll(page
                     .getContent()
                     .stream()
-                    .map(it -> new ArticleDto(
+                    .map(it -> new ShortArticleDto(
                             it.getId(),
                             it.getTitle(),
                             it.getPreView(),
-                            it.getContent(),
                             it.getPublishedDate(),
                             resolveUserName(it.getUserId()),
                             it.getTags(),
-                            it.getStatus().name().toLowerCase())
+                            calculateActions(it))
                     )
                     .toList()
             );
@@ -375,5 +375,19 @@ public class ContentService {
         }
 
         log.info("End to process pending article");
+    }
+
+    private ArticleDto.Actions calculateActions(Article article) {
+        var actions = new ArticleDto.Actions();
+        var currentUserIsOwner = Objects.equals(article.getUserId(), userInfo.getCurrentUser().getId());
+
+        if (currentUserIsOwner) {
+            actions.setCanDelete(true);
+            actions.setCanEdit(Objects.equals(Article.Status.DRAFT, article.getStatus()));
+            actions.setCanPublish(Objects.equals(Article.Status.DRAFT, article.getStatus()));
+            actions.setCanUnpublish(List.of(Article.Status.DRAFT, Article.Status.PENDING).contains(article.getStatus()));
+        }
+
+        return actions;
     }
 }
