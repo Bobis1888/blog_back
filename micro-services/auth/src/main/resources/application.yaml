@@ -10,6 +10,8 @@ eureka:
 spring:
   application:
     name: auth
+  profiles:
+    active: ${SPRING_ACTIVE_PROFILE}
 
   config.import: 'optional:configserver:'
   cloud:

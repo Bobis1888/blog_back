@@ -25,8 +25,18 @@ public class ListContentRequestDto {
     @NotNull(message = "nullable")
     private Integer page;
 
-    private Long userId;
-    private String query;
     private List<String> sortBy = new ArrayList<>();
     private Sort.Direction direction = Sort.Direction.ASC;
+
+    private Search search;
+
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Getter
+    @Setter
+    public static class Search {
+        private String query;
+        private List<String> tags = new ArrayList<>();
+        private String author;
+    }
 }

@@ -18,8 +18,6 @@ import org.springframework.util.StringUtils;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Slf4j
 @Service
@@ -111,7 +109,7 @@ public class ContentService {
         var article = articleRepo.findById(id);
 
         if (article.isPresent() && (article.get().getStatus() == Article.Status.PUBLISHED ||
-                (article.get().getStatus() == Article.Status.DRAFT &&
+                (List.of(Article.Status.DRAFT, Article.Status.PENDING).contains(article.get().getStatus()) &&
                         Objects.equals(article.get().getUserId(), userInfo.getCurrentUser().getId())))) {
             res.setId(article.get().getId());
             res.setContent(article.get().getContent());
@@ -185,8 +183,9 @@ public class ContentService {
     @Transactional
     public ListContentResponseDto list(ListContentRequestDto requestDto) {
         List<ArticleDto> resList = new ArrayList<>();
-        List<Article.Status> statuses = new ArrayList<>();
         String[] sortBy = null;
+
+        List<String> statuses = new ArrayList<>();
         Long userId = null;
         String query = null;
         String tags = null;
@@ -204,29 +203,29 @@ public class ContentService {
             sortBy = new String[]{"id"};
         }
 
-        if (StringUtils.hasText(requestDto.getQuery())) {
+        if (requestDto.getSearch() != null) {
+            var search = requestDto.getSearch();
 
-            if (requestDto.getQuery().startsWith("@")) {
-                userId = resolveUserId(requestDto.getQuery());
-                requestDto.setQuery(null);
+            if (StringUtils.hasText(search.getQuery())) {
+                query = search.getQuery();
             }
 
-            if (requestDto.getQuery() != null && requestDto.getQuery().startsWith("#")) {
-                tags = requestDto.getQuery().toLowerCase();
-                requestDto.setQuery(null);
+            if (StringUtils.hasText(search.getAuthor())) {
+                userId = resolveUserId(search.getAuthor());
             }
 
-            query = requestDto.getQuery();
+            if (search.getTags() != null && !search.getTags().isEmpty()) {
+                tags = String.join("|", search.getTags());
+            }
         }
 
-        // TODO refactor
         if (!Objects.equals(userInfo.getCurrentUser().getId(), userId)) {
-            statuses.add(Article.Status.PUBLISHED);
+            statuses.add(Article.Status.PUBLISHED.name());
         } else if (Objects.equals(userInfo.getCurrentUser().getId(), userId)) {
-            statuses.add(Article.Status.DRAFT);
-            statuses.add(Article.Status.PUBLISHED);
-            statuses.add(Article.Status.PENDING);
-            statuses.add(Article.Status.DELETED);
+            statuses.add(Article.Status.DRAFT.name());
+            statuses.add(Article.Status.PUBLISHED.name());
+            statuses.add(Article.Status.PENDING.name());
+            statuses.add(Article.Status.DELETED.name());
         }
 
         var pageRequest = PageRequest.of(
@@ -240,15 +239,15 @@ public class ContentService {
 
         Page<Article> page;
 
-        // TODO refactor
+        // TODO refactor Specification
         if (StringUtils.hasText(tags)) {
-            page = articleRepo.findAllByTags(statuses.stream().map(Article.Status::name).toList(), tags, pageRequest);
-        } else if (StringUtils.hasText(query)) {
-            page = articleRepo.findAllByContent(statuses.stream().map(Article.Status::name).toList(), query, pageRequest);
+            page = articleRepo.findAllByTags(statuses, tags, pageRequest);
         } else if (userId != null) {
-            page = articleRepo.findAllByStatusInAndUserId(statuses, userId, pageRequest);
+            page = articleRepo.findAllByUserId(userId, statuses, pageRequest);
+        } else if (StringUtils.hasText(query)) {
+            page = articleRepo.findAllByContent(statuses, query, pageRequest);
         } else {
-            page = articleRepo.findAllByStatusIn(statuses, pageRequest);
+            page = articleRepo.findAllByStatus(statuses, pageRequest);
         }
 
         if (!page.isEmpty()) {
@@ -302,6 +301,11 @@ public class ContentService {
     }
 
     private Long resolveUserId(String nickName) {
+
+        if (!nickName.startsWith("@")) {
+            nickName = "@" + nickName;
+        }
+
         return userRepo.getIdByNickName(nickName).orElseGet(() -> () -> -1L).getId();
     }
 
@@ -333,7 +337,8 @@ public class ContentService {
 
         try {
             var pageRequest = PageRequest.of(0, 1000);
-            var ids = articleRepo.getIdsByStatusIn(List.of(Article.Status.DELETED), pageRequest).map(Article.ArticleId::getId).toList();
+            var ids = articleRepo.getIdsByStatusIn(List.of(Article.Status.DELETED), pageRequest)
+                    .map(Article.ArticleId::getId).toList();
             log.info("Ids to clear deleted article: {}", ids);
             articleRepo.deleteAllByIdInBatch(ids);
         } catch (Exception ex) {
@@ -341,5 +346,34 @@ public class ContentService {
         }
 
         log.info("End to clear deleted article");
+    }
+
+    // TODO
+    @Transactional
+    @Scheduled(fixedDelay = 1L, timeUnit = TimeUnit.HOURS)
+    public void processArticle() {
+        log.info("Start to process pending article");
+
+        try {
+            var pageRequest = PageRequest.of(0, 100);
+            var page = articleRepo.findAllByStatus(List.of(Article.Status.PENDING.name()), pageRequest);
+
+            if (!page.isEmpty()) {
+                page.getContent().forEach(it -> {
+
+                    try {
+                        // TODO send to checker service and send email after checking
+                        it.setStatus(Article.Status.PUBLISHED);
+                        articleRepo.save(it);
+                    } catch (Exception ex) {
+                        log.error("Error process article", ex);
+                    }
+                });
+            }
+        } catch (Exception ex) {
+            log.error("Error process articles", ex);
+        }
+
+        log.info("End to process pending article");
     }
 }

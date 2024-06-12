@@ -10,6 +10,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -81,29 +82,57 @@ public class Article {
         return List.of();
     }
 
+    // TODO Specification
     @Repository
     public interface Repo extends JpaRepository<Article, Long> {
         Optional<Article> findByIdAndUserId(Long id, Long userId);
 
-        Page<Article> findAllByStatusIn(List<Status> status, Pageable pageable);
-
         Page<ArticleId> getIdsByStatusIn(List<Status> status, Pageable pageable);
 
-        Page<Article> findAllByStatusInAndUserId(List<Status> status, Long userId, Pageable pageable);
-
         @Query(
-                value = "select * from article where status in :status and (title ilike concat('%', :query, '%') or content ilike concat('%', :query, '%'))",
-                countQuery = "select count(*) from article where status in :status and (title ilike concat('%', :query, '%') or content ilike concat('%', :query, '%'))",
+                value = "select * from article a where a.status in :status and " +
+                        "(a.title ~* :query  or a.content ~* :query)",
+                countQuery = "select count(*) from article a where a.status in :status and " +
+                        "(a.title ~* :query  or a.content ~* :query)",
                 nativeQuery = true
         )
-        Page<Article> findAllByContent(@Param("status") List<String> status, @Param("query") String query, Pageable pageable);
+        Page<Article> findAllByContent(
+                @Param("status") Collection<String> status,
+                @Param("query") String query,
+                Pageable pageable);
+
 
         @Query(
-                value = "select * from article where  status in :status and tags ilike concat('%', :tags, '%')",
-                countQuery = "select count(*) from article where  status in :status and tags ilike concat('%', :tags, '%')",
+                value = "select * from article a where a.status in :status and " +
+                        "(a.tags ~* :query)",
+                countQuery = "select count(*) from article a where a.status in :status and " +
+                        "(a.tags ~* :query)",
                 nativeQuery = true
         )
-        Page<Article> findAllByTags(@Param("status") Collection<String> status, @Param("tags") String tags, Pageable pageable);
+        Page<Article> findAllByTags(
+                @Param("status") Collection<String> status,
+                @Param("query") String query,
+                Pageable pageable);
+
+
+        @Query(
+                value = "select * from article a where a.status in :status and a.user_id = :userId",
+                countQuery = "select count(*) from article a where a.status in :status and a.user_id = :userId",
+                nativeQuery = true
+        )
+        Page<Article> findAllByUserId(
+                @Param("userId") Long userId,
+                @Param("status") Collection<String> status,
+                Pageable pageable);
+
+        @Query(
+                value = "select * from article a where a.status in :status",
+                countQuery = "select count(*) from article a where a.status in :status",
+                nativeQuery = true
+        )
+        Page<Article> findAllByStatus(
+                @Param("status") Collection<String> status,
+                Pageable pageable);
 
         @Query(
                 value = "select distinct tags from article where status in :status",
@@ -113,8 +142,8 @@ public class Article {
         Page<String> getTags(@Param("status") Collection<String> status, PageRequest of);
 
         @Query(
-                value = "select distinct tags from article where status in :status and (tags ilike concat('%', :query, '%'))",
-                countQuery = "select count(distinct tags) from article where status in :status and (tags ilike concat('%', :query, '%'))",
+                value = "select distinct tags from article where status in :status and (tags ~* :query)",
+                countQuery = "select count(distinct tags) from article where status in :status and (tags ~* :query)",
                 nativeQuery = true
         )
         Page<String> getTags(@Param("status") Collection<String> status, @Param("query") String query, PageRequest of);
@@ -123,6 +152,11 @@ public class Article {
     public interface ArticleId {
         Long getId();
     }
+
+//    // PostgreSQL ~*
+//    static Specification<Article> findByParams() {
+//        return (articleRoot, cq, cb) -> cb.some("textregexeq", Boolean.class, message, cb.literal(re));
+//    }
 
     public enum Status {
         DRAFT,
