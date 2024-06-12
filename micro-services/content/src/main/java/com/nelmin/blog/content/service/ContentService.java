@@ -274,7 +274,7 @@ public class ContentService {
     @Transactional
     public TagsResponseDto tags(@NonNull TagsRequestDto requestDto) {
         var pageRequest = PageRequest.of(requestDto.getPage(), requestDto.getMax());
-        List<String> result = new ArrayList<>();
+        Set<String> result = new HashSet<>();
         Page<String> page = null;
 
         if (StringUtils.hasText(requestDto.getQuery())) {
