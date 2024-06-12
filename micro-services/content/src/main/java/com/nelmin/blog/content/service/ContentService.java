@@ -385,7 +385,7 @@ public class ContentService {
             actions.setCanDelete(true);
             actions.setCanEdit(Objects.equals(Article.Status.DRAFT, article.getStatus()));
             actions.setCanPublish(Objects.equals(Article.Status.DRAFT, article.getStatus()));
-            actions.setCanUnpublish(List.of(Article.Status.DRAFT, Article.Status.PENDING).contains(article.getStatus()));
+            actions.setCanUnpublish(List.of(Article.Status.PUBLISHED, Article.Status.PENDING).contains(article.getStatus()));
         }
 
         return actions;
