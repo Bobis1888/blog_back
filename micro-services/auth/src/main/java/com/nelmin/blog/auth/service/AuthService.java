@@ -110,7 +110,7 @@ public class AuthService {
                     userService.changeNickname(user, dto.nickname());
                 }
 
-                res.setSuccess(res.hasErrors());
+                res.setSuccess(!res.hasErrors());
             }
         } catch (Exception ex) {
             log.error("Error change nickname", ex);
