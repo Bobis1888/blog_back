@@ -91,48 +91,29 @@ public class AuthService {
     }
 
     @Transactional
-    public SuccessDto changePassword(@NonNull ChangeInfoRequestDto dto) {
+    public SuccessDto changeNickname(@NonNull ChangeInfoRequestDto dto) {
         var res = new SuccessDto(false);
 
-        if (!StringUtils.hasText(dto.password())) {
-            res.reject("invalid", "password");
-            return res;
-        }
-
-        User user = (User) userInfo.getCurrentUser();
-
-        if (StringUtils.hasText(dto.password())) {
-            userService.changePassword(user, dto.password());
-            res.setSuccess(true);
-        }
-
-        return res;
-    }
-
-    @Transactional
-    public SuccessDto changeNickName(@NonNull ChangeInfoRequestDto dto) {
-        var res = new SuccessDto(false);
-
-        if (!StringUtils.hasText(dto.nickName())) {
-            res.reject("invalid", "nickName");
+        if (!StringUtils.hasText(dto.nickname())) {
+            res.reject("invalid", "nickname");
             return res;
         }
 
         try {
             User user = (User) userInfo.getCurrentUser();
 
-            if (StringUtils.hasText(dto.nickName())) {
+            if (StringUtils.hasText(dto.nickname())) {
 
-                if (userRepository.getIdByNickName(dto.nickName()).isPresent()) {
-                    res.reject("invalid", "nickName");
+                if (userRepository.getIdByNickName(dto.nickname()).isPresent()) {
+                    res.reject("invalid", "nickname");
                 } else {
-                    userService.changeNickName(user, dto.nickName());
+                    userService.changeNickname(user, dto.nickname());
                 }
 
                 res.setSuccess(res.hasErrors());
             }
         } catch (Exception ex) {
-            log.error("Error change nick name", ex);
+            log.error("Error change nickname", ex);
             res.setSuccess(false);
         }
 
