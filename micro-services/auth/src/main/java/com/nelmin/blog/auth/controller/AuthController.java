@@ -72,7 +72,7 @@ public class AuthController {
     }
 
     @Secured("ROLE_USER")
-    @PostMapping(value = "/info/change-nickname")
+    @PostMapping(value = "/change-nickname")
     public ResponseEntity<SuccessDto> changeNickname(@RequestBody ChangeInfoRequestDto dto) {
         var response = authService.changeNickname(dto);
 
