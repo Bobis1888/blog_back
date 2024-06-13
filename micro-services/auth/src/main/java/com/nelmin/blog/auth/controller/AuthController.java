@@ -72,7 +72,7 @@ public class AuthController {
     }
 
     @Secured("ROLE_USER")
-    @PostMapping(value = "/change-nick-name")
+    @PostMapping(value = "/info/change-nick-name")
     public ResponseEntity<SuccessDto> changeNickName(@RequestBody ChangeInfoRequestDto dto) {
         var response = authService.changeNickName(dto);
 
@@ -82,7 +82,7 @@ public class AuthController {
     }
 
     @Secured("ROLE_USER")
-    @PostMapping(value = "/change-password")
+    @PostMapping(value = "/info/change-password")
     public ResponseEntity<SuccessDto> changePassword(@Valid @RequestBody ChangeInfoRequestDto dto) {
         var response = authService.changePassword(dto);
 
