@@ -52,7 +52,7 @@ public class AuthController {
     }
 
     @Secured("ROLE_USER")
-    @PostMapping(value = "/info")
+    @GetMapping(value = "/info")
     public ResponseEntity<UserInfoDto> info() {
         var response = userService.info(userInfo.getCurrentUser().getId());
 
@@ -61,10 +61,30 @@ public class AuthController {
                 .body(response);
     }
 
+    @GetMapping(value = "/info/{id}")
+    public ResponseEntity<UserInfoDto> info(@PathVariable Long id) {
+        var response = userService.info(id);
+
+        response.setEmail(null);
+        return ResponseEntity
+                .status(response.hasErrors() ? HttpStatus.BAD_REQUEST : HttpStatus.OK)
+                .body(response);
+    }
+
     @Secured("ROLE_USER")
-    @PostMapping(value = "/change-info")
+    @PostMapping(value = "/change-nick-name")
+    public ResponseEntity<SuccessDto> changeNickName(@RequestBody ChangeInfoRequestDto dto) {
+        var response = authService.changeNickName(dto);
+
+        return ResponseEntity
+                .status(response.hasErrors() ? HttpStatus.BAD_REQUEST : HttpStatus.OK)
+                .body(response);
+    }
+
+    @Secured("ROLE_USER")
+    @PostMapping(value = "/change-password")
     public ResponseEntity<SuccessDto> changePassword(@Valid @RequestBody ChangeInfoRequestDto dto) {
-        var response = authService.changeInfo(dto);
+        var response = authService.changePassword(dto);
 
         return ResponseEntity
                 .status(response.hasErrors() ? HttpStatus.BAD_REQUEST : HttpStatus.OK)

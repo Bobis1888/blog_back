@@ -91,17 +91,35 @@ public class AuthService {
     }
 
     @Transactional
-    public SuccessDto changeInfo(@NonNull ChangeInfoRequestDto dto) {
+    public SuccessDto changePassword(@NonNull ChangeInfoRequestDto dto) {
         var res = new SuccessDto(false);
 
-        if (!StringUtils.hasText(dto.nickName()) && !StringUtils.hasText(dto.password())) {
-            res.reject("invalid", "changeInfo");
+        if (!StringUtils.hasText(dto.password())) {
+            res.reject("invalid", "password");
+            return res;
+        }
+
+        User user = (User) userInfo.getCurrentUser();
+
+        if (StringUtils.hasText(dto.password())) {
+            userService.changePassword(user, dto.password());
+            res.setSuccess(true);
+        }
+
+        return res;
+    }
+
+    @Transactional
+    public SuccessDto changeNickName(@NonNull ChangeInfoRequestDto dto) {
+        var res = new SuccessDto(false);
+
+        if (!StringUtils.hasText(dto.nickName())) {
+            res.reject("invalid", "nickName");
             return res;
         }
 
         try {
             User user = (User) userInfo.getCurrentUser();
-
 
             if (StringUtils.hasText(dto.nickName())) {
 
@@ -113,13 +131,8 @@ public class AuthService {
 
                 res.setSuccess(res.hasErrors());
             }
-
-            if (StringUtils.hasText(dto.password())) {
-                userService.changePassword(user, dto.password());
-                res.setSuccess(true);
-            }
         } catch (Exception ex) {
-            log.error("Error change info", ex);
+            log.error("Error change nick name", ex);
             res.setSuccess(false);
         }
 
