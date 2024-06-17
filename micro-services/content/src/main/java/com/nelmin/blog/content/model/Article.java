@@ -10,7 +10,6 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -88,6 +87,27 @@ public class Article {
         Optional<Article> findByIdAndUserId(Long id, Long userId);
 
         Page<ArticleId> getIdsByStatusIn(List<Status> status, Pageable pageable);
+
+        @Query(
+                value = "select * from article a where a.id in (select b.article_id from bookmark b where b.user_id = :userId)",
+                countQuery = "select count(*) from article a where a.id in (select b.article_id from bookmark b where b.user_id = :userId)",
+                nativeQuery = true
+        )
+        Page<Article> findAllInBookmarks(
+                @Param("userId") Long userId,
+                Pageable pageable);
+
+        @Query(
+                value = "select * from article a where a.id in (select b.article_id from bookmark b where b.user_id = :userId) and " +
+                        "(a.title ~* :query  or a.content ~* :query)",
+                countQuery = "select count(*) from article a where a.id in (select b.article_id from bookmark b where b.user_id = :userId) and " +
+                        "(a.title ~* :query  or a.content ~* :query)",
+                nativeQuery = true
+        )
+        Page<Article> findAllInBookmarks(
+                @Param("userId") Long userId,
+                @Param("query") String query,
+                Pageable pageable);
 
         @Query(
                 value = "select * from article a where a.status in :status and " +

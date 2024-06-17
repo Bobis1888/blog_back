@@ -21,3 +21,26 @@ CREATE SEQUENCE IF NOT EXISTS hibernate_sequence START WITH 1;
 
 --changeset nelmin:2024-07-05-23-00
 ALTER TABLE article ADD COLUMN IF NOT EXISTS tags text;
+
+--changeset nelmin:2024-07-17-15-00
+CREATE TABLE bookmark
+(
+    id           BIGINT NOT NULL,
+    user_id      BIGINT NOT NULL,
+    article_id   BIGINT NOT NULL,
+    created_date TIMESTAMP WITHOUT TIME ZONE,
+    updated_date TIMESTAMP WITHOUT TIME ZONE,
+    CONSTRAINT bookmark_pkey PRIMARY KEY (id)
+);
+
+--changeset nelmin:2024-07-17-15-10
+CREATE TABLE "like"
+(
+    id           BIGINT  NOT NULL,
+    user_id      BIGINT  NOT NULL,
+    article_id   BIGINT  NOT NULL,
+    value        BOOLEAN NOT NULL default false,
+    created_date TIMESTAMP WITHOUT TIME ZONE,
+    updated_date TIMESTAMP WITHOUT TIME ZONE,
+    CONSTRAINT like_pkey PRIMARY KEY (id)
+);

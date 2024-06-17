@@ -25,6 +25,7 @@ public class ContentService {
     private final Article.Repo articleRepo;
     private final User.Repo userRepo;
     private final UserInfo userInfo;
+    private final ActionService actionService;
 
     @Transactional
     public CreateContentResponseDto save(@NonNull CreateContentRequestDto dto) {
@@ -33,10 +34,7 @@ public class ContentService {
         Article article = null;
 
         if (dto.id() != null) {
-            article = articleRepo
-                    .findByIdAndUserId(dto.id(), userInfo.getCurrentUser()
-                            .getId())
-                    .orElseGet(Article::new);
+            article = articleRepo.findByIdAndUserId(dto.id(), userInfo.getCurrentUser().getId()).orElseGet(Article::new);
         }
 
         if (article == null) {
@@ -59,7 +57,14 @@ public class ContentService {
 
         // TODO validate html/sql injection
         article.setContent(dto.content());
-        article.setPreView(dto.preView());
+
+        if (dto.preView() == null || StringUtils.hasText(dto.preView()) && dto.preView().equals("auto")) {
+            var generatedPreview = dto.content().substring(0, Math.min(dto.content().length(), 255));
+            article.setPreView(generatedPreview);
+        } else {
+            article.setPreView(dto.preView());
+        }
+
         article.setTitle(dto.title());
         article.setTags(dto.tags());
 
@@ -106,17 +111,19 @@ public class ContentService {
         var res = new ArticleDto();
         var article = articleRepo.findById(id);
 
-        if (article.isPresent() && (article.get().getStatus() == Article.Status.PUBLISHED ||
-                (List.of(Article.Status.DRAFT, Article.Status.PENDING).contains(article.get().getStatus()) &&
-                        Objects.equals(article.get().getUserId(), userInfo.getCurrentUser().getId())))) {
+        if (article.isPresent() && (article.get().getStatus() == Article.Status.PUBLISHED || (List.of(Article.Status.DRAFT, Article.Status.PENDING).contains(article.get().getStatus()) && Objects.equals(article.get().getUserId(), userInfo.getCurrentUser().getId())))) {
             res.setId(article.get().getId());
             res.setContent(article.get().getContent());
             res.setTitle(article.get().getTitle());
             res.setStatus(article.get().getStatus().name().toLowerCase());
             res.setPublishedDate(article.get().getPublishedDate());
             res.setTags(article.get().getTags());
+
+            if (article.get().getStatus() != Article.Status.PUBLISHED) {
+                res.setPreView(article.get().getPreView());
+            }
+
             res.setAuthorName(resolveUserName(article.get().getUserId()));
-            res.setActions(calculateActions(article.get()));
         } else {
             res.reject("notFound", "article");
         }
@@ -133,8 +140,7 @@ public class ContentService {
 
             try {
 
-                if (status == Article.Status.PUBLISHED &&
-                        List.of(Article.Status.PUBLISHED, Article.Status.PENDING).contains(article.get().getStatus())) {
+                if (status == Article.Status.PUBLISHED && List.of(Article.Status.PUBLISHED, Article.Status.PENDING).contains(article.get().getStatus())) {
 
                     if (article.get().getStatus() == Article.Status.PENDING) {
                         response.reject("pendingPublish", "status");
@@ -185,7 +191,7 @@ public class ContentService {
     //TODO refactor
     @Transactional
     public ListContentResponseDto list(ListContentRequestDto requestDto) {
-        List<ShortArticleDto> resList = new ArrayList<>();
+        List<ArticleDto> resList = new ArrayList<>();
         String[] sortBy = null;
 
         List<String> statuses = new ArrayList<>();
@@ -194,12 +200,7 @@ public class ContentService {
         String tags = null;
 
         if (requestDto.getSortBy() != null && !requestDto.getSortBy().isEmpty()) {
-            sortBy = requestDto
-                    .getSortBy()
-                    .stream()
-                    .filter(it -> ClassUtils.hasProperty(Article.class, it))
-                    .map(ContentService::camelToSnake)
-                    .toArray(String[]::new);
+            sortBy = requestDto.getSortBy().stream().filter(it -> ClassUtils.hasProperty(Article.class, it)).map(ContentService::camelToSnake).toArray(String[]::new);
         }
 
         if (sortBy == null || sortBy.length == 0) {
@@ -231,14 +232,7 @@ public class ContentService {
             statuses.add(Article.Status.DELETED.name());
         }
 
-        var pageRequest = PageRequest.of(
-                requestDto.getPage(),
-                requestDto.getMax(),
-                Sort.by(
-                        requestDto.getDirection(),
-                        sortBy
-                )
-        );
+        var pageRequest = PageRequest.of(requestDto.getPage(), requestDto.getMax(), Sort.by(requestDto.getDirection(), sortBy));
 
         Page<Article> page;
 
@@ -254,20 +248,13 @@ public class ContentService {
         }
 
         if (!page.isEmpty()) {
-            resList.addAll(page
-                    .getContent()
-                    .stream()
-                    .map(it -> new ShortArticleDto(
-                            it.getId(),
-                            it.getTitle(),
-                            it.getPreView(),
-                            it.getPublishedDate(),
-                            resolveUserName(it.getUserId()),
-                            it.getTags(),
-                            calculateActions(it))
-                    )
-                    .toList()
-            );
+            resList.addAll(page.getContent().stream().map(it -> {
+                var res = new ArticleDto(it);
+                res.setContent(null);
+                res.setAuthorName(resolveUserName(it.getUserId()));
+                actionService.fillInfo(res);
+                return res;
+            }).toList());
         }
 
         return new ListContentResponseDto(resList, page.getTotalPages());
@@ -288,6 +275,11 @@ public class ContentService {
         List<String> list = page.isEmpty() ? Collections.emptyList() : page.getContent();
 
         list.forEach(it -> {
+
+            if (it == null) {
+                return;
+            }
+
             if (it.contains(",")) {
                 result.addAll(Set.of(it.split(",")));
             } else {
@@ -311,7 +303,7 @@ public class ContentService {
         return userRepo.getIdByNickName(nickName).orElseGet(() -> () -> -1L).getId();
     }
 
-    private static String camelToSnake(String str) {
+    static String camelToSnake(String str) {
         StringBuilder result = new StringBuilder();
 
         char c = str.charAt(0);
@@ -330,19 +322,5 @@ public class ContentService {
         }
 
         return result.toString();
-    }
-
-    private ArticleDto.Actions calculateActions(Article article) {
-        var actions = new ArticleDto.Actions();
-        var currentUserIsOwner = Objects.equals(article.getUserId(), userInfo.getCurrentUser().getId());
-
-        if (currentUserIsOwner) {
-            actions.setCanDelete(true);
-            actions.setCanEdit(Objects.equals(Article.Status.DRAFT, article.getStatus()));
-            actions.setCanPublish(Objects.equals(Article.Status.DRAFT, article.getStatus()));
-            actions.setCanUnpublish(List.of(Article.Status.PUBLISHED, Article.Status.PENDING).contains(article.getStatus()));
-        }
-
-        return actions;
     }
 }

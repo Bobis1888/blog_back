@@ -41,7 +41,7 @@ public class RegistrationService {
         var uuid = UUID.randomUUID().toString();
         var user = new User();
         user.setUsername(registrationRequestDto.email());
-        user.setNickName("@" + UUID.randomUUID());
+        user.setNickName("@" + uuid.substring(0, 18).replaceAll("-", ""));
         user.setPassword(passwordEncoder.encode(registrationRequestDto.password()));
         user.setEnabled(false);
 

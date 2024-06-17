@@ -20,7 +20,7 @@ public class JobService {
     private final Article.Repo articleRepo;
 
     @Transactional
-    @Scheduled(fixedDelay = 12L, timeUnit = TimeUnit.HOURS)
+    @Scheduled(fixedDelay = 1L, timeUnit = TimeUnit.HOURS)
     public void clearDeletedArticle() {
         log.info("Start to clear deleted article");
 

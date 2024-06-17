@@ -1,6 +1,7 @@
 package com.nelmin.blog.content.dto;
 
 import com.nelmin.blog.common.dto.HasError;
+import com.nelmin.blog.content.model.Article;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -18,18 +19,22 @@ public class ArticleDto extends HasError {
     private String content;
     private LocalDateTime publishedDate;
     private String authorName;
+    private Long likes;
     private List<String> tags = new ArrayList<>();
     private String status;
     private Actions actions;
+    private Boolean isLiked = false;
+    private Boolean isSaved = false;
 
-    @AllArgsConstructor
-    @NoArgsConstructor
-    @Getter
-    @Setter
-    public static class Actions {
-        private Boolean canEdit = false;
-        private Boolean canDelete = false;
-        private Boolean canPublish = false;
-        private Boolean canUnpublish = false;
+    public ArticleDto(Article article) {
+        this.id = article.getId();
+        this.title = article.getTitle();
+        this.preView = article.getPreView();
+        this.content = article.getContent();
+        this.publishedDate = article.getPublishedDate();
+        this.tags = article.getTags();
+        this.status = article.getStatus().name();
     }
+
+
 }
