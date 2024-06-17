@@ -229,7 +229,6 @@ public class ContentService {
             statuses.add(Article.Status.DRAFT.name());
             statuses.add(Article.Status.PUBLISHED.name());
             statuses.add(Article.Status.PENDING.name());
-            statuses.add(Article.Status.DELETED.name());
         }
 
         var pageRequest = PageRequest.of(requestDto.getPage(), requestDto.getMax(), Sort.by(requestDto.getDirection(), sortBy));

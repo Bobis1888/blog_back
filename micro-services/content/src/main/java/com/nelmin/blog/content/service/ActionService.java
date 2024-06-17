@@ -20,9 +20,14 @@ public class ActionService implements FillInfo<ArticleDto> {
     private final User.Repo userRepo;
 
     public void fillInfo(ArticleDto article) {
-        var actions = calculate(userRepo.getIdByNickName(article.getAuthorName()).get().getId(),
-                Article.Status.valueOf(article.getStatus()));
-        article.setActions(actions);
+        try {
+            userRepo.getIdByNickName(article.getAuthorName()).ifPresent(it -> {
+                var status = Article.Status.valueOf(article.getStatus().toUpperCase());
+                article.setActions(calculate(it.getId(), status));
+            });
+        } catch (Exception ex) {
+            log.error("Error fill info", ex);
+        }
     }
 
     private Actions calculate(Long userId, Article.Status status) {
