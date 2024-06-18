@@ -12,6 +12,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Entity
@@ -97,6 +98,7 @@ public class User implements IUser {
         Optional<User> findUserByUsername(String username);
         Optional<UserNickName> getNickNameById(Long id);
         Optional<UserId> getIdByNickName(String nickName);
+        List<UserId> findAllByNickNameContaining(String nickName);
     }
 
     public interface UserNickName {

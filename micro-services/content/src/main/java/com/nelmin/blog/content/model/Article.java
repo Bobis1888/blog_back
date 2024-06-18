@@ -136,12 +136,12 @@ public class Article {
 
 
         @Query(
-                value = "select * from article a where a.status in :status and a.user_id = :userId",
-                countQuery = "select count(*) from article a where a.status in :status and a.user_id = :userId",
+                value = "select * from article a where a.status in :status and a.user_id in :userIds",
+                countQuery = "select count(*) from article a where a.status in :status and a.user_id in :userIds",
                 nativeQuery = true
         )
-        Page<Article> findAllByUserId(
-                @Param("userId") Long userId,
+        Page<Article> findAllByUserIds(
+                @Param("userIds") Collection<Long> userIds,
                 @Param("status") Collection<String> status,
                 Pageable pageable);
 

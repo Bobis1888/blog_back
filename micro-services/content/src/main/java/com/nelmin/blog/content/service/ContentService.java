@@ -195,7 +195,7 @@ public class ContentService {
         String[] sortBy = null;
 
         List<String> statuses = new ArrayList<>();
-        Long userId = null;
+        List<Long> userIds = new ArrayList<>();
         String query = null;
         String tags = null;
 
@@ -215,7 +215,7 @@ public class ContentService {
             }
 
             if (StringUtils.hasText(search.getAuthor())) {
-                userId = resolveUserId(search.getAuthor());
+                userIds = resolveUserIds(search.getAuthor());
             }
 
             if (search.getTags() != null && !search.getTags().isEmpty()) {
@@ -223,9 +223,9 @@ public class ContentService {
             }
         }
 
-        if (!Objects.equals(userInfo.getCurrentUser().getId(), userId)) {
+        if (userIds.size() > 1 || userIds.size() == 1 && !Objects.equals(userInfo.getCurrentUser().getId(), userIds.get(0))) {
             statuses.add(Article.Status.PUBLISHED.name());
-        } else if (Objects.equals(userInfo.getCurrentUser().getId(), userId)) {
+        } else if (userIds.size() == 1 && Objects.equals(userInfo.getCurrentUser().getId(), userIds.get(0))) {
             statuses.add(Article.Status.DRAFT.name());
             statuses.add(Article.Status.PUBLISHED.name());
             statuses.add(Article.Status.PENDING.name());
@@ -238,8 +238,8 @@ public class ContentService {
         // TODO refactor Specification
         if (StringUtils.hasText(tags)) {
             page = articleRepo.findAllByTags(statuses, tags, pageRequest);
-        } else if (userId != null) {
-            page = articleRepo.findAllByUserId(userId, statuses, pageRequest);
+        } else if (!userIds.isEmpty()) {
+            page = articleRepo.findAllByUserIds(userIds, statuses, pageRequest);
         } else if (StringUtils.hasText(query)) {
             page = articleRepo.findAllByContent(statuses, query, pageRequest);
         } else {
@@ -293,13 +293,13 @@ public class ContentService {
         return userRepo.getNickNameById(id).orElseGet(() -> () -> "unknown").getNickName();
     }
 
-    private Long resolveUserId(String nickName) {
+    private List<Long> resolveUserIds(String nickName) {
 
         if (!nickName.startsWith("@")) {
             nickName = "@" + nickName;
         }
 
-        return userRepo.getIdByNickName(nickName).orElseGet(() -> () -> -1L).getId();
+        return userRepo.findAllByNickNameContaining(nickName).stream().map(User.UserId::getId).toList();
     }
 
     static String camelToSnake(String str) {
