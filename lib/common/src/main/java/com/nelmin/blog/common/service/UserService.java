@@ -50,14 +50,27 @@ public class UserService {
 
     @Transactional
     public UserInfoDto info(Long id) {
-        var userInfo = userRepository.findById(id)
-                .orElseThrow(UserNotFoundException::new);
+        var userInfo = userRepository.findById(id);
         var userInfoDto = new UserInfoDto();
-        userInfoDto.setId(userInfo.getId());
-        userInfoDto.setEmail(userInfo.getUsername());
-        userInfoDto.setNickname(userInfo.getNickName());
-        userInfoDto.setEnabled(userInfo.isEnabled());
-        userInfoDto.setRegistrationDate(userInfo.getRegistrationDate());
+
+        userInfo.ifPresentOrElse((it) -> {
+            userInfoDto.setId(it.getId());
+            userInfoDto.setNickname(it.getNickName());
+            userInfoDto.setEmail(it.getUsername());
+            userInfoDto.setEnabled(it.isEnabled());
+            userInfoDto.setRegistrationDate(it.getRegistrationDate());
+        }, () -> {
+            userInfoDto.reject("notFound", "user");
+        });
+
+        return userInfoDto;
+    }
+
+    @Transactional
+    public UserInfoDto publicInfo(Long id) {
+       var userInfoDto = info(id);
+        userInfoDto.setEmail(null);
+        userInfoDto.setId(null);
         return userInfoDto;
     }
 }

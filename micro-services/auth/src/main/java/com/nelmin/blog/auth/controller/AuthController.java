@@ -63,9 +63,7 @@ public class AuthController {
 
     @GetMapping(value = "/info/{id}")
     public ResponseEntity<UserInfoDto> info(@PathVariable Long id) {
-        var response = userService.info(id);
-
-        response.setEmail(null);
+        var response = userService.publicInfo(id);
         return ResponseEntity
                 .status(response.hasErrors() ? HttpStatus.BAD_REQUEST : HttpStatus.OK)
                 .body(response);
