@@ -1,7 +1,6 @@
 package com.nelmin.blog.common.service;
 
 import com.nelmin.blog.common.dto.UserInfoDto;
-import com.nelmin.blog.common.exception.UserNotFoundException;
 import com.nelmin.blog.common.model.User;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -9,6 +8,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.concurrent.atomic.AtomicReference;
 
 // TODO user library
 
@@ -20,7 +21,8 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
 
     @PostConstruct
-    private void init() {}
+    private void init() {
+    }
 
     @Transactional
     public void changePassword(User user, String password) {
@@ -67,10 +69,18 @@ public class UserService {
     }
 
     @Transactional
-    public UserInfoDto publicInfo(Long id) {
-       var userInfoDto = info(id);
-        userInfoDto.setEmail(null);
-        userInfoDto.setId(null);
-        return userInfoDto;
+    public UserInfoDto publicInfo(String nickname) {
+        var user = userRepository.getIdByNickName(nickname);
+        AtomicReference<UserInfoDto> userInfoDto = new AtomicReference<>(new UserInfoDto());
+
+        user.ifPresentOrElse((it) -> {
+            userInfoDto.set(info(it.getId()));
+            userInfoDto.get().setEmail(null);
+            userInfoDto.get().setId(null);
+        }, () -> {
+            userInfoDto.get().reject("notFound", "user");
+        });
+
+        return userInfoDto.get();
     }
 }
