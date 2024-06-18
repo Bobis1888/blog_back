@@ -198,7 +198,8 @@ public class ContentService {
     @Transactional
     public ListContentResponseDto all(ListContentRequestDto requestDto) {
         var pageRequest = PageRequest.of(requestDto.getPage(), requestDto.getMax(), Sort.by(requestDto.getDirection(), "id"));
-        return search(List.of(userInfo.getCurrentUser().getId()), List.of(Article.Status.PUBLISHED.name()), "", "", pageRequest);
+        var statuses = List.of(Article.Status.PUBLISHED.name(), Article.Status.DRAFT.name(), Article.Status.PENDING.name());
+        return search(List.of(userInfo.getCurrentUser().getId()), statuses, null, null, pageRequest);
     }
 
     //TODO refactor
