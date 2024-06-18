@@ -195,13 +195,16 @@ public class ContentService {
         return response;
     }
 
+    @Transactional
+    public ListContentResponseDto all(ListContentRequestDto requestDto) {
+        var pageRequest = PageRequest.of(requestDto.getPage(), requestDto.getMax(), Sort.by(requestDto.getDirection(), "id"));
+        return search(List.of(userInfo.getCurrentUser().getId()), List.of(Article.Status.PUBLISHED.name()), "", "", pageRequest);
+    }
+
     //TODO refactor
     @Transactional
     public ListContentResponseDto list(ListContentRequestDto requestDto) {
-        List<ArticleDto> resList = new ArrayList<>();
         String[] sortBy = null;
-
-        List<String> statuses = new ArrayList<>();
         List<Long> userIds = new ArrayList<>();
         String query = null;
         String tags = null;
@@ -230,17 +233,15 @@ public class ContentService {
             }
         }
 
-        if (userIds.size() == 1 && Objects.equals(userInfo.getCurrentUser().getId(), userIds.get(0))) {
-            statuses.add(Article.Status.DRAFT.name());
-            statuses.add(Article.Status.PUBLISHED.name());
-            statuses.add(Article.Status.PENDING.name());
-        } else {
-            statuses.add(Article.Status.PUBLISHED.name());
-        }
-
         var pageRequest = PageRequest.of(requestDto.getPage(), requestDto.getMax(), Sort.by(requestDto.getDirection(), sortBy));
 
-        Page<Article> page;
+        return search(userIds, List.of(Article.Status.PUBLISHED.name()), tags, query, pageRequest);
+    }
+
+    private ListContentResponseDto search(List<Long> userIds, List<String> statuses, String tags, String query, PageRequest pageRequest) {
+        List<ArticleDto> resList = new ArrayList<>();
+
+        Page<Article> page = null;
 
         // TODO refactor Specification
         if (StringUtils.hasText(tags)) {

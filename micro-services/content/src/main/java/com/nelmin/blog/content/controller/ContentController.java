@@ -84,6 +84,17 @@ public class ContentController {
                 .body(response);
     }
 
+    //TODO
+    @Secured("ROLE_USER")
+    @PostMapping("/all")
+    public ResponseEntity<ListContentResponseDto> all(@Valid @RequestBody ListContentRequestDto dto) {
+        ListContentResponseDto response = contentService.all(dto);
+
+        return ResponseEntity
+                .status(response.hasErrors() ? HttpStatus.BAD_REQUEST : HttpStatus.OK)
+                .body(response);
+    }
+
     @Secured("ROLE_USER")
     @PostMapping("/change-status/{id}")
     public ResponseEntity<PublishContentResponseDto> changeStatus(@Valid @PathVariable Long id, @RequestBody @Valid ChangeStatusRequestDto requestDto) {
