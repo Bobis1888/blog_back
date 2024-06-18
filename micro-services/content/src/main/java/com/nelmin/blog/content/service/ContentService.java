@@ -1,6 +1,7 @@
 package com.nelmin.blog.content.service;
 
 import com.nelmin.blog.common.bean.UserInfo;
+import com.nelmin.blog.common.dto.SuccessDto;
 import com.nelmin.blog.common.model.User;
 import com.nelmin.blog.content.dto.*;
 import com.nelmin.blog.content.model.Article;
@@ -28,7 +29,13 @@ public class ContentService {
     private final ActionService actionService;
 
     @Transactional
-    public CreateContentResponseDto save(@NonNull CreateContentRequestDto dto) {
+    public CreateContentResponseDto update(@NonNull Long id, @NonNull CreateContentRequestDto dto) {
+        //TODO
+        throw new UnsupportedOperationException();
+    }
+
+    @Transactional
+    public CreateContentResponseDto create(@NonNull CreateContentRequestDto dto) {
         log.info("create content: {}", dto);
         var response = new CreateContentResponseDto();
         Article article = null;
@@ -287,6 +294,27 @@ public class ContentService {
         });
 
         return new TagsResponseDto(result, page.getTotalPages());
+    }
+
+    @Transactional
+    public SuccessDto changePreview(Long id, ChangePreviewRequestDto dto) {
+        var response = new SuccessDto(false);
+
+        try {
+            var article = articleRepo.findByIdAndUserId(id, userInfo.getCurrentUser().getId());
+
+            if (article.isPresent()) {
+                article.get().setPreView(dto.content());
+                articleRepo.save(article.get());
+                response.setSuccess(true);
+            } else {
+                response.reject("notFound", "article");
+            }
+        } catch (Exception ex) {
+            log.error("Error change preview", ex);
+        }
+
+        return response;
     }
 
     private String resolveUserName(Long id) {

@@ -26,7 +26,7 @@ public class ListContentRequestDto {
     private Integer page;
 
     private List<String> sortBy = new ArrayList<>();
-    private Sort.Direction direction = Sort.Direction.ASC;
+    private Sort.Direction direction = Sort.Direction.DESC;
 
     private Search search;
 

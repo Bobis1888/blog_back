@@ -27,8 +27,26 @@ public class ContentController {
     // TODO split create/edit
     @Secured("ROLE_USER")
     @PostMapping("/save")
-    public ResponseEntity<CreateContentResponseDto> save(@Valid @RequestBody CreateContentRequestDto dto) {
-        CreateContentResponseDto response = contentService.save(dto);
+    public ResponseEntity<CreateContentResponseDto> create(@Valid @RequestBody CreateContentRequestDto dto) {
+        CreateContentResponseDto response = contentService.create(dto);
+        return ResponseEntity
+                .status(response.hasErrors() ? HttpStatus.BAD_REQUEST : HttpStatus.OK)
+                .body(response);
+    }
+
+    @Secured("ROLE_USER")
+    @PutMapping("/save/{id}")
+    public ResponseEntity<CreateContentResponseDto> save(@Valid@PathVariable Long id, @Valid @RequestBody CreateContentRequestDto dto) {
+        CreateContentResponseDto response = contentService.update(id, dto);
+        return ResponseEntity
+                .status(response.hasErrors() ? HttpStatus.BAD_REQUEST : HttpStatus.OK)
+                .body(response);
+    }
+
+    @Secured("ROLE_USER")
+    @PutMapping("/preview/{id}")
+    public ResponseEntity<SuccessDto> changePreView(@Valid @PathVariable Long id,@Valid @RequestBody ChangePreviewRequestDto dto) {
+        SuccessDto response = contentService.changePreview(id, dto);
         return ResponseEntity
                 .status(response.hasErrors() ? HttpStatus.BAD_REQUEST : HttpStatus.OK)
                 .body(response);
