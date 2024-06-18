@@ -115,7 +115,7 @@ public class BookmarksService implements FillInfo<ArticleDto> {
                         return res;
                     })
                     .toList());
-
+            response.setTotalPages(dbResponse.getTotalPages());
         }
 
         return response;
