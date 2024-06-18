@@ -223,12 +223,12 @@ public class ContentService {
             }
         }
 
-        if (userIds.size() > 1 || userIds.size() == 1 && !Objects.equals(userInfo.getCurrentUser().getId(), userIds.get(0))) {
-            statuses.add(Article.Status.PUBLISHED.name());
-        } else if (userIds.size() == 1 && Objects.equals(userInfo.getCurrentUser().getId(), userIds.get(0))) {
+        if (userIds.size() == 1 && Objects.equals(userInfo.getCurrentUser().getId(), userIds.get(0))) {
             statuses.add(Article.Status.DRAFT.name());
             statuses.add(Article.Status.PUBLISHED.name());
             statuses.add(Article.Status.PENDING.name());
+        } else {
+            statuses.add(Article.Status.PUBLISHED.name());
         }
 
         var pageRequest = PageRequest.of(requestDto.getPage(), requestDto.getMax(), Sort.by(requestDto.getDirection(), sortBy));
