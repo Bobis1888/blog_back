@@ -66,7 +66,7 @@ public class Article {
     public void setTags(List<String> tags) {
 
         if (tags != null && !tags.isEmpty()) {
-            this.tags = String.join(",", tags).toLowerCase();
+            this.tags = String.join(",", tags).replaceAll(" ", "");
         } else {
             this.tags = null;
         }
