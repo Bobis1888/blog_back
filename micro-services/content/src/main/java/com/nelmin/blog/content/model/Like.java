@@ -46,7 +46,7 @@ public class Like {
     private LocalDateTime updatedDate;
 
     public interface Repo extends JpaRepository<Like, Long> {
-        Optional<Like> findByArticleId(Long articleId);
+        Optional<Like> findByArticleIdAndUserId(Long articleId, Long userId);
         boolean existsByArticleIdAndUserId(Long articleId, Long userId);
         Optional<IsLiked> getValueByArticleIdAndUserId(Long articleId, Long userId);
         Long countByArticleIdAndValue(Long articleId, Boolean value);

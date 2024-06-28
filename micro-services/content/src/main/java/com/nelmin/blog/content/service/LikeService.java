@@ -54,8 +54,9 @@ public class LikeService implements FillInfo<ArticleDto> {
             } else {
 
                 if (value) {
-                    Like like = likeRepo.findByArticleId(articleId).orElse(new Like());
-                    like.setUserId(userInfo.getCurrentUser().getId());
+                    Long userid = userInfo.getCurrentUser().getId();
+                    Like like = likeRepo.findByArticleIdAndUserId(articleId, userid).orElse(new Like());
+                    like.setUserId(userid);
                     like.setArticleId(articleId);
                     like.setValue(true);
                     likeRepo.save(like);
