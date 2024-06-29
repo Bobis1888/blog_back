@@ -209,6 +209,11 @@ public class ContentService {
     @Transactional
     public ListContentResponseDto listFromAuthors(ListContentRequestDto requestDto) {
         var userIds = subscriptionsService.subscriptions();
+
+        if (userIds == null || userIds.isEmpty()) {
+            return new ListContentResponseDto(new ArrayList<>(), 0);
+        }
+
         return search(
                 userIds,
                 List.of(Article.Status.PUBLISHED.name()),
