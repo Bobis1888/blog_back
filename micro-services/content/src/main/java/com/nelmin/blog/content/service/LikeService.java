@@ -37,7 +37,7 @@ public class LikeService implements FillInfo<ArticleDto> {
     @Override
     @Transactional
     public void fillInfo(ArticleDto response) {
-        var userId = userInfo.getCurrentUser().getId();
+        var userId = userInfo.getId();
         response.setLikes(countLike(response.getId()));
         likeRepo.getValueByArticleIdAndUserId(response.getId(), userId)
                 .ifPresentOrElse(
@@ -54,7 +54,7 @@ public class LikeService implements FillInfo<ArticleDto> {
             } else {
 
                 if (value) {
-                    Long userid = userInfo.getCurrentUser().getId();
+                    Long userid = userInfo.getId();
                     Like like = likeRepo.findByArticleIdAndUserId(articleId, userid).orElse(new Like());
                     like.setUserId(userid);
                     like.setArticleId(articleId);

@@ -2,6 +2,7 @@ package com.nelmin.blog.content.service;
 
 import com.nelmin.blog.common.bean.UserInfo;
 import com.nelmin.blog.common.dto.SuccessDto;
+import com.nelmin.blog.content.Utils;
 import com.nelmin.blog.content.dto.ArticleDto;
 import com.nelmin.blog.content.dto.BookmarksRequestDto;
 import com.nelmin.blog.content.dto.BookmarksResponseDto;
@@ -11,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.repository.util.ClassUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,14 +24,13 @@ public class BookmarksService implements FillInfo<ArticleDto> {
     private final UserInfo userInfo;
     private final Bookmark.Repo bookmarkRepository;
     private final Article.Repo articleRepository;
-    private final ActionService actionService;
 
     @Transactional
     public SuccessDto addToBookmarks(Long articleId) {
         var response = new SuccessDto(false);
 
         try {
-            var userId = userInfo.getCurrentUser().getId();
+            var userId = userInfo.getId();
             var bookmark = bookmarkRepository.findByArticleIdAndUserId(articleId, userId).orElse(new Bookmark());
 
             if (bookmark.getId() != null) {
@@ -52,7 +51,7 @@ public class BookmarksService implements FillInfo<ArticleDto> {
     @Transactional
     public SuccessDto removeFromBookmarks(Long articleId) {
         var response = new SuccessDto(false);
-        var userId = userInfo.getCurrentUser().getId();
+        var userId = userInfo.getId();
         var bookmark = bookmarkRepository.findByArticleIdAndUserId(articleId, userId);
 
         if (bookmark.isEmpty()) {
@@ -68,7 +67,7 @@ public class BookmarksService implements FillInfo<ArticleDto> {
     @Override
     @Transactional
     public void fillInfo(ArticleDto response) {
-        var exists = bookmarkRepository.existsByArticleIdAndUserId(response.getId(), userInfo.getCurrentUser().getId());
+        var exists = bookmarkRepository.existsByArticleIdAndUserId(response.getId(), userInfo.getId());
         response.setIsSaved(exists);
     }
 
@@ -79,12 +78,7 @@ public class BookmarksService implements FillInfo<ArticleDto> {
 
         if (requestDto.getSortBy() != null &&
                 !requestDto.getSortBy().isEmpty()) {
-            sortBy = requestDto
-                    .getSortBy()
-                    .stream()
-                    .filter(it -> ClassUtils.hasProperty(Article.class, it))
-                    .map(ContentService::camelToSnake)
-                    .toArray(String[]::new);
+            sortBy = Utils.getSortProperties(requestDto.getSortBy(), Article.class);
         }
 
         if (sortBy == null || sortBy.length == 0) {
@@ -100,7 +94,7 @@ public class BookmarksService implements FillInfo<ArticleDto> {
                 )
         );
 
-        var dbResponse = articleRepository.findAllInBookmarks(userInfo.getCurrentUser().getId(), pageRequest);
+        var dbResponse = articleRepository.findAllInBookmarks(userInfo.getId(), pageRequest);
 
         if (dbResponse.isEmpty()) {
             response.setList(new ArrayList<>());

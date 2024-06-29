@@ -54,7 +54,7 @@ public class AuthController {
     @Secured("ROLE_USER")
     @GetMapping(value = "/info")
     public ResponseEntity<UserInfoDto> info() {
-        var response = userService.info(userInfo.getCurrentUser().getId());
+        var response = userService.info(userInfo.getId());
 
         return ResponseEntity
                 .status(response.hasErrors() ? HttpStatus.BAD_REQUEST : HttpStatus.OK)

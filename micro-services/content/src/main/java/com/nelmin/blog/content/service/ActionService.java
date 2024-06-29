@@ -32,7 +32,7 @@ public class ActionService implements FillInfo<ArticleDto> {
 
     private Actions calculate(Long userId, Article.Status status) {
         var actions = new Actions();
-        var currentUserIsOwner = Objects.equals(userId, userInfo.getCurrentUser().getId());
+        var currentUserIsOwner = Objects.equals(userId, userInfo.getId());
 
         if (currentUserIsOwner) {
             actions.setCanDelete(true);

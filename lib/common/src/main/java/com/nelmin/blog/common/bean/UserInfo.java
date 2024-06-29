@@ -30,6 +30,10 @@ public class UserInfo implements UserDetails {
         return List.of(new SimpleGrantedAuthority("ROLE_USER"));
     }
 
+    public Long getId() {
+        return currentUser.getId();
+    }
+
     @Override
     public String getPassword() {
         return currentUser.getPassword();

@@ -44,3 +44,13 @@ CREATE TABLE "like"
     updated_date TIMESTAMP WITHOUT TIME ZONE,
     CONSTRAINT like_pkey PRIMARY KEY (id)
 );
+
+--changeset nelmin:2024-07-29-22-00
+CREATE TABLE subscription
+(
+    id           BIGINT NOT NULL,
+    user_id      BIGINT NOT NULL references "user",
+    author_id    BIGINT NOT NULL references "user",
+    created_date TIMESTAMP WITHOUT TIME ZONE,
+    CONSTRAINT subscription_pkey PRIMARY KEY (id)
+);

@@ -2,7 +2,8 @@ package com.nelmin.blog.content.service;
 
 import com.nelmin.blog.common.bean.UserInfo;
 import com.nelmin.blog.common.dto.SuccessDto;
-import com.nelmin.blog.common.model.User;
+import com.nelmin.blog.common.service.UserService;
+import com.nelmin.blog.content.Utils;
 import com.nelmin.blog.content.dto.*;
 import com.nelmin.blog.content.model.Article;
 import lombok.NonNull;
@@ -11,7 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.repository.util.ClassUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -24,9 +24,10 @@ import java.util.*;
 public class ContentService {
 
     private final Article.Repo articleRepo;
-    private final User.Repo userRepo;
     private final UserInfo userInfo;
     private final ActionService actionService;
+    private final UserService userService;
+    private final SubscriptionsService subscriptionsService;
 
     @Transactional
     public CreateContentResponseDto update(@NonNull Long id, @NonNull CreateContentRequestDto dto) {
@@ -41,7 +42,7 @@ public class ContentService {
         Article article = null;
 
         if (dto.id() != null) {
-            article = articleRepo.findByIdAndUserId(dto.id(), userInfo.getCurrentUser().getId()).orElseGet(Article::new);
+            article = articleRepo.findByIdAndUserId(dto.id(), userInfo.getId()).orElseGet(Article::new);
         }
 
         if (article == null) {
@@ -60,7 +61,7 @@ public class ContentService {
             return response;
         }
 
-        article.setUserId(userInfo.getCurrentUser().getId());
+        article.setUserId(userInfo.getId());
 
         // TODO validate html/sql injection
         article.setContent(dto.content());
@@ -92,7 +93,7 @@ public class ContentService {
     public DeleteContentResponseDto delete(@NonNull Long id) {
         var response = new DeleteContentResponseDto();
 
-        var article = articleRepo.findByIdAndUserId(id, userInfo.getCurrentUser().getId());
+        var article = articleRepo.findByIdAndUserId(id, userInfo.getId());
 
         if (article.isPresent()) {
 
@@ -118,7 +119,7 @@ public class ContentService {
         var res = new ArticleDto();
         var article = articleRepo.findById(id);
 
-        if (article.isPresent() && (article.get().getStatus() == Article.Status.PUBLISHED || (List.of(Article.Status.DRAFT, Article.Status.PENDING).contains(article.get().getStatus()) && Objects.equals(article.get().getUserId(), userInfo.getCurrentUser().getId())))) {
+        if (article.isPresent() && (article.get().getStatus() == Article.Status.PUBLISHED || (List.of(Article.Status.DRAFT, Article.Status.PENDING).contains(article.get().getStatus()) && Objects.equals(article.get().getUserId(), userInfo.getId())))) {
             res.setId(article.get().getId());
             res.setContent(article.get().getContent());
             res.setTitle(article.get().getTitle());
@@ -130,7 +131,7 @@ public class ContentService {
                 res.setPreView(article.get().getPreView());
             }
 
-            res.setAuthorName(resolveUserName(article.get().getUserId()));
+            res.setAuthorName(userService.resolveNickname(article.get().getUserId()));
         } else {
             res.reject("notFound", "article");
         }
@@ -141,7 +142,7 @@ public class ContentService {
     @Transactional
     public PublishContentResponseDto changeStatus(@NonNull Long id, @NonNull Article.Status status) {
         var response = new PublishContentResponseDto();
-        var article = articleRepo.findByIdAndUserId(id, userInfo.getCurrentUser().getId());
+        var article = articleRepo.findByIdAndUserId(id, userInfo.getId());
 
         if (article.isPresent()) {
 
@@ -197,9 +198,23 @@ public class ContentService {
 
     @Transactional
     public ListContentResponseDto all(ListContentRequestDto requestDto) {
-        var pageRequest = PageRequest.of(requestDto.getPage(), requestDto.getMax(), Sort.by(requestDto.getDirection(), "id"));
-        var statuses = List.of(Article.Status.PUBLISHED.name(), Article.Status.DRAFT.name(), Article.Status.PENDING.name());
-        return search(List.of(userInfo.getCurrentUser().getId()), statuses, null, null, pageRequest);
+        return search(
+                List.of(userInfo.getId()),
+                List.of(Article.Status.PUBLISHED.name(), Article.Status.DRAFT.name(), Article.Status.PENDING.name()),
+                null,
+                null,
+                createPageRequest(requestDto));
+    }
+
+    @Transactional
+    public ListContentResponseDto listFromAuthors(ListContentRequestDto requestDto) {
+        var userIds = subscriptionsService.subscriptions();
+        return search(
+                userIds,
+                List.of(Article.Status.PUBLISHED.name()),
+                null,
+                null,
+                createPageRequest(requestDto));
     }
 
     //TODO refactor
@@ -211,7 +226,7 @@ public class ContentService {
         String tags = null;
 
         if (requestDto.getSortBy() != null && !requestDto.getSortBy().isEmpty()) {
-            sortBy = requestDto.getSortBy().stream().filter(it -> ClassUtils.hasProperty(Article.class, it)).map(ContentService::camelToSnake).toArray(String[]::new);
+            sortBy = Utils.getSortProperties(requestDto.getSortBy(), Article.class);
         }
 
         if (sortBy == null || sortBy.length == 0) {
@@ -226,7 +241,7 @@ public class ContentService {
             }
 
             if (StringUtils.hasText(search.getAuthor())) {
-                userIds = resolveUserIds(search.getAuthor());
+                userIds = userService.resolveUserIds(search.getAuthor());
             }
 
             if (search.getTags() != null && !search.getTags().isEmpty()) {
@@ -259,7 +274,7 @@ public class ContentService {
             resList.addAll(page.getContent().stream().map(it -> {
                 var res = new ArticleDto(it);
                 res.setContent(null);
-                res.setAuthorName(resolveUserName(it.getUserId()));
+                res.setAuthorName(userService.resolveNickname(it.getUserId()));
                 actionService.fillInfo(res);
                 return res;
             }).toList());
@@ -303,7 +318,7 @@ public class ContentService {
         var response = new SuccessDto(false);
 
         try {
-            var article = articleRepo.findByIdAndUserId(id, userInfo.getCurrentUser().getId());
+            var article = articleRepo.findByIdAndUserId(id, userInfo.getId());
 
             if (article.isPresent()) {
                 article.get().setPreView(dto.content());
@@ -319,37 +334,7 @@ public class ContentService {
         return response;
     }
 
-    private String resolveUserName(Long id) {
-        return userRepo.getNickNameById(id).orElseGet(() -> () -> "unknown").getNickName();
-    }
-
-    private List<Long> resolveUserIds(String nickName) {
-
-        if (!nickName.startsWith("@")) {
-            nickName = "@" + nickName;
-        }
-
-        return userRepo.findAllByNickNameContaining(nickName).stream().map(User.UserId::getId).toList();
-    }
-
-    static String camelToSnake(String str) {
-        StringBuilder result = new StringBuilder();
-
-        char c = str.charAt(0);
-        result.append(Character.toLowerCase(c));
-
-        for (int i = 1; i < str.length(); i++) {
-
-            char ch = str.charAt(i);
-
-            if (Character.isUpperCase(ch)) {
-                result.append('_');
-                result.append(Character.toLowerCase(ch));
-            } else {
-                result.append(ch);
-            }
-        }
-
-        return result.toString();
+    private PageRequest createPageRequest(ListContentRequestDto requestDto) {
+        return PageRequest.of(requestDto.getPage(), requestDto.getMax(), Sort.by(requestDto.getDirection(), "id"));
     }
 }

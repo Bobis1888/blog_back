@@ -1,6 +1,7 @@
 package com.nelmin.blog.common.service;
 
 import com.nelmin.blog.common.dto.UserInfoDto;
+import com.nelmin.blog.common.exception.UserNotFoundException;
 import com.nelmin.blog.common.model.User;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -9,6 +10,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 // TODO user library
@@ -48,6 +50,23 @@ public class UserService {
             user.setNickName(nickname);
             userRepository.save(user);
         }
+    }
+
+    public String resolveNickname(Long id) {
+        return userRepository.getNickNameById(id).orElse(() -> "unknown").getNickName();
+    }
+
+    public Long resolveId(String nickname) {
+        return userRepository.getIdByNickName(nickname).orElseThrow(UserNotFoundException::new).getId();
+    }
+
+    public List<Long> resolveUserIds(String nickName) {
+
+        if (!nickName.startsWith("@")) {
+            nickName = "@" + nickName;
+        }
+
+        return userRepository.findAllByNickNameContaining(nickName).stream().map(User.UserId::getId).toList();
     }
 
     @Transactional

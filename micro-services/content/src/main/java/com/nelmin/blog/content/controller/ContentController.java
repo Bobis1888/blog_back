@@ -21,7 +21,6 @@ public class ContentController {
     private final ContentService contentService;
     private final LikeService likeService;
     private final BookmarksService bookmarksService;
-    private final ActionService actionService;
     private final List<FillInfo<ArticleDto>> fillInfoList;
 
     // TODO split create/edit
@@ -84,7 +83,15 @@ public class ContentController {
                 .body(response);
     }
 
-    //TODO
+    @PostMapping("/list-from-authors")
+    public ResponseEntity<ListContentResponseDto> listFromAuthors(@Valid @RequestBody ListContentRequestDto dto) {
+        ListContentResponseDto response = contentService.listFromAuthors(dto);
+
+        return ResponseEntity
+                .status(response.hasErrors() ? HttpStatus.BAD_REQUEST : HttpStatus.OK)
+                .body(response);
+    }
+
     @Secured("ROLE_USER")
     @PostMapping("/all")
     public ResponseEntity<ListContentResponseDto> all(@Valid @RequestBody ListContentRequestDto dto) {
@@ -111,26 +118,6 @@ public class ContentController {
 
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(response);
-    }
-
-    @Secured("ROLE_USER")
-    @PutMapping("/like/{id}")
-    public ResponseEntity<SuccessDto> like(@Valid @PathVariable Long id) {
-        var response = likeService.like(id);
-
-        return ResponseEntity
-                .status(response.hasErrors() ? HttpStatus.BAD_REQUEST : HttpStatus.OK)
-                .body(response);
-    }
-
-    @Secured("ROLE_USER")
-    @DeleteMapping("/like/{id}")
-    public ResponseEntity<SuccessDto> dislike(@Valid @PathVariable Long id) {
-        var response = likeService.dislike(id);
-
-        return ResponseEntity
-                .status(response.hasErrors() ? HttpStatus.BAD_REQUEST : HttpStatus.OK)
                 .body(response);
     }
 
