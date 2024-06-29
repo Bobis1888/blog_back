@@ -2,6 +2,7 @@ package com.nelmin.blog.content.service;
 
 import com.nelmin.blog.common.bean.UserInfo;
 import com.nelmin.blog.common.dto.SuccessDto;
+import com.nelmin.blog.common.service.UserService;
 import com.nelmin.blog.content.Utils;
 import com.nelmin.blog.content.dto.ArticleDto;
 import com.nelmin.blog.content.dto.BookmarksRequestDto;
@@ -24,6 +25,7 @@ public class BookmarksService implements FillInfo<ArticleDto> {
     private final UserInfo userInfo;
     private final Bookmark.Repo bookmarkRepository;
     private final Article.Repo articleRepository;
+    private final UserService userService;
 
     @Transactional
     public SuccessDto addToBookmarks(Long articleId) {
@@ -105,6 +107,7 @@ public class BookmarksService implements FillInfo<ArticleDto> {
                     .map((it) -> {
                         var res = new ArticleDto(it);
                         res.setIsSaved(true);
+                        res.setAuthorName(userService.resolveNickname(it.getUserId()));
                         fillInfo(res);
                         return res;
                     })
