@@ -49,12 +49,13 @@ public class LikeService implements FillInfo<ArticleDto> {
         var response = new SuccessDto(false);
 
         try {
+
             if (!articleRepo.existsById(articleId)) {
                 response.reject("notFound", "article");
             } else {
+                Long userid = userInfo.getId();
 
                 if (value) {
-                    Long userid = userInfo.getId();
                     Like like = likeRepo.findByArticleIdAndUserId(articleId, userid).orElse(new Like());
                     like.setUserId(userid);
                     like.setArticleId(articleId);
@@ -63,7 +64,7 @@ public class LikeService implements FillInfo<ArticleDto> {
                     response.setSuccess(like.getId() != null);
                 } else {
                     // TODO count dislike
-                    likeRepo.deleteByArticleId(articleId);
+                    likeRepo.deleteByArticleIdAndUserId(articleId, userid);
                     response.setSuccess(true);
                 }
             }

@@ -50,7 +50,7 @@ public class Like {
         boolean existsByArticleIdAndUserId(Long articleId, Long userId);
         Optional<IsLiked> getValueByArticleIdAndUserId(Long articleId, Long userId);
         Long countByArticleIdAndValue(Long articleId, Boolean value);
-        void deleteByArticleId(Long articleId);
+        void deleteByArticleIdAndUserId(Long articleId, Long userId);
     }
 
     public interface IsLiked {
