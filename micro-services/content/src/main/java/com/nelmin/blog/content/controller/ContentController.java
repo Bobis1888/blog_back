@@ -97,6 +97,10 @@ public class ContentController {
     public ResponseEntity<ListContentResponseDto> all(@Valid @RequestBody ListContentRequestDto dto) {
         ListContentResponseDto response = contentService.all(dto);
 
+        if (!response.hasErrors()) {
+            fillInfoList.forEach(it -> response.getList().forEach(it::fillInfo));
+        }
+
         return ResponseEntity
                 .status(response.hasErrors() ? HttpStatus.BAD_REQUEST : HttpStatus.OK)
                 .body(response);

@@ -153,6 +153,18 @@ public class SubscriptionsService {
                 .toList();
     }
 
+    public Boolean isSubscribed(String authorNickname) {
+
+        try {
+            var authorId = userService.resolveId(authorNickname);
+            return subscriptionRepo.existsByUserIdAndAuthorId(userInfo.getId(), authorId);
+        } catch (Exception ex) {
+            log.error("Error get isSubscribed", ex);
+        }
+
+        return false;
+    }
+
     private PageRequest createPageRequest(@NonNull ListSubscriptionRequestDto requestDto) {
         return PageRequest.of(
                 requestDto.getPage(),

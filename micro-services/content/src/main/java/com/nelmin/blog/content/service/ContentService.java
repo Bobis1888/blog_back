@@ -280,7 +280,6 @@ public class ContentService {
                 var res = new ArticleDto(it);
                 res.setContent(null);
                 res.setAuthorName(userService.resolveNickname(it.getUserId()));
-                actionService.fillInfo(res);
                 return res;
             }).toList());
         }

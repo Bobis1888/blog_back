@@ -14,4 +14,6 @@ public class Actions {
     private Boolean canDelete = false;
     private Boolean canPublish = false;
     private Boolean canUnpublish = false;
+    private Boolean canSubscribe = false;
+    private Boolean canUnsubscribe = false;
 }
