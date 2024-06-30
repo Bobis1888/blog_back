@@ -6,12 +6,16 @@ import com.nelmin.blog.common.model.User;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 // TODO user library
 
@@ -19,6 +23,7 @@ import java.util.concurrent.atomic.AtomicReference;
 @Service
 @RequiredArgsConstructor
 public class UserService {
+
     private final User.Repo userRepository;
     private final PasswordEncoder passwordEncoder;
 
@@ -40,6 +45,7 @@ public class UserService {
         userRepository.save(user);
     }
 
+    @CacheEvict(value = "users", key = "#user.id")
     @Transactional
     public void changeNickname(User user, String nickname) {
         var id = userRepository.getIdByNickName(nickname);
@@ -52,12 +58,28 @@ public class UserService {
         }
     }
 
+    @Cacheable(value = "users", key = "#id")
     public String resolveNickname(Long id) {
-        return userRepository.getNickNameById(id).orElse(() -> "unknown").getNickName();
+        return userRepository.getNickNameById(id)
+                .orElse(() -> "unknown")
+                .getNickName();
+    }
+
+    public Map<Long, String> resolveNicknames(List<Long> ids) {
+        return userRepository.getIdsAndNickNamesByIdIn(ids)
+                .stream()
+                .collect(
+                        Collectors.toMap(
+                                User.UserIdAndNickName::getId,
+                                User.UserIdAndNickName::getNickName
+                        )
+                );
     }
 
     public Long resolveId(String nickname) {
-        return userRepository.getIdByNickName(nickname).orElseThrow(UserNotFoundException::new).getId();
+        return userRepository.getIdByNickName(nickname)
+                .orElseThrow(UserNotFoundException::new)
+                .getId();
     }
 
     public List<Long> resolveUserIds(String nickName) {
@@ -66,7 +88,10 @@ public class UserService {
             nickName = "@" + nickName;
         }
 
-        return userRepository.findAllByNickNameContaining(nickName).stream().map(User.UserId::getId).toList();
+        return userRepository.findAllByNickNameContaining(nickName)
+                .stream()
+                .map(User.UserId::getId)
+                .toList();
     }
 
     @Transactional
@@ -96,9 +121,7 @@ public class UserService {
             userInfoDto.set(info(it.getId()));
             userInfoDto.get().setEmail(null);
             userInfoDto.get().setId(null);
-        }, () -> {
-            userInfoDto.get().reject("notFound", "user");
-        });
+        }, () -> userInfoDto.get().reject("notFound", "user"));
 
         return userInfoDto.get();
     }

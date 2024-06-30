@@ -45,6 +45,8 @@ public class Subscription {
 
         Long countByAuthorId(Long authorId);
 
+        Long countByUserId(Long userId);
+
         Optional<Subscription> findByUserIdAndAuthorId(Long userId, Long authorId);
 
         boolean existsByUserIdAndAuthorId(Long userId, Long authorId);

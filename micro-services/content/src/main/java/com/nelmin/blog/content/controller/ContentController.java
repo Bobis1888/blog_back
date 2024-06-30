@@ -1,6 +1,7 @@
 package com.nelmin.blog.content.controller;
 
 import com.nelmin.blog.common.dto.SuccessDto;
+import com.nelmin.blog.common.service.FillContentInfo;
 import com.nelmin.blog.content.dto.*;
 import com.nelmin.blog.content.service.*;
 import jakarta.validation.Valid;
@@ -19,9 +20,8 @@ import java.util.List;
 public class ContentController {
 
     private final ContentService contentService;
-    private final LikeService likeService;
     private final BookmarksService bookmarksService;
-    private final List<FillInfo<ArticleDto>> fillInfoList;
+    private final List<FillContentInfo<ArticleDto>> fillInfoList;
 
     // TODO split create/edit
     @Secured("ROLE_USER")
@@ -66,7 +66,7 @@ public class ContentController {
         ArticleDto response = contentService.get(id);
 
         if (!response.hasErrors()) {
-            fillInfoList.forEach(it -> it.fillInfo(response));
+            fillInfoList.forEach(it -> it.fillContentInfo(response));
         }
 
         return ResponseEntity
@@ -98,7 +98,7 @@ public class ContentController {
         ListContentResponseDto response = contentService.all(dto);
 
         if (!response.hasErrors()) {
-            fillInfoList.forEach(it -> response.getList().forEach(it::fillInfo));
+            fillInfoList.forEach(it -> response.getList().forEach(it::fillContentInfo));
         }
 
         return ResponseEntity

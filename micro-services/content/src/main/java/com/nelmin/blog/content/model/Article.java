@@ -167,6 +167,21 @@ public class Article {
                 nativeQuery = true
         )
         Page<String> getTags(@Param("status") Collection<String> status, @Param("query") String query, PageRequest of);
+
+        Long countByStatusAndUserId(Status status, Long userid);
+
+        @Query(
+                value = "SELECT * FROM article " +
+                        "LEFT JOIN (SELECT article_id, count(id) likes FROM \"like\" GROUP BY article_id) lk " +
+                        "ON article.id = lk.article_id " +
+                        "WHERE article.status = 'PUBLISHED' order by lk.likes desc",
+                countQuery = "SELECT count(*) FROM article " +
+                        "LEFT JOIN (SELECT article_id, count(id) likes FROM \"like\" GROUP BY article_id) lk " +
+                        "ON article.id = lk.article_id " +
+                        "WHERE article.status = 'PUBLISHED' order by lk.likes desc",
+                nativeQuery = true
+        )
+        Page<Article> findAllMostPopular(Pageable request);
     }
 
     public interface ArticleId {

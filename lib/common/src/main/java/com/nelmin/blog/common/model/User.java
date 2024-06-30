@@ -10,9 +10,12 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Entity
@@ -49,7 +52,7 @@ public class User implements IUser {
 
     private Boolean enabled = true;
 
-    private byte [] image = new byte[0];
+    private byte[] image = new byte[0];
 
     @Override
     public Boolean isEnabled() {
@@ -96,12 +99,30 @@ public class User implements IUser {
     @Repository
     public interface Repo extends JpaRepository<User, Long> {
         Optional<User> findUserByUsername(String username);
+
         Optional<UserNickName> getNickNameById(Long id);
+
         Optional<UserId> getIdByNickName(String nickName);
+
         List<UserId> findAllByNickNameContaining(String nickName);
+
+//        @Query(
+//                value = "SELECT id, nick_name FROM \"user\" WHERE id IN (:ids)",
+//                countQuery = "SELECT count(*) FROM \"user\" WHERE id IN (:ids)",
+//                nativeQuery = true
+//        )
+//        List<UserIdAndNickName> resolveNickNames(List<Long> ids);
+
+        List<UserIdAndNickName> getIdsAndNickNamesByIdIn(List<Long> ids);
     }
 
     public interface UserNickName {
+        String getNickName();
+    }
+
+    public interface UserIdAndNickName {
+        Long getId();
+
         String getNickName();
     }
 

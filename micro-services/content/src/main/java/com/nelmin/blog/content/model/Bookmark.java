@@ -45,5 +45,6 @@ public class Bookmark {
         Optional<Bookmark> findByArticleIdAndUserId(Long articleId, Long userId);
         boolean existsByArticleIdAndUserId(Long articleId, Long userId);
         List<Bookmark> findAllByUserId(Long userId);
+        Long countByUserId(Long userId);
     }
 }

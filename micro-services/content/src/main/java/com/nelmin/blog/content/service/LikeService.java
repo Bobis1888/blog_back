@@ -2,7 +2,10 @@ package com.nelmin.blog.content.service;
 
 import com.nelmin.blog.common.bean.UserInfo;
 import com.nelmin.blog.common.dto.SuccessDto;
+import com.nelmin.blog.common.service.FillContentInfo;
+import com.nelmin.blog.common.service.FillStatisticInfo;
 import com.nelmin.blog.content.dto.ArticleDto;
+import com.nelmin.blog.content.dto.StatisticsResponseDto;
 import com.nelmin.blog.content.model.Article;
 import com.nelmin.blog.content.model.Like;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class LikeService implements FillInfo<ArticleDto> {
+public class LikeService implements FillContentInfo<ArticleDto>, FillStatisticInfo<StatisticsResponseDto> {
 
     private final UserInfo userInfo;
     private final Like.Repo likeRepo;
@@ -36,7 +39,14 @@ public class LikeService implements FillInfo<ArticleDto> {
 
     @Override
     @Transactional
-    public void fillInfo(ArticleDto response) {
+    public void fillStatisticInfo(StatisticsResponseDto response) {
+        var userId = response.getUserid();
+        response.setLikes(likeRepo.countByUserId(userId));
+    }
+
+    @Override
+    @Transactional
+    public void fillContentInfo(ArticleDto response) {
         var userId = userInfo.getId();
         response.setLikes(countLike(response.getId()));
         likeRepo.getValueByArticleIdAndUserId(response.getId(), userId)

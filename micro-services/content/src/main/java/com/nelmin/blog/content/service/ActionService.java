@@ -2,6 +2,7 @@ package com.nelmin.blog.content.service;
 
 import com.nelmin.blog.common.bean.UserInfo;
 import com.nelmin.blog.common.model.User;
+import com.nelmin.blog.common.service.FillContentInfo;
 import com.nelmin.blog.common.service.UserService;
 import com.nelmin.blog.content.dto.Actions;
 import com.nelmin.blog.content.dto.ArticleDto;
@@ -16,13 +17,13 @@ import java.util.Objects;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class ActionService implements FillInfo<ArticleDto> {
+public class ActionService implements FillContentInfo<ArticleDto> {
     private final UserInfo userInfo;
     private final User.Repo userRepo;
     private final SubscriptionsService subscriptionsService;
     private final UserService userService;
 
-    public void fillInfo(ArticleDto article) {
+    public void fillContentInfo(ArticleDto article) {
         try {
             userRepo.getIdByNickName(article.getAuthorName()).ifPresent(it -> {
                 var status = Article.Status.valueOf(article.getStatus().toUpperCase());

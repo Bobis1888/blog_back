@@ -14,5 +14,6 @@ import java.util.List;
 @NoArgsConstructor
 public class ListContentResponseDto extends HasError {
     private List<ArticleDto> list;
+    private Long totalRows;
     private Integer totalPages;
 }

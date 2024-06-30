@@ -3,9 +3,11 @@ package com.nelmin.blog.content.service;
 import com.nelmin.blog.common.bean.UserInfo;
 import com.nelmin.blog.common.dto.SuccessDto;
 import com.nelmin.blog.common.exception.UserNotFoundException;
+import com.nelmin.blog.common.service.FillStatisticInfo;
 import com.nelmin.blog.common.service.UserService;
 import com.nelmin.blog.content.dto.ListSubscriptionRequestDto;
 import com.nelmin.blog.content.dto.ListSubscriptionResponseDto;
+import com.nelmin.blog.content.dto.StatisticsResponseDto;
 import com.nelmin.blog.content.dto.SubscriptionDto;
 import com.nelmin.blog.content.model.Subscription;
 import lombok.NonNull;
@@ -21,7 +23,7 @@ import java.util.List;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class SubscriptionsService {
+public class SubscriptionsService implements FillStatisticInfo<StatisticsResponseDto> {
 
     private final UserInfo userInfo;
     private final UserService userService;
@@ -54,7 +56,7 @@ public class SubscriptionsService {
                 log.warn("Already subscribed {} {}", userInfo.getId(), authorId);
             }
 
-        } catch (UserNotFoundException notFound){
+        } catch (UserNotFoundException notFound) {
             log.info("User not found {}", authorNickname);
             log.debug("Error subscribe", notFound);
             res.reject("not_found", "author");
@@ -80,7 +82,7 @@ public class SubscriptionsService {
             } else {
                 res.reject("not_found", "subscription");
             }
-        } catch (UserNotFoundException notFound){
+        } catch (UserNotFoundException notFound) {
             log.info("User not found {}", authorNickname);
             log.debug("Error subscribe", notFound);
             res.reject("not_found", "author");
@@ -154,6 +156,12 @@ public class SubscriptionsService {
                 .stream()
                 .map(Subscription.AuthorProjection::getAuthorId)
                 .toList();
+    }
+
+    @Override
+    public void fillStatisticInfo(StatisticsResponseDto response) {
+        response.setSubscribers(subscriptionRepo.countByAuthorId(userInfo.getId()));
+        response.setSubscriptions(subscriptionRepo.countByUserId(userInfo.getId()));
     }
 
     public Boolean isSubscribed(String authorNickname) {

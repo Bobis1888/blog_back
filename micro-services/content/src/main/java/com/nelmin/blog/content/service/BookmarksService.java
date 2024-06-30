@@ -2,11 +2,14 @@ package com.nelmin.blog.content.service;
 
 import com.nelmin.blog.common.bean.UserInfo;
 import com.nelmin.blog.common.dto.SuccessDto;
+import com.nelmin.blog.common.service.FillContentInfo;
+import com.nelmin.blog.common.service.FillStatisticInfo;
 import com.nelmin.blog.common.service.UserService;
 import com.nelmin.blog.content.Utils;
 import com.nelmin.blog.content.dto.ArticleDto;
 import com.nelmin.blog.content.dto.BookmarksRequestDto;
 import com.nelmin.blog.content.dto.BookmarksResponseDto;
+import com.nelmin.blog.content.dto.StatisticsResponseDto;
 import com.nelmin.blog.content.model.Article;
 import com.nelmin.blog.content.model.Bookmark;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +24,7 @@ import java.util.ArrayList;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class BookmarksService implements FillInfo<ArticleDto> {
+public class BookmarksService implements FillContentInfo<ArticleDto>, FillStatisticInfo<StatisticsResponseDto> {
     private final UserInfo userInfo;
     private final Bookmark.Repo bookmarkRepository;
     private final Article.Repo articleRepository;
@@ -68,9 +71,15 @@ public class BookmarksService implements FillInfo<ArticleDto> {
 
     @Override
     @Transactional
-    public void fillInfo(ArticleDto response) {
+    public void fillContentInfo(ArticleDto response) {
         var exists = bookmarkRepository.existsByArticleIdAndUserId(response.getId(), userInfo.getId());
         response.setIsSaved(exists);
+    }
+
+    @Override
+    @Transactional
+    public void fillStatisticInfo(StatisticsResponseDto response) {
+        response.setBookmarks(bookmarkRepository.countByUserId(response.getUserid()));
     }
 
     @Transactional
@@ -108,10 +117,11 @@ public class BookmarksService implements FillInfo<ArticleDto> {
                         var res = new ArticleDto(it);
                         res.setIsSaved(true);
                         res.setAuthorName(userService.resolveNickname(it.getUserId()));
-                        fillInfo(res);
+                        fillContentInfo(res);
                         return res;
                     })
                     .toList());
+            response.setTotalRows(dbResponse.getTotalElements());
             response.setTotalPages(dbResponse.getTotalPages());
         }
 

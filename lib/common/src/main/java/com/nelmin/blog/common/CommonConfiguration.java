@@ -57,7 +57,8 @@ public class CommonConfiguration implements WebMvcConfigurer {
     public CacheManager cacheManager() {
         SimpleCacheManager cacheManager = new SimpleCacheManager();
         cacheManager.setCaches(List.of(
-                new ConcurrentMapCache("default")
+                new ConcurrentMapCache("default"),
+                new ConcurrentMapCache("users")
         ));
         return cacheManager;
     }
@@ -65,6 +66,11 @@ public class CommonConfiguration implements WebMvcConfigurer {
     @Bean
     public Cache cache(CacheManager cacheManager) {
         return cacheManager.getCache("default");
+    }
+
+    @Bean
+    public Cache usersCache(CacheManager cacheManager) {
+        return cacheManager.getCache("users");
     }
 
     /**

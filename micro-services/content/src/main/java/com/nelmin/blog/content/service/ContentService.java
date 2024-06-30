@@ -2,6 +2,7 @@ package com.nelmin.blog.content.service;
 
 import com.nelmin.blog.common.bean.UserInfo;
 import com.nelmin.blog.common.dto.SuccessDto;
+import com.nelmin.blog.common.service.FillStatisticInfo;
 import com.nelmin.blog.common.service.UserService;
 import com.nelmin.blog.content.Utils;
 import com.nelmin.blog.content.dto.*;
@@ -21,11 +22,10 @@ import java.util.*;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class ContentService {
+public class ContentService implements FillStatisticInfo<StatisticsResponseDto> {
 
     private final Article.Repo articleRepo;
     private final UserInfo userInfo;
-    private final ActionService actionService;
     private final UserService userService;
     private final SubscriptionsService subscriptionsService;
 
@@ -211,7 +211,7 @@ public class ContentService {
         var userIds = subscriptionsService.subscriptions();
 
         if (userIds == null || userIds.isEmpty()) {
-            return new ListContentResponseDto(new ArrayList<>(), 0);
+            return new ListContentResponseDto(new ArrayList<>(), 0L, 0);
         }
 
         return search(
@@ -284,7 +284,7 @@ public class ContentService {
             }).toList());
         }
 
-        return new ListContentResponseDto(resList, page.getTotalPages());
+        return new ListContentResponseDto(resList, page.getTotalElements(), page.getTotalPages());
     }
 
     @Transactional
@@ -318,7 +318,7 @@ public class ContentService {
     }
 
     @Transactional
-    public SuccessDto changePreview(Long id, ChangePreviewRequestDto dto) {
+    public SuccessDto changePreview(@NonNull Long id, @NonNull ChangePreviewRequestDto dto) {
         var response = new SuccessDto(false);
 
         try {
@@ -336,6 +336,11 @@ public class ContentService {
         }
 
         return response;
+    }
+
+    @Override
+    public void fillStatisticInfo(@NonNull StatisticsResponseDto response) {
+        response.setArticles(articleRepo.countByStatusAndUserId(Article.Status.PUBLISHED, response.getUserid()));
     }
 
     private PageRequest createPageRequest(ListContentRequestDto requestDto) {
