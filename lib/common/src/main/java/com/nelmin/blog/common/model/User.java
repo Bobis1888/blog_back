@@ -10,12 +10,10 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @Entity
@@ -105,13 +103,6 @@ public class User implements IUser {
         Optional<UserId> getIdByNickName(String nickName);
 
         List<UserId> findAllByNickNameContaining(String nickName);
-
-//        @Query(
-//                value = "SELECT id, nick_name FROM \"user\" WHERE id IN (:ids)",
-//                countQuery = "SELECT count(*) FROM \"user\" WHERE id IN (:ids)",
-//                nativeQuery = true
-//        )
-//        List<UserIdAndNickName> resolveNickNames(List<Long> ids);
 
         List<UserIdAndNickName> getIdsAndNickNamesByIdIn(List<Long> ids);
     }
