@@ -14,5 +14,6 @@ import java.util.List;
 @NoArgsConstructor
 public class ListSubscriptionResponseDto extends HasError {
     private List<SubscriptionDto> list;
+    private Long totalRows;
     private Integer totalPages;
 }

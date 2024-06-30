@@ -109,6 +109,7 @@ public class SubscriptionsService {
                                 )).toList()
                 );
                 res.setTotalPages(page.getTotalPages());
+                res.setTotalRows(page.getTotalElements());
             }
 
         } catch (Exception ex) {
@@ -135,7 +136,9 @@ public class SubscriptionsService {
                                         it.getCreatedDate()
                                 )).toList()
                 );
+
                 res.setTotalPages(page.getTotalPages());
+                res.setTotalRows(page.getTotalElements());
             }
         } catch (Exception ex) {
             log.error("Error get subscriptions", ex);
