@@ -28,5 +28,13 @@ public class StatisticsController {
                 .body(response);
     }
 
-    // TODO stat by user nickname
+    @Secured("ROLE_USER")
+    @GetMapping("/statistics/{nickname}")
+    public ResponseEntity<StatisticsResponseDto> statistics(@PathVariable String nickname) {
+        var response = statisticsService.getStatistics(nickname);
+
+        return ResponseEntity
+                .status(response.hasErrors() ? HttpStatus.BAD_REQUEST : HttpStatus.OK)
+                .body(response);
+    }
 }
