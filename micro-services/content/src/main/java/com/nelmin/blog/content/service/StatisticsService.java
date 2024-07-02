@@ -41,6 +41,7 @@ public class StatisticsService {
         try {
             res.setUserid(userService.resolveId(nickname));
             fillInfoList.forEach(it -> it.fillStatisticInfo(res));
+            res.setUserid(null);
         } catch (Exception ex) {
             log.error("Error get statistics", ex);
         }

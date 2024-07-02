@@ -10,7 +10,7 @@ public record RegistrationRequestDto(
         @Email(message = "invalid", flags = {Pattern.Flag.CASE_INSENSITIVE})
         String email,
         @NotBlank(message = "nullable")
-        @Size(min = 8, max = 20, message = "invalidSize")
-        @Pattern(message = "invalid", regexp = "^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&-+=()])(?=\\S+$).{8,}$")
+        @Size(min = 8, max = 100, message = "invalidSize")
+        @Pattern(message = "invalid", regexp = "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$ %^&*-]).{8,}$")
         String password) {
 }

@@ -28,7 +28,6 @@ public class StatisticsController {
                 .body(response);
     }
 
-    @Secured("ROLE_USER")
     @GetMapping("/statistics/{nickname}")
     public ResponseEntity<StatisticsResponseDto> statistics(@PathVariable String nickname) {
         var response = statisticsService.getStatistics(nickname);
