@@ -163,6 +163,25 @@ public class AuthService {
             }
         }
     }
+
+    public SuccessDto changeDescription(ChangeInfoRequestDto dto) {
+        var res = new SuccessDto(false);
+
+        if (!StringUtils.hasText(dto.description())) {
+            res.reject("nullable", "description");
+        } else {
+            try {
+                User user = (User) userInfo.getCurrentUser();
+                userService.changeDescription(user, dto.description());
+                res.setSuccess(true);
+            } catch (Exception ex) {
+                log.error("Error change description", ex);
+                res.setSuccess(false);
+            }
+        }
+
+        return res;
+    }
 }
 
 

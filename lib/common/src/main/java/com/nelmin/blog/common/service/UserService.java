@@ -4,6 +4,7 @@ import com.nelmin.blog.common.dto.UserInfoDto;
 import com.nelmin.blog.common.exception.UserNotFoundException;
 import com.nelmin.blog.common.model.User;
 import jakarta.annotation.PostConstruct;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
@@ -103,8 +104,9 @@ public class UserService {
             userInfoDto.setId(it.getId());
             userInfoDto.setNickname(it.getNickName());
             userInfoDto.setEmail(it.getUsername());
-            userInfoDto.setEnabled(it.isEnabled());
             userInfoDto.setRegistrationDate(it.getRegistrationDate());
+            userInfoDto.setEnabled(it.isEnabled());
+            userInfoDto.setDescription(it.getDescription());
         }, () -> {
             userInfoDto.reject("notFound", "user");
         });
@@ -124,5 +126,11 @@ public class UserService {
         }, () -> userInfoDto.get().reject("notFound", "user"));
 
         return userInfoDto.get();
+    }
+
+    @Transactional
+    public void changeDescription(@NonNull User user, @NonNull String description) {
+        user.setDescription(description);
+        userRepository.save(user);
     }
 }

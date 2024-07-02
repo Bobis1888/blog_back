@@ -15,4 +15,6 @@ public class StatisticsResponseDto extends HasError {
     private Long likes;
     private Long subscriptions;
     private Long subscribers;
+    private Boolean isSubscriber = false;
+    private Boolean userIsSubscribed = false;
 }

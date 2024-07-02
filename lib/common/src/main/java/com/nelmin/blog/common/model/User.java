@@ -40,6 +40,8 @@ public class User implements IUser {
     @Column(nullable = false)
     private String password;
 
+    private String description;
+
     @CreatedDate
     private LocalDateTime registrationDate;
 

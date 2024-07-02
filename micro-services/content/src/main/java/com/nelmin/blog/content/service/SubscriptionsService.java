@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @Service
@@ -160,8 +161,13 @@ public class SubscriptionsService implements FillStatisticInfo<StatisticsRespons
 
     @Override
     public void fillStatisticInfo(StatisticsResponseDto response) {
-        response.setSubscribers(subscriptionRepo.countByAuthorId(userInfo.getId()));
-        response.setSubscriptions(subscriptionRepo.countByUserId(userInfo.getId()));
+        response.setSubscribers(subscriptionRepo.countByAuthorId(response.getUserid()));
+        response.setSubscriptions(subscriptionRepo.countByUserId(response.getUserid()));
+
+        if (!Objects.equals(userInfo.getId(), response.getUserid())) {
+            response.setIsSubscriber(isSubscribed(userInfo.getId(), response.getUserid()));
+            response.setUserIsSubscribed(isSubscribed(response.getUserid()));
+        }
     }
 
     public Boolean isSubscribed(String authorNickname) {
@@ -169,6 +175,21 @@ public class SubscriptionsService implements FillStatisticInfo<StatisticsRespons
         try {
             var authorId = userService.resolveId(authorNickname);
             return subscriptionRepo.existsByUserIdAndAuthorId(userInfo.getId(), authorId);
+        } catch (Exception ex) {
+            log.error("Error get isSubscribed", ex);
+        }
+
+        return false;
+    }
+
+    public Boolean isSubscribed(Long authorId) {
+        return isSubscribed(authorId, userInfo.getId());
+    }
+
+    public Boolean isSubscribed(Long authorId, Long userId) {
+
+        try {
+            return subscriptionRepo.existsByUserIdAndAuthorId(userId, authorId);
         } catch (Exception ex) {
             log.error("Error get isSubscribed", ex);
         }

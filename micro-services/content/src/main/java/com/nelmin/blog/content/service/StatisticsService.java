@@ -23,23 +23,20 @@ public class StatisticsService {
     @Transactional
     public StatisticsResponseDto getStatistics() {
         var res = new StatisticsResponseDto();
-
-        try {
-            res.setUserid(userInfo.getId());
-            fillInfoList.forEach(it -> it.fillStatisticInfo(res));
-        } catch (Exception ex) {
-            log.error("Error get statistics", ex);
-        }
-
-        return res;
+        res.setUserid(userInfo.getId());
+        return getStat(res);
     }
 
     @Transactional
     public StatisticsResponseDto getStatistics(String nickname) {
         var res = new StatisticsResponseDto();
+        res.setUserid(userService.resolveId(nickname));
+        return getStat(res);
+    }
+
+    private StatisticsResponseDto getStat(StatisticsResponseDto res) {
 
         try {
-            res.setUserid(userService.resolveId(nickname));
             fillInfoList.forEach(it -> it.fillStatisticInfo(res));
             res.setUserid(null);
         } catch (Exception ex) {

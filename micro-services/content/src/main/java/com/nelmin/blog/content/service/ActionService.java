@@ -3,7 +3,6 @@ package com.nelmin.blog.content.service;
 import com.nelmin.blog.common.bean.UserInfo;
 import com.nelmin.blog.common.model.User;
 import com.nelmin.blog.common.service.FillContentInfo;
-import com.nelmin.blog.common.service.UserService;
 import com.nelmin.blog.content.dto.Actions;
 import com.nelmin.blog.content.dto.ArticleDto;
 import com.nelmin.blog.content.model.Article;
@@ -21,8 +20,8 @@ public class ActionService implements FillContentInfo<ArticleDto> {
     private final UserInfo userInfo;
     private final User.Repo userRepo;
     private final SubscriptionsService subscriptionsService;
-    private final UserService userService;
 
+    @Override
     public void fillContentInfo(ArticleDto article) {
         try {
             userRepo.getIdByNickName(article.getAuthorName()).ifPresent(it -> {
@@ -37,7 +36,7 @@ public class ActionService implements FillContentInfo<ArticleDto> {
                     actions.setCanPublish(Objects.equals(Article.Status.DRAFT, status));
                     actions.setCanUnpublish(List.of(Article.Status.PUBLISHED, Article.Status.PENDING).contains(status));
                 } else if (status == Article.Status.PUBLISHED) {
-                    var subscribed = subscriptionsService.isSubscribed(userService.resolveNickname(userId));
+                    var subscribed = subscriptionsService.isSubscribed(userId);
                     actions.setCanSubscribe(!subscribed);
                     actions.setCanUnsubscribe(subscribed);
                 }

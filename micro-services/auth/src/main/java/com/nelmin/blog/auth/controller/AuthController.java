@@ -78,4 +78,14 @@ public class AuthController {
                 .status(response.hasErrors() ? HttpStatus.BAD_REQUEST : HttpStatus.OK)
                 .body(response);
     }
+
+    @Secured("ROLE_USER")
+    @PostMapping(value = "/change-description")
+    public ResponseEntity<SuccessDto> changeDescription(@RequestBody ChangeInfoRequestDto dto) {
+        var response = authService.changeDescription(dto);
+
+        return ResponseEntity
+                .status(response.hasErrors() ? HttpStatus.BAD_REQUEST : HttpStatus.OK)
+                .body(response);
+    }
 }

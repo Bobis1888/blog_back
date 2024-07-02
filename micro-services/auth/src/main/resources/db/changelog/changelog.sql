@@ -16,3 +16,8 @@ CREATE TABLE if not exists public.user
     CONSTRAINT users_pkey primary key (id),
     CONSTRAINT uk_user_username UNIQUE (username)
 );
+
+
+--changeset nelmin:2024-07-92-18-00
+ALTER TABLE public.user
+    ADD COLUMN IF NOT EXISTS description varchar(512);

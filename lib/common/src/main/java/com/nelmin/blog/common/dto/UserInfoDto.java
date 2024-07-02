@@ -19,6 +19,6 @@ public class UserInfoDto extends HasError {
     private String email;
     private LocalDateTime registrationDate;
     private Boolean enabled;
-    private Long subscriptions;
-    private Long subscribers;
+    private byte[] image;
+    private String description;
 }
