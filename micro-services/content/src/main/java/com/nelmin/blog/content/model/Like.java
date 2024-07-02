@@ -9,6 +9,8 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -50,7 +52,15 @@ public class Like {
         boolean existsByArticleIdAndUserId(Long articleId, Long userId);
         Optional<IsLiked> getValueByArticleIdAndUserId(Long articleId, Long userId);
         Long countByArticleIdAndValue(Long articleId, Boolean value);
-        Long countByUserId(Long userId);
+
+        @Query(
+                value = "select count(*) from \"like\" l " +
+                        "where l.article_id in (select a.id from article a where a.user_id = :userId) " +
+                        "and l.value = true",
+                nativeQuery = true
+        )
+        Long countByUserId(@Param("userId") Long userId);
+
         void deleteByArticleIdAndUserId(Long articleId, Long userId);
     }
 
