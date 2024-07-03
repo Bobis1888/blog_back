@@ -21,3 +21,6 @@ CREATE TABLE if not exists public.user
 --changeset nelmin:2024-07-92-18-00
 ALTER TABLE public.user
     ADD COLUMN IF NOT EXISTS description varchar(512);
+
+--changeset nelmin:2024-07-03-18-00
+ALTER TABLE public.user DROP COLUMN IF EXISTS image;

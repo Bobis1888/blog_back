@@ -1,0 +1,32 @@
+
+server:
+  port: 8085
+  address: 0.0.0.0
+
+eureka:
+  client.serviceUrl.defaultZone: http://127.0.0.1:8761/eureka/
+  instance.prefer-ip-address: true
+
+spring:
+  application:
+    name: storage
+  profiles:
+    active: ${SPRING_ACTIVE_PROFILE}
+
+  config.import: 'optional:configserver:'
+  cloud:
+    config:
+      discovery:
+        enabled: true
+        service-id: configserver
+      fail-fast: false
+      username: ${SPRING_SECURITY_USERNAME}
+      password: ${SPRING_SECURITY_PASSWORD}
+
+logging:
+  pattern:
+    console: "%blue(%d) %highlight(%-5level) %green(%t) %yellow(%c{1.}): %msg%n"
+    file: "%d %-5level %t %c{1.}: %msg%n"
+  level:
+    org.springframework.web.filter.CommonsRequestLoggingFilter: DEBUG
+    root: INFO

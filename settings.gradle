@@ -1,4 +1,4 @@
-rootProject.name = 'back'
+rootProject.name = 'my_log_back'
 
 ArrayList<String> listScanDirectory = ['micro-services', 'lib']
 System.err.println("Processing settings.gradle try search in ${listScanDirectory}")
