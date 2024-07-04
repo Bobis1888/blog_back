@@ -1,10 +1,12 @@
 package com.nelmin.my_log.storage.service.impl;
 
 import com.nelmin.my_log.common.bean.UserInfo;
+import com.nelmin.my_log.common.dto.HasError;
 import com.nelmin.my_log.common.dto.SuccessDto;
 import com.nelmin.my_log.common.service.UserService;
 import com.nelmin.my_log.storage.dto.GetRequestDto;
 import com.nelmin.my_log.storage.dto.SaveRequestDto;
+import com.nelmin.my_log.storage.dto.SaveResponseDto;
 import com.nelmin.my_log.storage.dto.StorageResponseDto;
 import com.nelmin.my_log.storage.model.Storage;
 import lombok.NonNull;
@@ -26,7 +28,7 @@ public class JDBCStorageService implements IStorageService {
     private final UserService userService;
 
     @Override
-    public SuccessDto save(@NonNull SaveRequestDto requestDto) {
+    public HasError save(@NonNull SaveRequestDto requestDto) {
 
         try {
 
@@ -42,7 +44,7 @@ public class JDBCStorageService implements IStorageService {
             storage.setFile(requestDto.file());
             storage.setCreatedDate(LocalDateTime.now());
             storageRepo.save(storage);
-            return new SuccessDto(true);
+            return new SaveResponseDto(storage.getUuid(), true);
         } catch (Exception ex) {
             log.error("Error save file", ex);
             var res = new SuccessDto(false);
