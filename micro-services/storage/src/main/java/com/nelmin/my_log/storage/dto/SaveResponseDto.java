@@ -7,6 +7,6 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class SaveResponseDto extends HasError {
-    private final String id;
+    private final String uuid;
     private final Boolean success;
 }
