@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -24,6 +25,9 @@ import java.io.IOException;
 @Component
 @RequiredArgsConstructor
 public class OAuthSuccessHandler implements AuthenticationSuccessHandler {
+
+    @Value("${spring.security.oauth2.client.success_redirect_url:http://localhost:4200/top}")
+    private String redirectUrl;
 
     private final UserDetailsService userDetailsService;
     private final UserService userService;
@@ -64,7 +68,7 @@ public class OAuthSuccessHandler implements AuthenticationSuccessHandler {
             userService.updateLastLoginDate(user);
         }
 
-        new DefaultRedirectStrategy().sendRedirect(request, response, "http://localhost:4200/top");
+        new DefaultRedirectStrategy().sendRedirect(request, response, redirectUrl);
     }
 
     private String extractUserName(@NonNull Object principal) {
