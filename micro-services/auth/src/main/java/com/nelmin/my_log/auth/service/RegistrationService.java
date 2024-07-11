@@ -158,6 +158,7 @@ public class RegistrationService implements OAuthRegistrationService {
 
         if (user.isPresent()) {
             userService.changePassword(user.get(), dto.password());
+            cache.evictIfPresent("blocked_cache_" + userName);
             cache.evictIfPresent("reset_uuid_" + dto.uuid());
             response.setSuccess(true);
         }
