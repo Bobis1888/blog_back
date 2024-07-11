@@ -161,6 +161,9 @@ public class RegistrationService implements OAuthRegistrationService {
             cache.evictIfPresent("blocked_cache_" + userName);
             cache.evictIfPresent("reset_uuid_" + dto.uuid());
             response.setSuccess(true);
+        } else {
+            response.reject("invalid", "uuid");
+            return response;
         }
 
         return response;
