@@ -155,7 +155,7 @@ public class AuthService {
                 cache.evictIfPresent("blocked_cache_" + loginRequestDto.login());
             } else {
                 authResponse.clearErrors();
-                authResponse.reject("blocked", "login", Map.of("time", blockMinutes));
+                authResponse.reject("block", "login", Map.of("time", blockMinutes));
                 authResponse.setSuccess(false);
             }
         }
