@@ -1,6 +1,5 @@
 package com.nelmin.my_log.common.conf;
 
-import com.nelmin.my_log.common.abstracts.IUser;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
@@ -9,6 +8,7 @@ import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -24,7 +24,7 @@ public class JwtTokenUtils {
     @Value("${jwttoken.expiration:7200000}")
     private Long jwtExpiration;
 
-    public String generateToken(IUser user) {
+    public String generateToken(UserDetails user) {
         return Jwts.builder()
                 .subject(user.getUsername())
                 .issuedAt(new Date(System.currentTimeMillis()))

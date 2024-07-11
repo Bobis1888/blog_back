@@ -5,22 +5,27 @@ import com.nelmin.my_log.auth.dto.ChangePasswordRequestDto;
 import com.nelmin.my_log.auth.dto.RegistrationRequestDto;
 import com.nelmin.my_log.auth.dto.ResetPasswordResponse;
 import com.nelmin.my_log.auth.exceptions.InvalidUUIDException;
+import com.nelmin.my_log.common.bean.UserInfo;
 import com.nelmin.my_log.common.model.User;
+import com.nelmin.my_log.common.service.OAuthRegistrationService;
 import com.nelmin.my_log.common.service.UserService;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.Cache;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class RegistrationService {
+public class RegistrationService implements OAuthRegistrationService {
 
     private final Cache cache;
     private final User.Repo userRepository;
@@ -54,6 +59,30 @@ public class RegistrationService {
 
         log.info("Registered User {}", user.getUsername());
         return response;
+    }
+
+    @Override
+    public UserDetails registration(@NonNull String email) {
+
+        if (!StringUtils.hasText(email)) {
+            log.error("Invalid email {}", email);
+            return null;
+        }
+
+        AtomicReference<User> user = new AtomicReference<>();
+
+        userRepository.findUserByUsername(email).ifPresentOrElse(user::set, () -> {
+            var uuid = UUID.randomUUID().toString();
+            user.set(new User());
+            user.get().setUsername(email);
+            user.get().setNickName("@" + uuid.substring(0, 18).replaceAll("-", ""));
+            user.get().setPassword(passwordEncoder.encode(UUID.randomUUID().toString()));
+            user.get().setEnabled(true);
+            userRepository.save(user.get());
+            //TODO send email
+        });
+
+        return new UserInfo(user.get());
     }
 
     @Transactional

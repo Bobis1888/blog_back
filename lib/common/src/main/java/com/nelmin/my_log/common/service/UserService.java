@@ -1,5 +1,6 @@
 package com.nelmin.my_log.common.service;
 
+import com.nelmin.my_log.common.bean.UserInfo;
 import com.nelmin.my_log.common.dto.UserInfoDto;
 import com.nelmin.my_log.common.exception.UserNotFoundException;
 import com.nelmin.my_log.common.model.User;
@@ -9,10 +10,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
@@ -131,6 +134,19 @@ public class UserService {
     @Transactional
     public void changeDescription(@NonNull User user, @NonNull String description) {
         user.setDescription(description);
+        userRepository.save(user);
+    }
+
+
+    @Transactional
+    public void updateLastLoginDate(@NonNull UserDetails userInfo) {
+
+        if (!(userInfo instanceof UserInfo)) {
+            return;
+        }
+
+        var user = ((User) ((UserInfo) userInfo).getCurrentUser());
+        user.setLastLoginDate(LocalDateTime.now());
         userRepository.save(user);
     }
 }

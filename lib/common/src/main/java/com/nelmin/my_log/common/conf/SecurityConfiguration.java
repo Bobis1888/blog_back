@@ -4,8 +4,10 @@ import com.nelmin.my_log.common.abstracts.AnonymousUser;
 import com.nelmin.my_log.common.filer.JwtTokenFilter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
@@ -19,6 +21,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Slf4j
@@ -27,6 +30,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 @EnableMethodSecurity(securedEnabled = true)
 public class SecurityConfiguration {
+
+    @Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri:}")
+    private String ss;
 
     @Bean
     public AuthenticationManager authenticationManager(HttpSecurity http, UserDetailsService userDetailsService, PasswordEncoder passwordEncoder) throws Exception {
@@ -45,8 +51,10 @@ public class SecurityConfiguration {
     }
 
     @Bean
+    @Order(1)
     public SecurityFilterChain configure(HttpSecurity http,
                                          JwtAuthEntryPoint jwtAuthEntryPoint,
+                                         AuthenticationSuccessHandler handler,
                                          JwtTokenFilter jwtTokenFilter) throws Exception {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
@@ -57,6 +65,7 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(reg -> reg
                         .anyRequest()
                         .permitAll())
+                .oauth2Login(it -> it.successHandler(handler))
                 .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class)
                 .logout(it -> it
                         .permitAll()

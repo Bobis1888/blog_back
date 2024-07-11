@@ -2,8 +2,10 @@ package com.nelmin.my_log.common;
 
 import com.nelmin.my_log.common.abstracts.AnonymousUser;
 import com.nelmin.my_log.common.bean.UserInfo;
+import com.nelmin.my_log.common.service.OAuthRegistrationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
@@ -12,6 +14,9 @@ import org.springframework.cache.support.SimpleCacheManager;
 import org.springframework.context.annotation.*;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.filter.CommonsRequestLoggingFilter;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -77,6 +82,7 @@ public class CommonConfiguration implements WebMvcConfigurer {
      * The proxyMode attribute is necessary because at the moment of the instantiation of the web application context,
      * there is no active request. Spring creates a proxy to be injected as a dependency,
      * and instantiates the target bean when it is needed in a request.
+     *
      * @return UserInfo
      */
     @Bean
@@ -89,6 +95,15 @@ public class CommonConfiguration implements WebMvcConfigurer {
             return new UserInfo(new AnonymousUser());
         }
 
-        return  (UserInfo) auth.getPrincipal();
+        return (UserInfo) auth.getPrincipal();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public OAuthRegistrationService defaultRegService() {
+        return jwt -> {
+            log.debug("Have no any OAuthRegistrationService implementation");
+            return null;
+        };
     }
 }

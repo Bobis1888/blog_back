@@ -6,7 +6,6 @@ import com.nelmin.my_log.common.conf.JwtTokenUtils;
 import com.nelmin.my_log.auth.dto.AuthResponseDto;
 import com.nelmin.my_log.auth.dto.BlockedUser;
 import com.nelmin.my_log.auth.dto.LoginRequestDto;
-import com.nelmin.my_log.common.exception.UserNotFoundException;
 import com.nelmin.my_log.common.dto.SuccessDto;
 import com.nelmin.my_log.common.model.User;
 import com.nelmin.my_log.common.service.UserService;
@@ -19,6 +18,8 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -43,9 +44,10 @@ public class AuthService {
     private final JwtTokenUtils jwtTokenUtils;
     private final Cache cache;
     private final UserService userService;
+    private final UserDetailsService userDetailsService;
     private final UserInfo userInfo;
 
-    // TODO защита от перебора
+    // TODO
     @Transactional
     public AuthResponseDto authenticate(LoginRequestDto loginRequestDto) {
         var authResponse = new AuthResponseDto(false);
@@ -56,13 +58,13 @@ public class AuthService {
             return authResponse;
         }
 
-        var userInfo = userRepository.findUserByUsername(loginRequestDto.login());
-
-        var userNamePasswordToken = new UsernamePasswordAuthenticationToken(loginRequestDto.login(), loginRequestDto.password());
-        Authentication authentication;
+        UserDetails userInfo;
 
         try {
-            authentication = authenticationManager.authenticate(userNamePasswordToken);
+            userInfo = userDetailsService.loadUserByUsername(loginRequestDto.login());
+            Authentication authentication = new UsernamePasswordAuthenticationToken(userInfo, null, userInfo.getAuthorities());
+            authentication = authenticationManager.authenticate(authentication);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
         } catch (BadCredentialsException exception) {
             countAttempts(loginRequestDto, authResponse);
             return authResponse;
@@ -72,21 +74,15 @@ public class AuthService {
             return authResponse;
         }
 
-        var user = userInfo.orElseThrow(UserNotFoundException::new);
-
-        user.setLastLoginDate(LocalDateTime.now());
-        userRepository.save(user);
-
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        var token = jwtTokenUtils.generateToken(user);
-
+        userService.updateLastLoginDate(userInfo);
+        var token = jwtTokenUtils.generateToken(userInfo);
         authResponse.setToken(token);
         // TODO refresh token
         authResponse.setRefreshToken(token);
         authResponse.setSuccess(true);
 
         cache.evictIfPresent("blocked_cache_" + loginRequestDto.login());
-        log.info("User {} logged", user.getUsername());
+        log.info("User {} logged", userInfo.getUsername());
         return authResponse;
     }
 
@@ -104,6 +100,7 @@ public class AuthService {
 
             if (StringUtils.hasText(dto.nickname())) {
 
+                // TODO
                 if (userRepository.getIdByNickName(dto.nickname()).isPresent()) {
                     res.reject("invalid", "nickname");
                 } else {
