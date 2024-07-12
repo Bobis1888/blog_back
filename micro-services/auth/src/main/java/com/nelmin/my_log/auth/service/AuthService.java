@@ -72,7 +72,7 @@ public class AuthService {
             return authResponse;
         } catch (Exception exception) {
             log.error("Auth Error", exception);
-            authResponse.reject("server_error", "server_error");
+            authResponse.reject("serverError");
             return authResponse;
         }
 
