@@ -46,7 +46,7 @@ public class RegistrationService implements OAuthRegistrationService {
         var uuid = UUID.randomUUID().toString();
         var user = new User();
         user.setUsername(registrationRequestDto.email());
-        user.setNickName("@" + uuid.substring(0, 18).replaceAll("-", ""));
+        user.setNickName(createNickname(registrationRequestDto.email()));
         user.setPassword(passwordEncoder.encode(registrationRequestDto.password()));
         user.setEnabled(false);
 
@@ -72,10 +72,9 @@ public class RegistrationService implements OAuthRegistrationService {
         AtomicReference<User> user = new AtomicReference<>();
 
         userRepository.findUserByUsername(email).ifPresentOrElse(user::set, () -> {
-            var uuid = UUID.randomUUID().toString();
             user.set(new User());
             user.get().setUsername(email);
-            user.get().setNickName("@" + uuid.substring(0, 18).replaceAll("-", ""));
+            user.get().setNickName(createNickname(email));
             user.get().setPassword(passwordEncoder.encode(UUID.randomUUID().toString()));
             user.get().setEnabled(true);
             userRepository.save(user.get());
@@ -167,5 +166,20 @@ public class RegistrationService implements OAuthRegistrationService {
         }
 
         return response;
+    }
+
+    private String createNickname(@NonNull String email) {
+        var emailParts = email.split("@");
+
+        if (emailParts.length == 2) {
+            var nickname = "@" + emailParts[0];
+            var id = userRepository.getIdByNickName(nickname);
+
+            if (id.isEmpty()) {
+                return nickname;
+            }
+        }
+
+        return "@" + UUID.randomUUID().toString().substring(0, 16).replaceAll("-", "");
     }
 }
