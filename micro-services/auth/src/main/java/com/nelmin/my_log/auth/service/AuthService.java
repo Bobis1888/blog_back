@@ -7,6 +7,7 @@ import com.nelmin.my_log.auth.dto.AuthResponseDto;
 import com.nelmin.my_log.auth.dto.BlockedUser;
 import com.nelmin.my_log.auth.dto.LoginRequestDto;
 import com.nelmin.my_log.common.dto.SuccessDto;
+import com.nelmin.my_log.common.exception.UserNotFoundException;
 import com.nelmin.my_log.common.model.User;
 import com.nelmin.my_log.common.service.UserService;
 import lombok.*;
@@ -20,6 +21,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -65,7 +67,7 @@ public class AuthService {
             Authentication authentication = new UsernamePasswordAuthenticationToken(loginRequestDto.login(), loginRequestDto.password());
             authentication = authenticationManager.authenticate(authentication);
             SecurityContextHolder.getContext().setAuthentication(authentication);
-        } catch (BadCredentialsException exception) {
+        } catch (BadCredentialsException | UsernameNotFoundException | UserNotFoundException exception) {
             countAttempts(loginRequestDto, authResponse);
             return authResponse;
         } catch (Exception exception) {
