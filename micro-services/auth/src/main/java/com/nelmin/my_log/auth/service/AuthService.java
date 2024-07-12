@@ -62,7 +62,7 @@ public class AuthService {
 
         try {
             userInfo = userDetailsService.loadUserByUsername(loginRequestDto.login());
-            Authentication authentication = new UsernamePasswordAuthenticationToken(userInfo, null, userInfo.getAuthorities());
+            Authentication authentication = new UsernamePasswordAuthenticationToken(loginRequestDto.login(), loginRequestDto.password());
             authentication = authenticationManager.authenticate(authentication);
             SecurityContextHolder.getContext().setAuthentication(authentication);
         } catch (BadCredentialsException exception) {
