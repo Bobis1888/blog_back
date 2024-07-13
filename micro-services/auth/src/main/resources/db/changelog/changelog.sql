@@ -24,3 +24,14 @@ ALTER TABLE public.user
 
 --changeset nelmin:2024-07-03-18-00
 ALTER TABLE public.user DROP COLUMN IF EXISTS image;
+
+--changeset nelmin:2024-08-14-18-00
+CREATE TABLE public.premium
+(
+    id           BIGINT NOT NULL,
+    user_id      BIGINT NOT NULL,
+    created_date TIMESTAMP WITHOUT TIME ZONE,
+    updated_time TIMESTAMP WITHOUT TIME ZONE,
+    enabled      BOOLEAN,
+    CONSTRAINT premium_pkey PRIMARY KEY (id)
+);

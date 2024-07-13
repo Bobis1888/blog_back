@@ -61,6 +61,16 @@ public class AuthController {
                 .body(response);
     }
 
+    @Secured("ROLE_PREMIUM_USER")
+    @GetMapping(value = "/premium-info")
+    public ResponseEntity<UserInfoDto> premiumInfo() {
+        var response = userService.info(userInfo.getId());
+
+        return ResponseEntity
+                .status(response.hasErrors() ? HttpStatus.BAD_REQUEST : HttpStatus.OK)
+                .body(response);
+    }
+
     @GetMapping(value = "/info/{nickname}")
     public ResponseEntity<UserInfoDto> info(@PathVariable String nickname) {
         var response = userService.publicInfo(nickname);

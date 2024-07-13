@@ -14,6 +14,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Entity
@@ -52,9 +53,23 @@ public class User implements IUser {
 
     private Boolean enabled = true;
 
+    @OneToOne(fetch = FetchType.LAZY , cascade = CascadeType.ALL)
+    @JoinColumn(name = "id", referencedColumnName = "user_id")
+    private Premium premium;
+
     @Override
     public Boolean isEnabled() {
         return enabled;
+    }
+
+    @Override
+    public Boolean isPremiumUser() {
+
+        if (Objects.isNull(premium)) {
+            return false;
+        }
+
+        return premium.getEnabled();
     }
 
     @Override

@@ -20,4 +20,5 @@ public class UserInfoDto extends HasError {
     private LocalDateTime registrationDate;
     private Boolean enabled;
     private String description;
+    private Boolean isPremiumUser;
 }

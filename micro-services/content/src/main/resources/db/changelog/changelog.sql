@@ -54,3 +54,16 @@ CREATE TABLE subscription
     created_date TIMESTAMP WITHOUT TIME ZONE,
     CONSTRAINT subscription_pkey PRIMARY KEY (id)
 );
+
+--changeset nelmin:2024-08-14-02-00
+CREATE TABLE private_link
+(
+    id           BIGINT                      NOT NULL,
+    user_id      BIGINT                      NOT NULL,
+    article_id   BIGINT                      NOT NULL,
+    link         VARCHAR(255)                NOT NULL,
+    expired_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    created_date TIMESTAMP WITHOUT TIME ZONE,
+    updated_date TIMESTAMP WITHOUT TIME ZONE,
+    CONSTRAINT private_link_pkey PRIMARY KEY (id)
+);

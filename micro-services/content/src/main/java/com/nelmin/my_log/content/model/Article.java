@@ -174,11 +174,11 @@ public class Article {
                 value = "SELECT * FROM article " +
                         "LEFT JOIN (SELECT article_id, count(id) likes FROM \"like\" GROUP BY article_id) lk " +
                         "ON article.id = lk.article_id " +
-                        "WHERE article.status = 'PUBLISHED' order by lk.likes desc",
+                        "WHERE article.status = 'PUBLISHED' order by lk.likes desc nulls last",
                 countQuery = "SELECT count(*) FROM article " +
                         "LEFT JOIN (SELECT article_id, count(id) likes FROM \"like\" GROUP BY article_id) lk " +
                         "ON article.id = lk.article_id " +
-                        "WHERE article.status = 'PUBLISHED' order by lk.likes desc",
+                        "WHERE article.status = 'PUBLISHED' order by lk.likes desc nulls last",
                 nativeQuery = true
         )
         Page<Article> findAllMostPopular(Pageable request);
@@ -196,6 +196,7 @@ public class Article {
     public enum Status {
         DRAFT,
         PUBLISHED,
+        PRIVATE_PUBLISHED,
         PENDING,
         DELETED
     }

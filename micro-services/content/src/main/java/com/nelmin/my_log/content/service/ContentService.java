@@ -7,6 +7,7 @@ import com.nelmin.my_log.common.service.UserService;
 import com.nelmin.my_log.content.Utils;
 import com.nelmin.my_log.content.dto.*;
 import com.nelmin.my_log.content.model.Article;
+import com.nelmin.my_log.content.model.PrivateLink;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +28,7 @@ public class ContentService implements FillStatisticInfo<StatisticsResponseDto> 
     private final Article.Repo articleRepo;
     private final UserInfo userInfo;
     private final UserService userService;
+    private final PrivateLink.Repo privateLinkRepo;
     private final SubscriptionsService subscriptionsService;
 
     @Transactional
@@ -115,11 +117,30 @@ public class ContentService implements FillStatisticInfo<StatisticsResponseDto> 
     }
 
     @Transactional
+    public ArticleDto get(@NonNull String privateLink) {
+
+        try {
+            var id = privateLinkRepo.getArticleIdByLink(privateLink);
+
+            if (id.isPresent()) {
+                return get(id.get().getArticleId());
+            }
+        } catch (Exception ex) {
+            log.error("Error get article", ex);
+        }
+
+        var res = new ArticleDto();
+        res.reject("notFound", "article");
+        return res;
+    }
+
+    @Transactional
     public ArticleDto get(@NonNull Long id) {
         var res = new ArticleDto();
         var article = articleRepo.findById(id);
 
-        if (article.isPresent() && (article.get().getStatus() == Article.Status.PUBLISHED || (List.of(Article.Status.DRAFT, Article.Status.PENDING).contains(article.get().getStatus()) && Objects.equals(article.get().getUserId(), userInfo.getId())))) {
+        if (article.isPresent() && (List.of(Article.Status.PUBLISHED, Article.Status.PRIVATE_PUBLISHED).contains(article.get().getStatus()) ||
+                (article.get().getStatus() != Article.Status.DELETED && Objects.equals(article.get().getUserId(), userInfo.getId())))) {
             res.setId(article.get().getId());
             res.setContent(article.get().getContent());
             res.setTitle(article.get().getTitle());
@@ -148,7 +169,8 @@ public class ContentService implements FillStatisticInfo<StatisticsResponseDto> 
 
             try {
 
-                if (status == Article.Status.PUBLISHED && List.of(Article.Status.PUBLISHED, Article.Status.PENDING).contains(article.get().getStatus())) {
+                if (List.of(Article.Status.PUBLISHED, Article.Status.PRIVATE_PUBLISHED).contains(status)
+                        && List.of(Article.Status.PUBLISHED, Article.Status.PENDING, Article.Status.PRIVATE_PUBLISHED).contains(article.get().getStatus())) {
 
                     if (article.get().getStatus() == Article.Status.PENDING) {
                         response.reject("pendingPublish", "status");
@@ -170,7 +192,7 @@ public class ContentService implements FillStatisticInfo<StatisticsResponseDto> 
                     return response;
                 }
 
-                if (status == Article.Status.PUBLISHED) {
+                if (List.of(Article.Status.PUBLISHED, Article.Status.PRIVATE_PUBLISHED).contains(status)) {
                     status = Article.Status.PENDING;
                 }
 
@@ -200,7 +222,7 @@ public class ContentService implements FillStatisticInfo<StatisticsResponseDto> 
     public ListContentResponseDto all(ListContentRequestDto requestDto) {
         return search(
                 List.of(userInfo.getId()),
-                List.of(Article.Status.PUBLISHED.name(), Article.Status.DRAFT.name(), Article.Status.PENDING.name()),
+                Arrays.stream(Article.Status.values()).filter(it -> it != Article.Status.DELETED).map(Enum::name).toList(),
                 null,
                 null,
                 createPageRequest(requestDto));

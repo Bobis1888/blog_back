@@ -8,6 +8,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -31,6 +32,16 @@ public class CommonExceptionHandler extends ResponseEntityExceptionHandler {
         response.setDateTime(LocalDateTime.now());
         response.setMessage(exception.getMessage());
         return new ResponseEntity<>(response, exception.getStatus());
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    protected ResponseEntity<Object> handleExceptionInternal(AccessDeniedException exception, WebRequest webRequest) {
+        log.error("Exception endpoint path : {}", ((ServletWebRequest) webRequest).getRequest().getRequestURI());
+        log.error("Exception message : {}", exception.getMessage());
+        ExceptionResponse response = new ExceptionResponse();
+        response.setDateTime(LocalDateTime.now());
+        response.setMessage(exception.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
     }
 
     @Override

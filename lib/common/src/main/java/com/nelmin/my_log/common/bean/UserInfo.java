@@ -8,8 +8,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 @Slf4j
 @Getter
@@ -27,7 +27,20 @@ public class UserInfo implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_USER"));
+        // TODO service
+        var res = new ArrayList<SimpleGrantedAuthority>();
+
+        if (currentUser instanceof AnonymousUser) {
+            res.add(new SimpleGrantedAuthority("ROLE_ANONYMOUS"));
+        } else {
+            res.add(new SimpleGrantedAuthority("ROLE_USER"));
+
+            if (currentUser.isPremiumUser()) {
+                res.add(new SimpleGrantedAuthority("ROLE_PREMIUM_USER"));
+            }
+        }
+
+        return res;
     }
 
     public Long getId() {
@@ -63,6 +76,4 @@ public class UserInfo implements UserDetails {
     public boolean isCredentialsNonExpired() {
         return true;
     }
-
-
 }

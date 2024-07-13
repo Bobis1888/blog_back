@@ -110,9 +110,8 @@ public class UserService {
             userInfoDto.setRegistrationDate(it.getRegistrationDate());
             userInfoDto.setEnabled(it.isEnabled());
             userInfoDto.setDescription(it.getDescription());
-        }, () -> {
-            userInfoDto.reject("notFound", "user");
-        });
+            userInfoDto.setIsPremiumUser(it.isPremiumUser());
+        }, () -> userInfoDto.reject("notFound", "user"));
 
         return userInfoDto;
     }
@@ -136,7 +135,6 @@ public class UserService {
         user.setDescription(description);
         userRepository.save(user);
     }
-
 
     @Transactional
     public void updateLastLoginDate(@NonNull UserDetails userInfo) {
