@@ -13,6 +13,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -37,7 +38,19 @@ public class OAuthSuccessHandler implements AuthenticationSuccessHandler {
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
         UserDetails user = null;
-        String userName = extractUserName(authentication.getPrincipal());
+
+        if (!(authentication.getPrincipal() instanceof DefaultOAuth2User)) {
+            log.error("Principal is not DefaultOAuth2User");
+            return;
+        }
+
+        if (!(authentication instanceof OAuth2AuthenticationToken)) {
+            log.error("authentication is not OAuth2AuthenticationToken");
+            return;
+        }
+
+        String authorizedClientRegistrationId = ((OAuth2AuthenticationToken) authentication).getAuthorizedClientRegistrationId();
+        String userName = extractUserName((DefaultOAuth2User) authentication.getPrincipal(), authorizedClientRegistrationId);
 
         if (!StringUtils.hasText(userName)) {
             log.error("User name not found");
@@ -71,15 +84,17 @@ public class OAuthSuccessHandler implements AuthenticationSuccessHandler {
         new DefaultRedirectStrategy().sendRedirect(request, response, redirectUrl);
     }
 
-    private String extractUserName(@NonNull Object principal) {
+    private String extractUserName(@NonNull DefaultOAuth2User principal, String authorizedClientRegistrationId) {
 
-        if (principal instanceof DefaultOAuth2User) {
+        try {
 
-            try {
-                return ((DefaultOAuth2User) principal).getAttribute("email");
-            } catch (Exception ex) {
-                log.error("Error extract user name", ex);
-            }
+            return switch (authorizedClientRegistrationId) {
+                case "google" -> principal.getAttribute("email");
+                case "yandex" -> principal.getAttribute("default_email");
+                default -> null;
+            };
+        } catch (Exception ex) {
+            log.error("Error extract user name", ex);
         }
 
         return null;

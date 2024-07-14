@@ -21,6 +21,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -54,7 +55,8 @@ public class SecurityConfiguration {
     @Order(1)
     public SecurityFilterChain configure(HttpSecurity http,
                                          JwtAuthEntryPoint jwtAuthEntryPoint,
-                                         AuthenticationSuccessHandler handler,
+                                         AuthenticationFailureHandler failureHandler,
+                                         AuthenticationSuccessHandler successHandler,
                                          JwtTokenFilter jwtTokenFilter) throws Exception {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
@@ -65,7 +67,9 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(reg -> reg
                         .anyRequest()
                         .permitAll())
-                .oauth2Login(it -> it.successHandler(handler))
+                .oauth2Login(it -> it
+                        .failureHandler(failureHandler)
+                        .successHandler(successHandler))
                 .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class)
                 .logout(it -> it
                         .permitAll()
