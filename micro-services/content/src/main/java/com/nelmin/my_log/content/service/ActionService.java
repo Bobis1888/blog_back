@@ -31,11 +31,17 @@ public class ActionService implements FillContentInfo<ArticleDto> {
                 var currentUserIsOwner = Objects.equals(userId, userInfo.getId());
 
                 if (currentUserIsOwner) {
+
                     actions.setCanDelete(true);
-                    actions.setCanEdit(Objects.equals(Article.Status.DRAFT, status));
+                    actions.setCanEdit(true);
                     actions.setCanPublish(Objects.equals(Article.Status.DRAFT, status));
-                    actions.setCanUnpublish(List.of(Article.Status.PUBLISHED, Article.Status.PENDING).contains(status));
+                    actions.setCanUnpublish(List.of(
+                            Article.Status.PRIVATE_PUBLISHED,
+                            Article.Status.PUBLISHED,
+                            Article.Status.PENDING).contains(status));
+
                 } else if (status == Article.Status.PUBLISHED) {
+
                     var subscribed = subscriptionsService.isSubscribed(userId);
                     actions.setCanSubscribe(!subscribed);
                     actions.setCanUnsubscribe(subscribed);
