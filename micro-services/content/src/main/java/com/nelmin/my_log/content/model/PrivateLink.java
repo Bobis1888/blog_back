@@ -13,6 +13,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.UUID;
 
 @Entity
 @Getter
@@ -28,17 +29,14 @@ public class PrivateLink {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "hibernate")
     private Long id;
 
-    @Column(name = "user_id", nullable = false)
-    private Long userId;
-
     @Column(name = "article_id", nullable = false)
     private Long articleId;
 
     @Column(name = "link", nullable = false)
-    private String link;
+    private String link = UUID.randomUUID().toString();
 
     @Column(name = "expired_date", nullable = false)
-    private LocalDateTime expiredDate;
+    private LocalDateTime expiredDate = LocalDateTime.now().plusDays(365);
 
     @CreatedDate
     private LocalDateTime createdDate;

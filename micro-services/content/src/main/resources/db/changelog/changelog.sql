@@ -67,3 +67,6 @@ CREATE TABLE private_link
     updated_date TIMESTAMP WITHOUT TIME ZONE,
     CONSTRAINT private_link_pkey PRIMARY KEY (id)
 );
+
+--changeset nelmin:2024-08-15-10-00
+ALTER TABLE private_link DROP COLUMN IF EXISTS user_id;

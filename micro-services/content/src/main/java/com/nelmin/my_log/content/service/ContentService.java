@@ -30,6 +30,7 @@ public class ContentService implements FillStatisticInfo<StatisticsResponseDto> 
     private final UserService userService;
     private final PrivateLink.Repo privateLinkRepo;
     private final SubscriptionsService subscriptionsService;
+    private final PrivateLinkService privateLinkService;
 
     @Transactional
     public CreateContentResponseDto update(@NonNull Long id, @NonNull CreateContentRequestDto dto) {
@@ -162,6 +163,11 @@ public class ContentService implements FillStatisticInfo<StatisticsResponseDto> 
 
     @Transactional
     public PublishContentResponseDto changeStatus(@NonNull Long id, @NonNull Article.Status status) {
+
+        if (status == Article.Status.PRIVATE_PUBLISHED && !userInfo.isPremiumUser()) {
+            status = Article.Status.PUBLISHED;
+        }
+
         var response = new PublishContentResponseDto();
         var article = articleRepo.findByIdAndUserId(id, userInfo.getId());
 
@@ -192,7 +198,12 @@ public class ContentService implements FillStatisticInfo<StatisticsResponseDto> 
                     return response;
                 }
 
-                if (List.of(Article.Status.PUBLISHED, Article.Status.PRIVATE_PUBLISHED).contains(status)) {
+                if (status == Article.Status.PRIVATE_PUBLISHED && userInfo.isPremiumUser()) {
+                    var link = privateLinkService.generate(article.get().getId());
+                    response.setLink(link);
+                }
+
+                if (Article.Status.PUBLISHED == status) {
                     status = Article.Status.PENDING;
                 }
 

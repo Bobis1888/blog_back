@@ -1,5 +1,6 @@
 package com.nelmin.my_log.content.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.nelmin.my_log.common.dto.HasError;
 import com.nelmin.my_log.content.model.Article;
 import lombok.*;
@@ -20,11 +21,12 @@ public class ArticleDto extends HasError {
     private LocalDateTime publishedDate;
     private String authorName;
     private Long likes;
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private List<String> tags = new ArrayList<>();
     private String status;
     private Actions actions;
-    private Boolean isLiked = false;
-    private Boolean isSaved = false;
+    private Boolean isLiked;
+    private Boolean isSaved;
 
     public ArticleDto(Article article) {
         this.id = article.getId();

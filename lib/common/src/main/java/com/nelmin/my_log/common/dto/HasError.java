@@ -10,6 +10,7 @@ import java.util.Map;
 
 @Getter
 @Setter
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public abstract class HasError {
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private List<Error> errors = new ArrayList<>();

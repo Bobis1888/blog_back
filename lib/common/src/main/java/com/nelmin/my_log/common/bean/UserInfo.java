@@ -47,6 +47,10 @@ public class UserInfo implements UserDetails {
         return currentUser.getId();
     }
 
+    public Boolean isPremiumUser() {
+        return currentUser.isPremiumUser();
+    }
+
     @Override
     public String getPassword() {
         return currentUser.getPassword();

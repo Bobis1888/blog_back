@@ -12,4 +12,5 @@ import lombok.Setter;
 @NoArgsConstructor
 public class PublishContentResponseDto extends HasError {
     private Boolean success;
+    private String link;
 }

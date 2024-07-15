@@ -1,8 +1,10 @@
 package com.nelmin.my_log.common.handler;
 
+import com.nelmin.my_log.common.bean.UserInfo;
 import com.nelmin.my_log.common.dto.Error;
 import com.nelmin.my_log.common.dto.ExceptionResponse;
 import com.nelmin.my_log.common.exception.CommonException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -22,12 +24,14 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @ControllerAdvice
+@RequiredArgsConstructor
 public class CommonExceptionHandler extends ResponseEntityExceptionHandler {
+
+    private final UserInfo userInfo;
 
     @ExceptionHandler(CommonException.class)
     protected ResponseEntity<Object> handleExceptionInternal(CommonException exception, WebRequest webRequest) {
-        log.error("Exception endpoint path : {}", ((ServletWebRequest) webRequest).getRequest().getRequestURI());
-        log.error("Exception message : {}", exception.getMessage());
+        log(((ServletWebRequest) webRequest).getRequest().getRequestURI(), exception.getMessage());
         ExceptionResponse response = new ExceptionResponse();
         response.setDateTime(LocalDateTime.now());
         response.setMessage(exception.getMessage());
@@ -36,12 +40,23 @@ public class CommonExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(AccessDeniedException.class)
     protected ResponseEntity<Object> handleExceptionInternal(AccessDeniedException exception, WebRequest webRequest) {
-        log.error("Exception endpoint path : {}", ((ServletWebRequest) webRequest).getRequest().getRequestURI());
-        log.error("Exception message : {}", exception.getMessage());
+        log(((ServletWebRequest) webRequest).getRequest().getRequestURI(), exception.getMessage());
         ExceptionResponse response = new ExceptionResponse();
         response.setDateTime(LocalDateTime.now());
         response.setMessage(exception.getMessage());
-        return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
+
+        HttpStatus status = HttpStatus.UNAUTHORIZED;
+
+        if (userInfo.isAuthorized()) {
+            status = HttpStatus.FORBIDDEN;
+        }
+
+        return new ResponseEntity<>(response, status);
+    }
+
+    private void log(String path, String message) {
+        log.error("Exception endpoint path : {}", path);
+        log.error("Exception message : {}", message);
     }
 
     @Override
