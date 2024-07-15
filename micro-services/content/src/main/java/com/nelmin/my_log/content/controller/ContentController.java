@@ -74,6 +74,19 @@ public class ContentController {
                 .body(response);
     }
 
+    @GetMapping("/get-by-link/{link}")
+    public ResponseEntity<ArticleDto> getByLink(@Valid @PathVariable String link) {
+        ArticleDto response = contentService.get(link);
+
+        if (!response.hasErrors()) {
+            fillInfoList.forEach(it -> it.fillContentInfo(response));
+        }
+
+        return ResponseEntity
+                .status(response.hasErrors() ? HttpStatus.BAD_REQUEST : HttpStatus.OK)
+                .body(response);
+    }
+
     @PostMapping("/list")
     public ResponseEntity<ListContentResponseDto> list(@Valid @RequestBody ListContentRequestDto dto) {
         ListContentResponseDto response = contentService.list(dto);
