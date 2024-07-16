@@ -31,6 +31,9 @@ public class Premium {
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
+    @Column(name = "expired_date", nullable = false)
+    private LocalDateTime expiredDate;
+
     @CreatedDate
     private LocalDateTime createdDate;
 

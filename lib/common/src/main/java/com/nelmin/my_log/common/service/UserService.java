@@ -9,7 +9,6 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -18,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 // TODO user library
@@ -30,6 +28,7 @@ public class UserService {
 
     private final User.Repo userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final UserInfo userInfo;
 
     @PostConstruct
     private void init() {
@@ -62,7 +61,8 @@ public class UserService {
         }
     }
 
-    @Cacheable(value = "users", key = "#id")
+    // TODO redis cache + clean by key when user change nickname
+//    @Cacheable(value = "users", key = "#id")
     public String resolveNickname(Long id) {
         return userRepository.getNickNameById(id)
                 .orElse(() -> "unknown")
@@ -111,6 +111,7 @@ public class UserService {
             userInfoDto.setEnabled(it.isEnabled());
             userInfoDto.setDescription(it.getDescription());
             userInfoDto.setIsPremiumUser(it.isPremiumUser());
+            userInfoDto.setPremiumExpireDate(it.isPremiumUser() ? it.getPremium().getExpiredDate() : null);
         }, () -> userInfoDto.reject("notFound", "user"));
 
         return userInfoDto;
@@ -118,16 +119,17 @@ public class UserService {
 
     @Transactional
     public UserInfoDto publicInfo(String nickname) {
-        var user = userRepository.getIdByNickName(nickname);
-        AtomicReference<UserInfoDto> userInfoDto = new AtomicReference<>(new UserInfoDto());
+        var user = userRepository.findUserByNickName(nickname);
+        UserInfoDto userInfoDto = new UserInfoDto();
 
         user.ifPresentOrElse((it) -> {
-            userInfoDto.set(info(it.getId()));
-            userInfoDto.get().setEmail(null);
-            userInfoDto.get().setId(null);
-        }, () -> userInfoDto.get().reject("notFound", "user"));
+            userInfoDto.setNickname(it.getNickName());
+            userInfoDto.setRegistrationDate(it.getRegistrationDate());
+            userInfoDto.setDescription(it.getDescription());
+            userInfoDto.setIsPremiumUser(it.isPremiumUser());
+        }, () -> userInfoDto.reject("notFound", "user"));
 
-        return userInfoDto.get();
+        return userInfoDto;
     }
 
     @Transactional
@@ -146,5 +148,28 @@ public class UserService {
         var user = ((User) ((UserInfo) userInfo).getCurrentUser());
         user.setLastLoginDate(LocalDateTime.now());
         userRepository.save(user);
+    }
+
+    @Transactional
+    public List<UserInfoDto> publicInfos(@NonNull String nickname) {
+
+        try {
+            return userRepository
+                    .findAllByNickNameContainsAndIdIsNot(nickname, userInfo.getId())
+                    .stream()
+                    .map(it -> {
+                        var userInfoDto = new UserInfoDto();
+                        userInfoDto.setId(it.getId());
+                        userInfoDto.setNickname(it.getNickName());
+                        userInfoDto.setRegistrationDate(it.getRegistrationDate());
+                        userInfoDto.setDescription(it.getDescription());
+                        userInfoDto.setIsPremiumUser(it.isPremiumUser());
+                        return userInfoDto;
+                    })
+                    .toList();
+        } catch (Exception ex) {
+            log.error("Error public infos", ex);
+            return List.of();
+        }
     }
 }

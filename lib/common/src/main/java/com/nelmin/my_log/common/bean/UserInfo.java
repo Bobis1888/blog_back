@@ -80,4 +80,8 @@ public class UserInfo implements UserDetails {
     public boolean isCredentialsNonExpired() {
         return true;
     }
+
+    public String getNickname() {
+        return currentUser.getNickName();
+    }
 }

@@ -21,4 +21,5 @@ public class UserInfoDto extends HasError {
     private Boolean enabled;
     private String description;
     private Boolean isPremiumUser;
+    private LocalDateTime premiumExpireDate;
 }

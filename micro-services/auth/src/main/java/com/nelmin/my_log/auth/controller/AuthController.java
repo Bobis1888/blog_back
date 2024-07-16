@@ -18,6 +18,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 public class AuthController {
@@ -72,16 +74,24 @@ public class AuthController {
     }
 
     @GetMapping(value = "/info/{nickname}")
-    public ResponseEntity<UserInfoDto> info(@PathVariable String nickname) {
+    public ResponseEntity<UserInfoDto> info(@Valid @PathVariable String nickname) {
         var response = userService.publicInfo(nickname);
         return ResponseEntity
                 .status(response.hasErrors() ? HttpStatus.BAD_REQUEST : HttpStatus.OK)
                 .body(response);
     }
 
+    @GetMapping(value = "/infos/{nickname}")
+    public ResponseEntity<List<UserInfoDto>> infos(@Valid @PathVariable String nickname) {
+        var response = userService.publicInfos(nickname);
+        return ResponseEntity
+                .status(response.isEmpty() ? HttpStatus.BAD_REQUEST : HttpStatus.OK)
+                .body(response);
+    }
+
     @Secured("ROLE_USER")
     @PostMapping(value = "/change-nickname")
-    public ResponseEntity<SuccessDto> changeNickname(@RequestBody ChangeInfoRequestDto dto) {
+    public ResponseEntity<SuccessDto> changeNickname(@Valid @RequestBody ChangeInfoRequestDto dto) {
         var response = authService.changeNickname(dto);
 
         return ResponseEntity
@@ -91,7 +101,7 @@ public class AuthController {
 
     @Secured("ROLE_USER")
     @PostMapping(value = "/change-description")
-    public ResponseEntity<SuccessDto> changeDescription(@RequestBody ChangeInfoRequestDto dto) {
+    public ResponseEntity<SuccessDto> changeDescription(@Valid @RequestBody ChangeInfoRequestDto dto) {
         var response = authService.changeDescription(dto);
 
         return ResponseEntity

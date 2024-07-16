@@ -178,7 +178,7 @@ public class Article {
                 countQuery = "SELECT count(*) FROM article " +
                         "LEFT JOIN (SELECT article_id, count(id) likes FROM \"like\" GROUP BY article_id) lk " +
                         "ON article.id = lk.article_id " +
-                        "WHERE article.status = 'PUBLISHED' order by lk.likes desc nulls last",
+                        "WHERE article.status = 'PUBLISHED'",
                 nativeQuery = true
         )
         Page<Article> findAllMostPopular(Pageable request);

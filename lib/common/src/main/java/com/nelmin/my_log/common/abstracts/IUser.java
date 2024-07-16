@@ -6,4 +6,5 @@ public interface IUser {
     String getPassword();
     Boolean isEnabled();
     Boolean isPremiumUser();
+    String getNickName();
 }

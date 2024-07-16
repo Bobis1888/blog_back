@@ -27,7 +27,7 @@ public class ContentController {
     @Secured("ROLE_USER")
     @PostMapping("/save")
     public ResponseEntity<CreateContentResponseDto> create(@Valid @RequestBody CreateContentRequestDto dto) {
-        CreateContentResponseDto response = contentService.create(dto);
+        CreateContentResponseDto response = contentService.save(dto);
         return ResponseEntity
                 .status(response.hasErrors() ? HttpStatus.BAD_REQUEST : HttpStatus.OK)
                 .body(response);

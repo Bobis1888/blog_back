@@ -33,7 +33,7 @@ public class ActionService implements FillContentInfo<ArticleDto> {
                 if (currentUserIsOwner) {
 
                     actions.setCanDelete(true);
-                    actions.setCanEdit(true);
+                    actions.setCanEdit(userInfo.isPremiumUser() || status == Article.Status.DRAFT);
                     actions.setCanPublish(Objects.equals(Article.Status.DRAFT, status));
                     actions.setCanUnpublish(List.of(
                             Article.Status.PRIVATE_PUBLISHED,

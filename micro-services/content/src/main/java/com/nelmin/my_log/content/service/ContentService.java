@@ -18,7 +18,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDateTime;
 import java.util.*;
+
+import static com.nelmin.my_log.content.model.Article.Status.*;
 
 @Slf4j
 @Service
@@ -39,7 +42,7 @@ public class ContentService implements FillStatisticInfo<StatisticsResponseDto> 
     }
 
     @Transactional
-    public CreateContentResponseDto create(@NonNull CreateContentRequestDto dto) {
+    public CreateContentResponseDto save(@NonNull CreateContentRequestDto dto) {
         log.info("create content: {}", dto);
         var response = new CreateContentResponseDto();
         Article article = null;
@@ -52,13 +55,13 @@ public class ContentService implements FillStatisticInfo<StatisticsResponseDto> 
             article = new Article();
         }
 
-        if (article.getStatus() == Article.Status.PUBLISHED) {
+        if (article.getStatus() == PUBLISHED && !userInfo.isPremiumUser()) {
             response.setSuccess(false);
             response.reject("notEditable", "status");
             return response;
         }
 
-        if (article.getStatus() == Article.Status.PENDING) {
+        if (article.getStatus() == PENDING) {
             response.setSuccess(false);
             response.reject("notEditable", "status");
             return response;
@@ -101,7 +104,7 @@ public class ContentService implements FillStatisticInfo<StatisticsResponseDto> 
         if (article.isPresent()) {
 
             try {
-                article.get().setStatus(Article.Status.DELETED);
+                article.get().setStatus(DELETED);
                 articleRepo.save(article.get());
                 response.setSuccess(true);
             } catch (Exception ex) {
@@ -140,19 +143,15 @@ public class ContentService implements FillStatisticInfo<StatisticsResponseDto> 
         var res = new ArticleDto();
         var article = articleRepo.findById(id);
 
-        if (article.isPresent() && (List.of(Article.Status.PUBLISHED, Article.Status.PRIVATE_PUBLISHED).contains(article.get().getStatus()) ||
-                (article.get().getStatus() != Article.Status.DELETED && Objects.equals(article.get().getUserId(), userInfo.getId())))) {
+        if (article.isPresent() && (List.of(PUBLISHED, PRIVATE_PUBLISHED).contains(article.get().getStatus()) ||
+                (article.get().getStatus() != DELETED && Objects.equals(article.get().getUserId(), userInfo.getId())))) {
             res.setId(article.get().getId());
             res.setContent(article.get().getContent());
             res.setTitle(article.get().getTitle());
             res.setStatus(article.get().getStatus().name().toLowerCase());
             res.setPublishedDate(article.get().getPublishedDate());
             res.setTags(article.get().getTags());
-
-            if (article.get().getStatus() != Article.Status.PUBLISHED) {
-                res.setPreView(article.get().getPreView());
-            }
-
+            res.setPreView(article.get().getPreView());
             res.setAuthorName(userService.resolveNickname(article.get().getUserId()));
         } else {
             res.reject("notFound", "article");
@@ -164,8 +163,8 @@ public class ContentService implements FillStatisticInfo<StatisticsResponseDto> 
     @Transactional
     public PublishContentResponseDto changeStatus(@NonNull Long id, @NonNull Article.Status status) {
 
-        if (status == Article.Status.PRIVATE_PUBLISHED && !userInfo.isPremiumUser()) {
-            status = Article.Status.PUBLISHED;
+        if (status == PRIVATE_PUBLISHED && !userInfo.isPremiumUser()) {
+            status = PUBLISHED;
         }
 
         var response = new PublishContentResponseDto();
@@ -175,10 +174,10 @@ public class ContentService implements FillStatisticInfo<StatisticsResponseDto> 
 
             try {
 
-                if (List.of(Article.Status.PUBLISHED, Article.Status.PRIVATE_PUBLISHED).contains(status)
-                        && List.of(Article.Status.PUBLISHED, Article.Status.PENDING, Article.Status.PRIVATE_PUBLISHED).contains(article.get().getStatus())) {
+                if (List.of(PUBLISHED, PRIVATE_PUBLISHED).contains(status)
+                        && List.of(PUBLISHED, PENDING, PRIVATE_PUBLISHED).contains(article.get().getStatus())) {
 
-                    if (article.get().getStatus() == Article.Status.PENDING) {
+                    if (article.get().getStatus() == PENDING) {
                         response.reject("pendingPublish", "status");
                     } else {
                         response.reject("alreadyPublished", "status");
@@ -198,17 +197,21 @@ public class ContentService implements FillStatisticInfo<StatisticsResponseDto> 
                     return response;
                 }
 
-                if (status == Article.Status.PRIVATE_PUBLISHED && userInfo.isPremiumUser()) {
+                if (status == PRIVATE_PUBLISHED && userInfo.isPremiumUser()) {
                     var link = privateLinkService.generate(article.get().getId());
                     response.setLink(link);
                 }
 
-                if (Article.Status.PUBLISHED == status) {
-                    status = Article.Status.PENDING;
+                if (PUBLISHED == status && !userInfo.isPremiumUser()) {
+                    status = PENDING;
                 }
 
-                if (status == Article.Status.DRAFT) {
+                if (status == DRAFT) {
                     article.get().setPublishedDate(null);
+                }
+
+                if (List.of(PUBLISHED, PRIVATE_PUBLISHED).contains(status)) {
+                    article.get().setPublishedDate(LocalDateTime.now());
                 }
 
                 article.get().setStatus(status);
@@ -233,7 +236,7 @@ public class ContentService implements FillStatisticInfo<StatisticsResponseDto> 
     public ListContentResponseDto all(ListContentRequestDto requestDto) {
         return search(
                 List.of(userInfo.getId()),
-                Arrays.stream(Article.Status.values()).filter(it -> it != Article.Status.DELETED).map(Enum::name).toList(),
+                Arrays.stream(values()).filter(it -> it != DELETED).map(Enum::name).toList(),
                 null,
                 null,
                 createPageRequest(requestDto));
@@ -249,7 +252,7 @@ public class ContentService implements FillStatisticInfo<StatisticsResponseDto> 
 
         return search(
                 userIds,
-                List.of(Article.Status.PUBLISHED.name()),
+                List.of(PUBLISHED.name()),
                 null,
                 null,
                 createPageRequest(requestDto));
@@ -289,7 +292,7 @@ public class ContentService implements FillStatisticInfo<StatisticsResponseDto> 
 
         var pageRequest = PageRequest.of(requestDto.getPage(), requestDto.getMax(), Sort.by(requestDto.getDirection(), sortBy));
 
-        return search(userIds, List.of(Article.Status.PUBLISHED.name()), tags, query, pageRequest);
+        return search(userIds, List.of(PUBLISHED.name()), tags, query, pageRequest);
     }
 
     private ListContentResponseDto search(List<Long> userIds, List<String> statuses, String tags, String query, PageRequest pageRequest) {
@@ -327,9 +330,9 @@ public class ContentService implements FillStatisticInfo<StatisticsResponseDto> 
         Page<String> page = null;
 
         if (StringUtils.hasText(requestDto.getQuery())) {
-            page = articleRepo.getTags(List.of(Article.Status.PUBLISHED.name()), requestDto.getQuery(), pageRequest);
+            page = articleRepo.getTags(List.of(PUBLISHED.name()), requestDto.getQuery(), pageRequest);
         } else {
-            page = articleRepo.getTags(List.of(Article.Status.PUBLISHED.name()), pageRequest);
+            page = articleRepo.getTags(List.of(PUBLISHED.name()), pageRequest);
         }
 
         List<String> list = page.isEmpty() ? Collections.emptyList() : page.getContent();
@@ -358,22 +361,30 @@ public class ContentService implements FillStatisticInfo<StatisticsResponseDto> 
             var article = articleRepo.findByIdAndUserId(id, userInfo.getId());
 
             if (article.isPresent()) {
-                article.get().setPreView(dto.content());
-                articleRepo.save(article.get());
-                response.setSuccess(true);
+
+                if (List.of(PUBLISHED, PRIVATE_PUBLISHED).contains(article.get().getStatus())
+                        && !userInfo.isPremiumUser()) {
+                    response.reject("notEditable", "status");
+                } else {
+                    article.get().setPreView(dto.content());
+                    articleRepo.save(article.get());
+                    response.setSuccess(true);
+                }
             } else {
                 response.reject("notFound", "article");
             }
         } catch (Exception ex) {
             log.error("Error change preview", ex);
+            response.reject("serverError");
         }
 
+        response.setSuccess(response.hasErrors());
         return response;
     }
 
     @Override
     public void fillStatisticInfo(@NonNull StatisticsResponseDto response) {
-        response.setArticles(articleRepo.countByStatusAndUserId(Article.Status.PUBLISHED, response.getUserid()));
+        response.setArticles(articleRepo.countByStatusAndUserId(PUBLISHED, response.getUserid()));
     }
 
     private PageRequest createPageRequest(ListContentRequestDto requestDto) {

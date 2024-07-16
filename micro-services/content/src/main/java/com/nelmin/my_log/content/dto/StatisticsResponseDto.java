@@ -10,6 +10,7 @@ import lombok.*;
 @Builder
 public class StatisticsResponseDto extends HasError {
     private Long userid;
+    private String nickname;
     private Long articles;
     private Long bookmarks;
     private Long likes;

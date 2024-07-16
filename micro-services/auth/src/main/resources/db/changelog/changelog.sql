@@ -35,3 +35,6 @@ CREATE TABLE public.premium
     enabled      BOOLEAN,
     CONSTRAINT premium_pkey PRIMARY KEY (id)
 );
+
+--changeset nelmin:2024-08-17-01-00
+ALTER TABLE public.premium ADD COLUMN IF NOT EXISTS expired_date timestamp without time zone;

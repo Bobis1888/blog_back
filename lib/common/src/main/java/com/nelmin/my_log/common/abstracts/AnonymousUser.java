@@ -6,6 +6,7 @@ import lombok.Getter;
 public final class AnonymousUser implements IUser {
     private final Long id = -1L;
     private final String username = "anonymous";
+    private final String nickName = "anonymous";
     private final String password = "****";
 
     @Override

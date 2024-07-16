@@ -113,11 +113,15 @@ public class User implements IUser {
     public interface Repo extends JpaRepository<User, Long> {
         Optional<User> findUserByUsername(String username);
 
+        Optional<User> findUserByNickName(String nickname);
+
         Optional<UserNickName> getNickNameById(Long id);
 
         Optional<UserId> getIdByNickName(String nickName);
 
         List<UserId> findAllByNickNameContaining(String nickName);
+
+        List<User> findAllByNickNameContainsAndIdIsNot(String nickName, Long id);
 
         List<UserIdAndNickName> getIdsAndNickNamesByIdIn(List<Long> ids);
     }

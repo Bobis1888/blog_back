@@ -12,6 +12,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -46,6 +47,8 @@ public class PrivateLink {
 
     public interface Repo extends JpaRepository<PrivateLink, Long> {
         Optional<PrivateLinkArticleId> getArticleIdByLink(String privateLink);
+
+        void deleteAllByArticleIdIsIn(List<Long> ids);
     }
 
     public interface PrivateLinkArticleId {

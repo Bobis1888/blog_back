@@ -1,6 +1,7 @@
 package com.nelmin.my_log.content.service;
 
 import com.nelmin.my_log.content.model.Article;
+import com.nelmin.my_log.content.model.PrivateLink;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -18,6 +19,7 @@ import java.util.concurrent.TimeUnit;
 public class JobService {
 
     private final Article.Repo articleRepo;
+    private final PrivateLink.Repo privateLinkRepo;
 
     @Transactional
     @Scheduled(fixedDelay = 1L, timeUnit = TimeUnit.HOURS)
@@ -29,7 +31,13 @@ public class JobService {
             var ids = articleRepo.getIdsByStatusIn(List.of(Article.Status.DELETED), pageRequest)
                     .map(Article.ArticleId::getId).toList();
             log.info("Ids to clear deleted article: {}", ids);
+
+            log.info("Clear private links");
+            privateLinkRepo.deleteAllByArticleIdIsIn(ids);
+
+            log.info("Clear articles");
             articleRepo.deleteAllByIdInBatch(ids);
+
         } catch (Exception ex) {
             log.error("Error clear deleted article", ex);
         }
