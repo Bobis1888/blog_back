@@ -9,6 +9,8 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -154,8 +156,10 @@ public class UserService {
     public List<UserInfoDto> publicInfos(@NonNull String nickname) {
 
         try {
+            var request = PageRequest.of(0, 10, Sort.by("nickName"));
+
             return userRepository
-                    .findAllByNickNameContainsAndIdIsNot(nickname, userInfo.getId())
+                    .findAllByNickNameContainsAndIdIsNot(nickname, userInfo.getId(), request)
                     .stream()
                     .map(it -> {
                         var userInfoDto = new UserInfoDto();

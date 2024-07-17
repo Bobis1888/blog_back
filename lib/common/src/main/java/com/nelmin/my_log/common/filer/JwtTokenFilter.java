@@ -52,6 +52,8 @@ public class JwtTokenFilter extends OncePerRequestFilter {
             }
         } catch (Exception ex) {
             log.error("Error filter", ex);
+            response.setHeader("Set-Cookie", "Authorization=; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:10 GMT; Path=/");
+            response.setHeader("Set-Cookie", "RefreshToken=; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:10 GMT; Path=/");
         } finally {
             filterChain.doFilter(request, response);
         }

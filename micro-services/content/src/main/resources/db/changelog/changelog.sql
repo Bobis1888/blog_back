@@ -70,3 +70,7 @@ CREATE TABLE private_link
 
 --changeset nelmin:2024-08-15-10-00
 ALTER TABLE private_link DROP COLUMN IF EXISTS user_id;
+
+--changeset nelmin:2024-08-17-13-00
+ALTER TABLE "like" rename to reaction;
+ALTER TABLE reaction ALTER COLUMN value TYPE VARCHAR(255);

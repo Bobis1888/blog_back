@@ -13,7 +13,7 @@ public class StatisticsResponseDto extends HasError {
     private String nickname;
     private Long articles;
     private Long bookmarks;
-    private Long likes;
+    private Long reactions;
     private Long subscriptions;
     private Long subscribers;
     @Builder.Default

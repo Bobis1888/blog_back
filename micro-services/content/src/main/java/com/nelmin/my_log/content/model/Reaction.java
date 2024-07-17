@@ -13,6 +13,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Entity
@@ -21,8 +22,8 @@ import java.util.Optional;
 @NoArgsConstructor
 @AllArgsConstructor
 @EntityListeners({AuditingEntityListener.class})
-@Table(name = "\"like\"")
-public class Like {
+@Table(name = "reaction")
+public class Reaction {
 
     @Id
     @SequenceGenerator(name = "hibernate", sequenceName = "hibernate_sequence", allocationSize = 1)
@@ -35,11 +36,8 @@ public class Like {
     @Column(name = "article_id", nullable = false)
     private Long articleId;
 
-    /**
-     * true = like, false = dislike
-     */
     @Column(name = "value", nullable = false)
-    private Boolean value;
+    private String value;
 
     @CreatedDate
     private LocalDateTime createdDate;
@@ -47,24 +45,37 @@ public class Like {
     @LastModifiedDate
     private LocalDateTime updatedDate;
 
-    public interface Repo extends JpaRepository<Like, Long> {
-        Optional<Like> findByArticleIdAndUserId(Long articleId, Long userId);
+    public interface Repo extends JpaRepository<Reaction, Long> {
+        Optional<Reaction> findByArticleIdAndUserId(Long articleId, Long userId);
         boolean existsByArticleIdAndUserId(Long articleId, Long userId);
-        Optional<IsLiked> getValueByArticleIdAndUserId(Long articleId, Long userId);
-        Long countByArticleIdAndValue(Long articleId, Boolean value);
+        Optional<IsReacted> getValueByArticleIdAndUserId(Long articleId, Long userId);
 
         @Query(
-                value = "select count(*) from \"like\" l " +
-                        "where l.article_id in (select a.id from article a where a.user_id = :userId) " +
-                        "and l.value = true",
+                value = "select count(l.value), l.value from reaction l " +
+                        "where l.article_id = :articleId " +
+                        "group by l.value;",
                 nativeQuery = true
         )
-        Long countByUserId(@Param("userId") Long userId);
+        List<CountReaction> countByArticleId(Long articleId);
+
+        @Query(
+                value = "select count(l.value), l.value from reaction l " +
+                        "where l.article_id in (select a.id from article a where a.user_id = :userId) " +
+                        "group by l.value;",
+                nativeQuery = true
+        )
+        List<CountReaction> countByUserId(@Param("userId") Long userId);
 
         void deleteByArticleIdAndUserId(Long articleId, Long userId);
+        void deleteAllByArticleIdIn(List<Long> ids);
     }
 
-    public interface IsLiked {
-        Boolean getValue();
+    public interface IsReacted {
+        String getValue();
+    }
+
+    public interface CountReaction {
+        Long getCount();
+        String getValue();
     }
 }

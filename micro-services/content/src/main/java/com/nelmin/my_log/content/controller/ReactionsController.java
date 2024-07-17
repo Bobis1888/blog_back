@@ -1,7 +1,7 @@
 package com.nelmin.my_log.content.controller;
 
 import com.nelmin.my_log.common.dto.SuccessDto;
-import com.nelmin.my_log.content.service.LikeService;
+import com.nelmin.my_log.content.service.ReactionsService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,14 +13,14 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-public class LikeController {
+public class ReactionsController {
 
-    private final LikeService likeService;
+    private final ReactionsService reactionsService;
 
     @Secured("ROLE_USER")
-    @PutMapping("/like/{id}")
-    public ResponseEntity<SuccessDto> like(@Valid @PathVariable Long id) {
-        var response = likeService.like(id);
+    @PutMapping("/react/{id}/{type}")
+    public ResponseEntity<SuccessDto> react(@Valid @PathVariable Long id, @Valid @PathVariable String type) {
+        var response = reactionsService.react(id, type);
 
         return ResponseEntity
                 .status(response.hasErrors() ? HttpStatus.BAD_REQUEST : HttpStatus.OK)
@@ -28,9 +28,9 @@ public class LikeController {
     }
 
     @Secured("ROLE_USER")
-    @DeleteMapping("/like/{id}")
-    public ResponseEntity<SuccessDto> dislike(@Valid @PathVariable Long id) {
-        var response = likeService.dislike(id);
+    @DeleteMapping("/react/{id}")
+    public ResponseEntity<SuccessDto> remove(@Valid @PathVariable Long id) {
+        var response = reactionsService.remove(id);
 
         return ResponseEntity
                 .status(response.hasErrors() ? HttpStatus.BAD_REQUEST : HttpStatus.OK)

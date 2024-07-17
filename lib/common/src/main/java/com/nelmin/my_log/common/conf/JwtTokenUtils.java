@@ -13,6 +13,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import javax.crypto.SecretKey;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
 @Slf4j
@@ -21,14 +23,14 @@ public class JwtTokenUtils {
     @Value("${jwttoken.secret:mambasupersecrettokenmambasupersecrettokenmambasupersecrettoken}")
     private String jwtSecret;
 
-    @Value("${jwttoken.expiration:7200000}")
+    @Value("${jwttoken.expiration:1}")
     private Long jwtExpiration;
 
     public String generateToken(UserDetails user) {
         return Jwts.builder()
                 .subject(user.getUsername())
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + jwtExpiration))
+                .expiration(new Date(System.currentTimeMillis() + (1000 * 60 * 60 * 24 * jwtExpiration)))
                 .signWith(getSigningKey(), Jwts.SIG.HS256)
                 .compact();
     }
@@ -76,7 +78,8 @@ public class JwtTokenUtils {
     }
 
     public String createTokenCookieValue(String token) {
-        return "Authorization=Bearer_" + token + "; Max-Age=86400; SameSite=None; Path=/; Secure; HttpOnly";
+        var seconds = ChronoUnit.SECONDS.between(LocalDateTime.now(), LocalDateTime.now().plusDays(jwtExpiration).minusMinutes(1));
+        return "Authorization=Bearer_" + token + "; Max-Age=" + seconds + "; SameSite=None; Path=/; Secure; HttpOnly";
     }
 
     public String createRefreshTokenCookieValue(String token) {

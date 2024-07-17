@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -121,7 +122,7 @@ public class User implements IUser {
 
         List<UserId> findAllByNickNameContaining(String nickName);
 
-        List<User> findAllByNickNameContainsAndIdIsNot(String nickName, Long id);
+        List<User> findAllByNickNameContainsAndIdIsNot(String nickName, Long id, Pageable pageable);
 
         List<UserIdAndNickName> getIdsAndNickNamesByIdIn(List<Long> ids);
     }

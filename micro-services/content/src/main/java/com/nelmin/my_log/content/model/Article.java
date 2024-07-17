@@ -172,11 +172,11 @@ public class Article {
 
         @Query(
                 value = "SELECT * FROM article " +
-                        "LEFT JOIN (SELECT article_id, count(id) likes FROM \"like\" GROUP BY article_id) lk " +
+                        "LEFT JOIN (SELECT article_id, count(id) reactions FROM reaction GROUP BY article_id) lk " +
                         "ON article.id = lk.article_id " +
-                        "WHERE article.status = 'PUBLISHED' order by lk.likes desc nulls last",
+                        "WHERE article.status = 'PUBLISHED' order by lk.reactions desc nulls last",
                 countQuery = "SELECT count(*) FROM article " +
-                        "LEFT JOIN (SELECT article_id, count(id) likes FROM \"like\" GROUP BY article_id) lk " +
+                        "LEFT JOIN (SELECT article_id, count(id) reactions FROM reaction GROUP BY article_id) lk " +
                         "ON article.id = lk.article_id " +
                         "WHERE article.status = 'PUBLISHED'",
                 nativeQuery = true

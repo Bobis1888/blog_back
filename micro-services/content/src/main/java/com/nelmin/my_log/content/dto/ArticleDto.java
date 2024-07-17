@@ -20,12 +20,11 @@ public class ArticleDto extends HasError {
     private String content;
     private LocalDateTime publishedDate;
     private String authorName;
-    private Long likes;
+    private List<ReactionDto> reactions;
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private List<String> tags = new ArrayList<>();
     private String status;
     private Actions actions;
-    private Boolean isLiked;
     private Boolean isSaved;
 
     public ArticleDto(Article article) {
@@ -38,5 +37,13 @@ public class ArticleDto extends HasError {
         this.status = article.getStatus().name();
     }
 
-
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class ReactionDto {
+        private Long count;
+        private String value;
+        private Boolean isUserReaction;
+    }
 }
