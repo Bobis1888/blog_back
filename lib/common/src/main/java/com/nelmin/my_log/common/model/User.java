@@ -56,7 +56,7 @@ public class User implements IUser {
 
     private Boolean enabled = true;
 
-    @OneToOne(fetch = FetchType.LAZY , cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "id", referencedColumnName = "user_id")
     private Premium premium;
 
