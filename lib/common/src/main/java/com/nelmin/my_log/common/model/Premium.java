@@ -28,8 +28,12 @@ public class Premium {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "hibernate")
     private Long id;
 
-    @Column(name = "user_id", nullable = false)
-    private Long userId;
+//    @Column(name = "user_id", nullable = false)
+//    private Long userId;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
 
     @Column(name = "expired_date", nullable = false)
     private LocalDateTime expiredDate;
@@ -42,17 +46,21 @@ public class Premium {
 
     private Boolean enabled = true;
 
+    public Long getUserId() {
+        return user.getId();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Premium premium = (Premium) o;
-        return Objects.equals(id, premium.id) && Objects.equals(userId, premium.userId) && Objects.equals(createdDate, premium.createdDate);
+        return Objects.equals(id, premium.id) && Objects.equals(getUserId(), premium.getUserId()) && Objects.equals(createdDate, premium.createdDate);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, userId, createdDate);
+        return Objects.hash(id, getUserId(), createdDate);
     }
 
     @Repository

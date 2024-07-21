@@ -56,8 +56,7 @@ public class User implements IUser {
 
     private Boolean enabled = true;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "id", referencedColumnName = "user_id")
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "user")
     private Premium premium;
 
     @Override
