@@ -30,3 +30,4 @@ logging:
   level:
     org.springframework.web.filter.CommonsRequestLoggingFilter: DEBUG
     root: INFO
+    com.nelmin: DEBUG

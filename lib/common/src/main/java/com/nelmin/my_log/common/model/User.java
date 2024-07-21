@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.domain.Pageable;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+@Slf4j
 @Entity
 @Getter
 @Setter
@@ -65,8 +67,10 @@ public class User implements IUser {
 
     @Override
     public Boolean isPremiumUser() {
+        log.debug("User premium {}", premium);
 
         if (Objects.isNull(premium)) {
+            log.debug("User is not premium");
             return false;
         }
 

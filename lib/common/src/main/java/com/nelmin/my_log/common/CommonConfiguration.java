@@ -14,9 +14,6 @@ import org.springframework.cache.support.SimpleCacheManager;
 import org.springframework.context.annotation.*;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.filter.CommonsRequestLoggingFilter;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -48,12 +45,11 @@ public class CommonConfiguration implements WebMvcConfigurer {
     @Bean
     public CommonsRequestLoggingFilter logFilter() {
         CommonsRequestLoggingFilter filter = new CommonsRequestLoggingFilter();
-        filter.setIncludeQueryString(false);
+        filter.setIncludeQueryString(true);
         filter.setIncludePayload(true);
         filter.setMaxPayloadLength(10000);
         filter.setIncludeHeaders(false);
         filter.setIncludeClientInfo(false);
-        filter.setAfterMessagePrefix("REQUEST DATA : ");
         return filter;
     }
 
@@ -61,10 +57,7 @@ public class CommonConfiguration implements WebMvcConfigurer {
     // TODO redis cache
     public CacheManager cacheManager() {
         SimpleCacheManager cacheManager = new SimpleCacheManager();
-        cacheManager.setCaches(List.of(
-                new ConcurrentMapCache("default"),
-                new ConcurrentMapCache("users")
-        ));
+        cacheManager.setCaches(List.of(new ConcurrentMapCache("default"), new ConcurrentMapCache("users")));
         return cacheManager;
     }
 
