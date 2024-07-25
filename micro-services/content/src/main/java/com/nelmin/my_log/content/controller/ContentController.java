@@ -129,15 +129,6 @@ public class ContentController {
                 .body(response);
     }
 
-    @PostMapping("/tags")
-    public ResponseEntity<TagsResponseDto> tags(@Valid @RequestBody TagsRequestDto dto) {
-        var response = contentService.tags(dto);
-
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(response);
-    }
-
     @Secured("ROLE_USER")
     @PutMapping("/bookmark/{id}")
     public ResponseEntity<SuccessDto> addToBookmarks(@Valid @PathVariable Long id) {
@@ -158,6 +149,7 @@ public class ContentController {
                 .body(response);
     }
 
+    //TODO bookmark/list
     @Secured("ROLE_USER")
     @PostMapping("/bookmarks")
     public ResponseEntity<BookmarksResponseDto> bookmarks(@Valid @RequestBody BookmarksRequestDto requestDto) {

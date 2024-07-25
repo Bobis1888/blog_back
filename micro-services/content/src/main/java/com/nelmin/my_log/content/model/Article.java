@@ -155,18 +155,17 @@ public class Article {
                 Pageable pageable);
 
         @Query(
-                value = "select distinct tags from article where status in :status",
-                countQuery = "select count(distinct tags) from article where status in :status",
+                value = "select tag, count(*) as count " +
+                        "from article a , unnest(string_to_array(tags, ',')) as tag " +
+                        "where a.status = 'PUBLISHED' " +
+//                        "and a.updated_date >= current_timestamp - interval '24 hours' " +
+                        "and (tag ~* :query) " +
+                        "group by tag " +
+                        "order by count desc " +
+                        "limit :limit",
                 nativeQuery = true
         )
-        Page<String> getTags(@Param("status") Collection<String> status, PageRequest of);
-
-        @Query(
-                value = "select distinct tags from article where status in :status and (tags ~* :query)",
-                countQuery = "select count(distinct tags) from article where status in :status and (tags ~* :query)",
-                nativeQuery = true
-        )
-        Page<String> getTags(@Param("status") Collection<String> status, @Param("query") String query, PageRequest of);
+        List<TagCount> extractTags(@Param("limit") Integer limit, @Param("query") String query);
 
         Long countByStatusAndUserId(Status status, Long userid);
 
@@ -188,10 +187,10 @@ public class Article {
         Long getId();
     }
 
-//    // PostgreSQL ~*
-//    static Specification<Article> findByParams() {
-//        return (articleRoot, cq, cb) -> cb.some("textregexeq", Boolean.class, message, cb.literal(re));
-//    }
+    public interface TagCount {
+        String getTag();
+        Long getCount();
+    }
 
     public enum Status {
         DRAFT,

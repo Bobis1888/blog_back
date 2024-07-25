@@ -57,7 +57,13 @@ public class CommonConfiguration implements WebMvcConfigurer {
     // TODO redis cache
     public CacheManager cacheManager() {
         SimpleCacheManager cacheManager = new SimpleCacheManager();
-        cacheManager.setCaches(List.of(new ConcurrentMapCache("default"), new ConcurrentMapCache("users")));
+        cacheManager.setCaches(
+                List.of(
+                        new ConcurrentMapCache("default"),
+                        new ConcurrentMapCache("users"),
+                        new ConcurrentMapCache("tags")
+                )
+        );
         return cacheManager;
     }
 

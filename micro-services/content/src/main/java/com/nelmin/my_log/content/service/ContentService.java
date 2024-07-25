@@ -324,36 +324,6 @@ public class ContentService implements FillStatisticInfo<StatisticsResponseDto> 
     }
 
     @Transactional
-    public TagsResponseDto tags(@NonNull TagsRequestDto requestDto) {
-        var pageRequest = PageRequest.of(requestDto.getPage(), requestDto.getMax());
-        Set<String> result = new HashSet<>();
-        Page<String> page = null;
-
-        if (StringUtils.hasText(requestDto.getQuery())) {
-            page = articleRepo.getTags(List.of(PUBLISHED.name()), requestDto.getQuery(), pageRequest);
-        } else {
-            page = articleRepo.getTags(List.of(PUBLISHED.name()), pageRequest);
-        }
-
-        List<String> list = page.isEmpty() ? Collections.emptyList() : page.getContent();
-
-        list.forEach(it -> {
-
-            if (it == null) {
-                return;
-            }
-
-            if (it.contains(",")) {
-                result.addAll(Set.of(it.split(",")));
-            } else {
-                result.add(it);
-            }
-        });
-
-        return new TagsResponseDto(result, page.getTotalPages());
-    }
-
-    @Transactional
     public SuccessDto changePreview(@NonNull Long id, @NonNull ChangePreviewRequestDto dto) {
         var response = new SuccessDto(false);
 

@@ -12,12 +12,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class TagsRequestDto {
-
-    @NotNull(message = "nullable")
-    @Max(value = 255, message = "invalidSize")
+    @Max(value = 1000, message = "invalidSize")
     private Integer max;
-
-    @NotNull(message = "nullable")
-    private Integer page;
     private String query;
 }

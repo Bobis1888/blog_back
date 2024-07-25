@@ -17,14 +17,14 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class JobService {
+public class ClearArticleService {
 
     private final Article.Repo articleRepo;
     private final Reaction.Repo reactionRepo;
     private final PrivateLink.Repo privateLinkRepo;
 
     @Transactional
-    @Scheduled(fixedDelay = 1L, timeUnit = TimeUnit.HOURS)
+    @Scheduled(fixedDelay = 12L, timeUnit = TimeUnit.HOURS)
     public void clearDeletedArticle() {
         log.info("Start to clear deleted article");
 
@@ -34,15 +34,19 @@ public class JobService {
                     .map(Article.ArticleId::getId).toList();
             log.info("Ids to clear deleted article: {}", ids);
 
-            log.info("Clear private links");
-            privateLinkRepo.deleteAllByArticleIdIsIn(ids);
+            if (!ids.isEmpty()) {
 
-            log.info("Clear articles");
-            articleRepo.deleteAllByIdInBatch(ids);
+                log.info("Clear private links");
+                privateLinkRepo.deleteAllByArticleIdIsIn(ids);
 
-            log.info("Clear reactions");
-            reactionRepo.deleteAllByArticleIdIn(ids);
+                log.info("Clear reactions");
+                reactionRepo.deleteAllByArticleIdIn(ids);
 
+                log.info("Clear articles");
+                articleRepo.deleteAllByIdInBatch(ids);
+            } else {
+                log.info("No need to clear deleted article");
+            }
         } catch (Exception ex) {
             log.error("Error clear deleted article", ex);
         }
