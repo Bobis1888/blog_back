@@ -72,7 +72,7 @@ public class ContentService implements FillStatisticInfo<StatisticsResponseDto> 
         // TODO validate html/sql injection
         article.setContent(dto.content());
 
-        if (dto.preView() == null || StringUtils.hasText(dto.preView()) && dto.preView().equals("auto")) {
+        if (dto.preView() == null || !StringUtils.hasText(dto.preView()) || StringUtils.hasText(dto.preView()) && dto.preView().equals("auto")) {
             var generatedPreview = dto.content().substring(0, Math.min(dto.content().length(), 255));
             article.setPreView(generatedPreview);
         } else {
