@@ -44,7 +44,7 @@ public class ContentController {
 
     @Secured("ROLE_USER")
     @PutMapping("/preview/{id}")
-    public ResponseEntity<SuccessDto> changePreView(@Valid @PathVariable Long id,@Valid @RequestBody ChangePreviewRequestDto dto) {
+    public ResponseEntity<SuccessDto> changePreview(@Valid @PathVariable Long id, @Valid @RequestBody ChangePreviewRequestDto dto) {
         SuccessDto response = contentService.changePreview(id, dto);
         return ResponseEntity
                 .status(response.hasErrors() ? HttpStatus.BAD_REQUEST : HttpStatus.OK)
