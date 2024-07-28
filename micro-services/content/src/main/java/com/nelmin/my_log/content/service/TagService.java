@@ -21,7 +21,8 @@ public class TagService {
     private final Article.Repo contentRepo;
 
     @Transactional
-    @Cacheable(value = "tags", key = "#query")
+    // TODO redis cache
+//    @Cacheable(value = "tags", key = "#query")
     public List<TagDto> list(Integer limit, String query) {
         try {
             return contentRepo.extractTags(limit, query)
