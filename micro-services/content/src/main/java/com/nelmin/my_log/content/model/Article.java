@@ -12,6 +12,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -54,6 +55,9 @@ public class Article {
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private Status status = Status.DRAFT;
+
+    @Column(name = "count_views", nullable = false)
+    private Long countViews = 0L;
 
     @CreatedDate
     private LocalDateTime createdDate;
@@ -181,6 +185,14 @@ public class Article {
                 nativeQuery = true
         )
         Page<Article> findAllMostPopular(Pageable request);
+
+
+        @Modifying
+        @Query(
+                value = "update article set count_views = count_views + 1 where id = :id",
+                nativeQuery = true
+        )
+        void increaseCountViews(Long id);
     }
 
     public interface ArticleId {

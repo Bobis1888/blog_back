@@ -74,3 +74,6 @@ ALTER TABLE private_link DROP COLUMN IF EXISTS user_id;
 --changeset nelmin:2024-08-17-13-00
 ALTER TABLE "like" rename to reaction;
 ALTER TABLE reaction ALTER COLUMN value TYPE VARCHAR(255);
+
+--changeset nelmin:2024-07-29-00-10
+ALTER TABLE article ADD COLUMN IF NOT EXISTS count_views bigint default 0;

@@ -152,7 +152,17 @@ public class ContentService implements FillStatisticInfo<StatisticsResponseDto> 
             res.setPublishedDate(article.get().getPublishedDate());
             res.setTags(article.get().getTags());
             res.setPreView(article.get().getPreView());
+            res.setCountViews(article.get().getCountViews());
             res.setAuthorName(userService.resolveNickname(article.get().getUserId()));
+
+            if (List.of(PUBLISHED, PRIVATE_PUBLISHED).contains(article.get().getStatus()) && !article.get().getUserId().equals(userInfo.getId())) {
+
+                try {
+                    articleRepo.increaseCountViews(article.get().getId());
+                } catch (Exception ex) {
+                    log.error("Error increase count views", ex);
+                }
+            }
         } else {
             res.reject("notFound", "article");
         }

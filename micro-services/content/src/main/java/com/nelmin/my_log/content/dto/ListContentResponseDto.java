@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -13,7 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ListContentResponseDto extends HasError {
-    private List<ArticleDto> list;
+    private List<ArticleDto> list = new ArrayList<>();
     private Long totalRows;
     private Integer totalPages;
 }
