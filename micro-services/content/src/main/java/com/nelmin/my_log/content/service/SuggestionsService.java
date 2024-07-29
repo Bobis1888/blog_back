@@ -2,6 +2,7 @@ package com.nelmin.my_log.content.service;
 
 import com.nelmin.my_log.common.service.UserService;
 import com.nelmin.my_log.content.dto.ArticleDto;
+import com.nelmin.my_log.content.dto.ListContentRequestDto;
 import com.nelmin.my_log.content.dto.ListContentResponseDto;
 import com.nelmin.my_log.content.model.Article;
 import lombok.RequiredArgsConstructor;
@@ -21,11 +22,11 @@ public class SuggestionsService {
     private final UserService userService;
 
     @Transactional
-    public ListContentResponseDto mostPopular() {
+    public ListContentResponseDto suggestions(ListContentRequestDto requestDto) {
         var res = new ListContentResponseDto();
 
         try {
-            var page = articleRepo.findAllMostPopular(PageRequest.of(0,10));
+            var page = articleRepo.findAllMostPopular(PageRequest.of(requestDto.getPage(), requestDto.getMax()));
 
             if (!page.isEmpty()) {
                 var userIds = page.getContent().stream().map(Article::getUserId).toList();

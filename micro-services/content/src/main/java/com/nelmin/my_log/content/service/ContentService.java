@@ -20,6 +20,7 @@ import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.nelmin.my_log.content.model.Article.Status.*;
 
@@ -80,7 +81,22 @@ public class ContentService implements FillStatisticInfo<StatisticsResponseDto> 
         }
 
         article.setTitle(dto.title());
-        article.setTags(dto.tags());
+
+        if (dto.tags() != null) {
+            article.setTags(dto.tags().stream().map(it -> {
+
+                if (it == null || it.length() < 2) {
+                    return null;
+                }
+
+                char ch = Character.toLowerCase(it.charAt(1));
+
+                var chArr = it.toCharArray();
+                chArr[1] = ch;
+
+                return new String(chArr);
+            }).collect(Collectors.toList()));
+        }
 
         try {
             articleRepo.save(article);
