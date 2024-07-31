@@ -177,7 +177,7 @@ public class Article {
                 value = "SELECT * FROM article " +
                         "LEFT JOIN (SELECT article_id, count(id) reactions FROM reaction GROUP BY article_id) lk " +
                         "ON article.id = lk.article_id " +
-                        "WHERE article.status = 'PUBLISHED' order by lk.reactions desc nulls last",
+                        "WHERE article.status = 'PUBLISHED' order by lk.reactions desc nulls last, article.count_views desc nulls last",
                 countQuery = "SELECT count(*) FROM article " +
                         "LEFT JOIN (SELECT article_id, count(id) reactions FROM reaction GROUP BY article_id) lk " +
                         "ON article.id = lk.article_id " +

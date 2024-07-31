@@ -290,18 +290,9 @@ public class ContentService implements FillStatisticInfo<StatisticsResponseDto> 
     //TODO refactor
     @Transactional
     public ListContentResponseDto list(ListContentRequestDto requestDto) {
-        String[] sortBy = null;
         List<Long> userIds = new ArrayList<>();
         String query = null;
         String tags = null;
-
-        if (requestDto.getSortBy() != null && !requestDto.getSortBy().isEmpty()) {
-            sortBy = Utils.getSortProperties(requestDto.getSortBy(), Article.class);
-        }
-
-        if (sortBy == null || sortBy.length == 0) {
-            sortBy = new String[]{"id"};
-        }
 
         if (requestDto.getSearch() != null) {
             var search = requestDto.getSearch();
@@ -319,9 +310,7 @@ public class ContentService implements FillStatisticInfo<StatisticsResponseDto> 
             }
         }
 
-        var pageRequest = PageRequest.of(requestDto.getPage(), requestDto.getMax(), Sort.by(requestDto.getDirection(), sortBy));
-
-        return search(userIds, List.of(PUBLISHED.name()), tags, query, pageRequest);
+        return search(userIds, List.of(PUBLISHED.name()), tags, query, createPageRequest(requestDto));
     }
 
     private ListContentResponseDto search(List<Long> userIds, List<String> statuses, String tags, String query, PageRequest pageRequest) {
@@ -387,6 +376,16 @@ public class ContentService implements FillStatisticInfo<StatisticsResponseDto> 
     }
 
     private PageRequest createPageRequest(ListContentRequestDto requestDto) {
-        return PageRequest.of(requestDto.getPage(), requestDto.getMax(), Sort.by(requestDto.getDirection(), "id"));
+        String[] sortBy = null;
+
+        if (requestDto.getSortBy() != null && !requestDto.getSortBy().isEmpty()) {
+            sortBy = Utils.getSortProperties(requestDto.getSortBy(), Article.class);
+        }
+
+        if (sortBy == null || sortBy.length == 0) {
+            sortBy = new String[]{"id"};
+        }
+
+        return PageRequest.of(requestDto.getPage(), requestDto.getMax(), Sort.by(requestDto.getDirection(), sortBy));
     }
 }
