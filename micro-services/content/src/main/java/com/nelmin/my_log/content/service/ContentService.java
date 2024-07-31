@@ -36,6 +36,8 @@ public class ContentService implements FillStatisticInfo<StatisticsResponseDto> 
     private final SubscriptionsService subscriptionsService;
     private final PrivateLinkService privateLinkService;
 
+    private static final String CLEAR_TAG_REGEXP = "[^a-zA-Zа-яА-Я0-9_]";
+
     @Transactional
     public CreateContentResponseDto update(@NonNull Long id, @NonNull CreateContentRequestDto dto) {
         //TODO
@@ -89,6 +91,7 @@ public class ContentService implements FillStatisticInfo<StatisticsResponseDto> 
                     return null;
                 }
 
+                it = it.replaceAll(CLEAR_TAG_REGEXP, "");
                 char ch = Character.toLowerCase(it.charAt(1));
 
                 var chArr = it.toCharArray();
