@@ -92,6 +92,11 @@ public class ContentService implements FillStatisticInfo<StatisticsResponseDto> 
                 }
 
                 it = it.replaceAll(CLEAR_TAG_REGEXP, "");
+
+                if (!it.startsWith("#")) {
+                    it = "#" + it;
+                }
+
                 char ch = Character.toLowerCase(it.charAt(1));
 
                 var chArr = it.toCharArray();
