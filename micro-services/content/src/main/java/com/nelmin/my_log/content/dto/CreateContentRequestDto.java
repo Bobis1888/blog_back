@@ -8,6 +8,7 @@ import java.util.List;
 public record CreateContentRequestDto(
         Long id,
         @NotBlank(message = "nullable")
+        @Size(max = 255, message = "invalidSize")
         String title,
         @NotBlank(message = "nullable")
         @Size(max = 255, message = "invalidSize")
