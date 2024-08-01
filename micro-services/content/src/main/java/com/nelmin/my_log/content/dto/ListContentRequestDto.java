@@ -37,5 +37,6 @@ public class ListContentRequestDto {
         private String query;
         private List<String> tags = new ArrayList<>();
         private String author;
+        private List<Long> exclude = new ArrayList<>();
     }
 }
