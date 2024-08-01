@@ -36,7 +36,7 @@ public class ContentService implements FillStatisticInfo<StatisticsResponseDto> 
     private final SubscriptionsService subscriptionsService;
     private final PrivateLinkService privateLinkService;
 
-    private static final String CLEAR_TAG_REGEXP = "[^a-zA-Zа-яА-Я0-9_]";
+    private static final String CLEAR_TAG_REGEXP = "[^#a-zA-Zа-яА-Я0-9_]";
 
     @Transactional
     public CreateContentResponseDto update(@NonNull Long id, @NonNull CreateContentRequestDto dto) {
