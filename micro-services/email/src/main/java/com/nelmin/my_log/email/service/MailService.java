@@ -1,6 +1,6 @@
 package com.nelmin.my_log.email.service;
 
-import com.nelmin.my_log.email.dto.Message;
+import com.nelmin.my_log.common.dto.EmailMessage;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +26,7 @@ public class MailService {
     private final JavaMailSender javaMailSender;
 
     @JmsListener(destination = "blog.email.send")
-    public void receiveMail(Message message) {
+    public void receiveMail(EmailMessage message) {
 
         try {
             sendMail(message.getRecipient(), message.getSubject(), message.getContent());

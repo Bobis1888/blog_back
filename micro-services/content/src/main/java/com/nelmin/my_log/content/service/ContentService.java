@@ -58,7 +58,7 @@ public class ContentService implements FillStatisticInfo<StatisticsResponseDto> 
             article = new Article();
         }
 
-        if (article.getStatus() == PUBLISHED && !userInfo.isPremiumUser()) {
+        if (article.getStatus() == PUBLISHED && !userInfo.isPremiumUser() || article.getStatus() == BLOCKED) {
             response.setSuccess(false);
             response.reject("notEditable", "status");
             return response;
@@ -126,6 +126,11 @@ public class ContentService implements FillStatisticInfo<StatisticsResponseDto> 
         var article = articleRepo.findByIdAndUserId(id, userInfo.getId());
 
         if (article.isPresent()) {
+
+            if (List.of(DELETED, BLOCKED).contains(article.get().getStatus())) {
+                response.reject("notEditable", "status");
+                return response;
+            }
 
             try {
                 article.get().setStatus(DELETED);
@@ -356,7 +361,7 @@ public class ContentService implements FillStatisticInfo<StatisticsResponseDto> 
             if (article.isPresent()) {
 
                 if (List.of(PUBLISHED, PRIVATE_PUBLISHED).contains(article.get().getStatus())
-                        && !userInfo.isPremiumUser()) {
+                        && !userInfo.isPremiumUser() || article.get().getStatus() == BLOCKED) {
                     response.reject("notEditable", "status");
                 } else {
                     article.get().setPreView(dto.content());

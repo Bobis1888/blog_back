@@ -38,3 +38,18 @@ CREATE TABLE public.premium
 
 --changeset nelmin:2024-08-17-01-00
 ALTER TABLE public.premium ADD COLUMN IF NOT EXISTS expired_date timestamp without time zone;
+
+--changeset nelmin:2024-08-06-01-00
+ALTER TABLE public.user ADD COLUMN IF NOT EXISTS blocked boolean default false;
+
+--changeset nelmin:2024-08-06-10-00
+CREATE TABLE report
+(
+    id           BIGINT NOT NULL,
+    user_id      BIGINT NOT NULL REFERENCES "user",
+    article_id   BIGINT NOT NULL REFERENCES article,
+    type         VARCHAR(255),
+    description  VARCHAR(255),
+    created_date TIMESTAMP WITHOUT TIME ZONE,
+    CONSTRAINT report_pkey PRIMARY KEY (id)
+);

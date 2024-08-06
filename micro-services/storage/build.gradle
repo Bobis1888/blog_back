@@ -50,6 +50,7 @@ dependencies {
     implementation 'io.jsonwebtoken:jjwt-api:0.12.5'
 
     implementation project(":lib:common")
+    implementation 'org.springframework.boot:spring-boot-starter-artemis'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'io.projectreactor:reactor-test'

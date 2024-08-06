@@ -1,6 +1,7 @@
 package com.nelmin.my_log.content.service;
 
 import com.nelmin.my_log.common.bean.UserInfo;
+import com.nelmin.my_log.common.model.Report;
 import com.nelmin.my_log.common.model.User;
 import com.nelmin.my_log.common.service.FillContentInfo;
 import com.nelmin.my_log.content.dto.Actions;
@@ -17,9 +18,11 @@ import java.util.Objects;
 @Service
 @RequiredArgsConstructor
 public class ActionService implements FillContentInfo<ArticleDto> {
+
     private final UserInfo userInfo;
     private final User.Repo userRepo;
     private final SubscriptionsService subscriptionsService;
+    private final Report.Repo reportRepo;
 
     @Override
     public void fillContentInfo(ArticleDto article) {
@@ -31,9 +34,10 @@ public class ActionService implements FillContentInfo<ArticleDto> {
                 var currentUserIsOwner = Objects.equals(userId, userInfo.getId());
 
                 if (currentUserIsOwner) {
+                    var canEdit = (userInfo.isPremiumUser() && status != Article.Status.BLOCKED || status == Article.Status.DRAFT);
 
-                    actions.setCanDelete(true);
-                    actions.setCanEdit(userInfo.isPremiumUser() || status == Article.Status.DRAFT);
+                    actions.setCanDelete(status != Article.Status.BLOCKED);
+                    actions.setCanEdit(canEdit);
                     actions.setCanPublish(Objects.equals(Article.Status.DRAFT, status));
                     actions.setCanUnpublish(List.of(
                             Article.Status.PRIVATE_PUBLISHED,
@@ -42,11 +46,16 @@ public class ActionService implements FillContentInfo<ArticleDto> {
 
                 } else if (status == Article.Status.PUBLISHED) {
 
-                    var subscribed = subscriptionsService.isSubscribed(userId);
-                    actions.setCanSubscribe(!subscribed);
-                    actions.setCanUnsubscribe(subscribed);
+
+                    if (userInfo.isAuthorized()) {
+                        var subscribed = subscriptionsService.isSubscribed(userId);
+                        actions.setCanSubscribe(!subscribed);
+                        actions.setCanUnsubscribe(subscribed);
+                        actions.setCanReport(!reportRepo.existsByArticleIdAndUserId(article.getId(), userInfo.getId()));
+                    }
                 }
 
+                actions.setCanReact(userInfo.isAuthorized());
                 article.setActions(actions);
             });
         } catch (Exception ex) {

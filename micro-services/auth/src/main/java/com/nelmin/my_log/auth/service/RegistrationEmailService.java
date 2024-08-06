@@ -1,10 +1,9 @@
 package com.nelmin.my_log.auth.service;
 
-import com.nelmin.my_log.auth.dto.EmailMessage;
+import com.nelmin.my_log.common.service.EmailSender;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Service;
 
 // TODO refactor / rewrite
@@ -16,33 +15,25 @@ public class RegistrationEmailService {
     @Value("${server.url:127.0.0.1}")
     private String serverUrl;
 
-    //TODO config
-    private final String emailQueue = "blog.email.send";
-
-    private final JmsTemplate jmsTemplate;
+    private final EmailSender emailSender;
 
     // TODO refactor
     public void sendResetEmail(String email, String uud) {
         String link = resolveUrl("?reset-password=" + uud);
-        jmsTemplate.convertAndSend(
-                emailQueue,
-                new EmailMessage(
-                        "Ссылка для сброса пароля",
-                        buildResetPasswordHtml(link),
-                        email)
+        emailSender.sendEmail(
+                "Ссылка для сброса пароля",
+                buildResetPasswordHtml(link),
+                email
         );
     }
 
     // TODO refactor
     public void sendConfirmEmail(String email, String uud) {
         String link = resolveUrl("api/auth/confirm?uuid=" + uud);
-
-        jmsTemplate.convertAndSend(
-                emailQueue,
-                new EmailMessage(
-                        "Подтвердите регистрацию на сайте",
-                        buildConfirmEmailHtml(link),
-                        email)
+        emailSender.sendEmail(
+                "Подтвердите регистрацию на сайте",
+                buildConfirmEmailHtml(link),
+                email
         );
     }
 
@@ -81,6 +72,6 @@ public class RegistrationEmailService {
     }
 
     private String resolveUrl(String paths) {
-        return (serverUrl.endsWith("/") ? serverUrl : serverUrl  + "/") + paths;
+        return (serverUrl.endsWith("/") ? serverUrl : serverUrl + "/") + paths;
     }
 }

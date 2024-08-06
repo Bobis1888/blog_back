@@ -64,6 +64,16 @@ public class AuthService {
 
         try {
             userInfo = userDetailsService.loadUserByUsername(loginRequestDto.login());
+
+            if (!userInfo.isEnabled()) {
+                throw new UserNotFoundException();
+            }
+
+            if (!userInfo.isAccountNonLocked()) {
+                authResponse.reject("locked", "login");
+                return authResponse;
+            }
+
             Authentication authentication = new UsernamePasswordAuthenticationToken(loginRequestDto.login(), loginRequestDto.password());
             authentication = authenticationManager.authenticate(authentication);
             SecurityContextHolder.getContext().setAuthentication(authentication);

@@ -209,6 +209,7 @@ public class Article {
         PUBLISHED,
         PRIVATE_PUBLISHED,
         PENDING,
+        BLOCKED,
         DELETED
     }
 }
