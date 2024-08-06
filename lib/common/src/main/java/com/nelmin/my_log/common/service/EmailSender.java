@@ -17,7 +17,7 @@ public class EmailSender {
 
     private final JmsTemplate jmsTemplate;
 
-    public void sendEmail(String email, String content, String subject) {
+    public void sendEmail(String email, String subject, String content) {
         log.info("Send email to {}", email);
         jmsTemplate.convertAndSend(emailQueue, new EmailMessage(subject, content, email));
     }

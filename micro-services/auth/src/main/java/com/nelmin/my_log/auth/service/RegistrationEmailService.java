@@ -21,20 +21,18 @@ public class RegistrationEmailService {
     public void sendResetEmail(String email, String uud) {
         String link = resolveUrl("?reset-password=" + uud);
         emailSender.sendEmail(
+                email,
                 "Ссылка для сброса пароля",
-                buildResetPasswordHtml(link),
-                email
-        );
+                buildResetPasswordHtml(link));
     }
 
     // TODO refactor
     public void sendConfirmEmail(String email, String uud) {
         String link = resolveUrl("api/auth/confirm?uuid=" + uud);
         emailSender.sendEmail(
+                email,
                 "Подтвердите регистрацию на сайте",
-                buildConfirmEmailHtml(link),
-                email
-        );
+                buildConfirmEmailHtml(link));
     }
 
     // TODO template

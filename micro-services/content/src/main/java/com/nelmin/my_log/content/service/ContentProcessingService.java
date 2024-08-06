@@ -121,7 +121,7 @@ public class ContentProcessingService {
 
             var builder = new StringBuilder();
             articleToSave.forEach(it -> builder.append(it.getId()).append(", "));
-            emailSender.sendEmail(supportEmail, builder.toString(), "Blocked articles");
+            emailSender.sendEmail(supportEmail, "Blocked articles", builder.toString());
 //            reportRepo.deleteAllByArticleIdIn(articleToSave.stream().map(Article::getId).toList());
         }
 
