@@ -99,7 +99,7 @@ public class ContentProcessingService {
     }
 
     @Transactional
-    @Scheduled(fixedDelay = 30L, timeUnit = TimeUnit.SECONDS)
+    @Scheduled(fixedDelay = 2L, timeUnit = TimeUnit.HOURS)
     public void processReport() {
         log.info("Start to process report");
         var articleToSave = new ArrayList<Article>();
