@@ -2,16 +2,23 @@ package com.nelmin.my_log.common;
 
 import com.nelmin.my_log.common.abstracts.AnonymousUser;
 import com.nelmin.my_log.common.bean.UserInfo;
+import com.nelmin.my_log.common.dto.EmailMessage;
 import com.nelmin.my_log.common.service.OAuthRegistrationService;
+import jakarta.jms.ConnectionFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.cache.support.SimpleCacheManager;
 import org.springframework.context.annotation.*;
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.jms.core.JmsTemplate;
+import org.springframework.jms.support.converter.MappingJackson2MessageConverter;
+import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.context.WebApplicationContext;
@@ -21,11 +28,13 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Configuration
-@EnableCaching
 @RequiredArgsConstructor
+@EnableJpaAuditing
+@EnableJpaRepositories(basePackages = "com.nelmin", considerNestedRepositories = true)
 @ComponentScan(basePackages = "com.nelmin")
 public class CommonConfiguration implements WebMvcConfigurer {
 
@@ -104,5 +113,24 @@ public class CommonConfiguration implements WebMvcConfigurer {
             log.debug("Have no any OAuthRegistrationService implementation");
             return null;
         };
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    public JmsTemplate jmsArtemisTemplate(ConnectionFactory jmsArtemisConnectionFactory) {
+        JmsTemplate jmsTemplate = new JmsTemplate(jmsArtemisConnectionFactory);
+        jmsTemplate.setExplicitQosEnabled(true);
+        jmsTemplate.setMessageConverter(messageConverter());
+        return jmsTemplate;
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public MessageConverter messageConverter() {
+        var converter = new MappingJackson2MessageConverter();
+        converter.setTypeIdPropertyName("type");
+        converter.setTypeIdMappings(Map.of("email", EmailMessage.class));
+        return converter;
     }
 }

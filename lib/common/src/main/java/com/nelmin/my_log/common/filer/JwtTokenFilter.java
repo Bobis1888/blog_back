@@ -13,6 +13,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.security.web.authentication.logout.CookieClearingLogoutHandler;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -46,17 +47,32 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 
                 String userName = jwtTokenUtils.extractUserName(token);
                 UserDetails user = userDetailsService.loadUserByUsername(userName);
-                var authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
-                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+
+                if (user.isAccountNonLocked() && user.isEnabled()) {
+                    var authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                } else {
+                    SecurityContextHolder.clearContext();
+                    clearCookies(response, request);
+
+                    if (request.getSession() != null) {
+                        request.getSession().invalidate();
+                    }
+                }
             }
         } catch (Exception ex) {
             log.error("Error filter", ex);
-            response.setHeader("Set-Cookie", "Authorization=; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:10 GMT; Path=/");
-            response.setHeader("Set-Cookie", "RefreshToken=; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:10 GMT; Path=/");
+            clearCookies(response, request);
         } finally {
             filterChain.doFilter(request, response);
         }
+    }
+
+    private void clearCookies(HttpServletResponse response, HttpServletRequest request) {
+        new CookieClearingLogoutHandler("Authorization", "RefreshToken")
+                .logout(request, response, null);
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
     }
 
     private String getTokenFromRequest(HttpServletRequest request) {

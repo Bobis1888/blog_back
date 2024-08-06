@@ -5,7 +5,6 @@ import org.springframework.context.annotation.*;
 
 @Slf4j
 @Configuration
-@ComponentScan(basePackages = "com.nelmin")
 public class L18nConfiguration {
 
 }

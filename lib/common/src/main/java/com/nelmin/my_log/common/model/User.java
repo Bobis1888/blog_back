@@ -56,6 +56,8 @@ public class User implements IUser {
 
     private Boolean enabled = true;
 
+    private Boolean blocked = false;
+
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "user")
     private Premium premium;
 
@@ -74,6 +76,11 @@ public class User implements IUser {
         }
 
         return premium.getEnabled();
+    }
+
+    @Override
+    public Boolean isBlocked() {
+        return blocked;
     }
 
     @Override

@@ -73,7 +73,7 @@ public class UserInfo implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return !currentUser.isBlocked();
     }
 
     @Override

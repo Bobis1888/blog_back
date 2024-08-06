@@ -7,4 +7,5 @@ public interface IUser {
     Boolean isEnabled();
     Boolean isPremiumUser();
     String getNickName();
+    Boolean isBlocked();
 }

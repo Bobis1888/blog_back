@@ -18,4 +18,9 @@ public final class AnonymousUser implements IUser {
     public Boolean isPremiumUser() {
         return false;
     }
+
+    @Override
+    public Boolean isBlocked() {
+        return false;
+    }
 }
