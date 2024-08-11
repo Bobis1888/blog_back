@@ -16,6 +16,8 @@ public class StatisticsResponseDto extends HasError {
     private Long reactions;
     private Long subscriptions;
     private Long subscribers;
+    private Long comments;
+    private Long rating;
     @Builder.Default
     private Boolean isSubscriber = false;
     @Builder.Default

@@ -82,6 +82,7 @@ public class UserService {
                 );
     }
 
+    //    @Cacheable(value = "users", key = "#nickname")
     public Long resolveId(String nickname) {
         return userRepository.getIdByNickName(nickname)
                 .orElseThrow(UserNotFoundException::new)
@@ -159,7 +160,7 @@ public class UserService {
             var request = PageRequest.of(0, 10, Sort.by("nickName"));
 
             return userRepository
-                    .findAllByNickNameContainsAndIdIsNot(nickname, userInfo.getId(), request)
+                    .findAllByNickNameContains(nickname, request)
                     .stream()
                     .map(it -> {
                         var userInfoDto = new UserInfoDto();

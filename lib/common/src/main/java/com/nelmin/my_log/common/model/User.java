@@ -9,9 +9,11 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -132,7 +134,7 @@ public class User implements IUser {
 
         List<UserId> findAllByNickNameContaining(String nickName);
 
-        List<User> findAllByNickNameContainsAndIdIsNot(String nickName, Long id, Pageable pageable);
+        List<User> findAllByNickNameContains(String nickName, Pageable pageable);
 
         List<UserIdAndNickName> getIdsAndNickNamesByIdIn(List<Long> ids);
     }

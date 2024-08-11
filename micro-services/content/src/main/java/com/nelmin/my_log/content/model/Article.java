@@ -22,6 +22,7 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -67,7 +68,7 @@ public class Article {
 
     private LocalDateTime publishedDate;
 
-    public void setTags(List<String> tags) {
+    public void setTags(Set<String> tags) {
 
         if (tags != null && !tags.isEmpty()) {
             this.tags = String.join(",", tags).replaceAll(" ", "");

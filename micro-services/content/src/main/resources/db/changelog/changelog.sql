@@ -77,3 +77,25 @@ ALTER TABLE reaction ALTER COLUMN value TYPE VARCHAR(255);
 
 --changeset nelmin:2024-07-29-00-10
 ALTER TABLE article ADD COLUMN IF NOT EXISTS count_views bigint default 0;
+
+--changeset nelmin:2024-08-12-00-50
+CREATE TABLE comment
+(
+    id           BIGINT       NOT NULL,
+    user_id      BIGINT       NOT NULL references "user",
+    article_id   BIGINT       NOT NULL references article,
+    content      VARCHAR(255) NOT NULL,
+    rating       BIGINT,
+    created_date TIMESTAMP WITHOUT TIME ZONE,
+    CONSTRAINT comment_pkey PRIMARY KEY (id)
+);
+
+CREATE TABLE vote
+(
+    id           BIGINT  NOT NULL,
+    user_id      BIGINT  NOT NULL references "user",
+    comment_id   BIGINT  NOT NULL references comment,
+    vote         BOOLEAN NOT NULL,
+    created_date TIMESTAMP WITHOUT TIME ZONE,
+    CONSTRAINT vote_pkey PRIMARY KEY (id)
+);

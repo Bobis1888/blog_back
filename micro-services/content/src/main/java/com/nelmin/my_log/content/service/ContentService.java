@@ -97,13 +97,9 @@ public class ContentService implements FillStatisticInfo<StatisticsResponseDto> 
                     it = "#" + it;
                 }
 
-                char ch = Character.toLowerCase(it.charAt(1));
-
-                var chArr = it.toCharArray();
-                chArr[1] = ch;
-
-                return new String(chArr);
-            }).collect(Collectors.toList()));
+                return it;
+            }).filter(Objects::nonNull)
+                    .collect(Collectors.toSet()));
         }
 
         try {

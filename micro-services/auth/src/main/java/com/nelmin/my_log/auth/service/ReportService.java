@@ -1,7 +1,6 @@
 package com.nelmin.my_log.auth.service;
 
 import com.nelmin.my_log.auth.dto.ReportRequestDto;
-import com.nelmin.my_log.common.exception.CommonException;
 import com.nelmin.my_log.common.model.Report;
 import com.nelmin.my_log.common.bean.UserInfo;
 import lombok.RequiredArgsConstructor;
@@ -20,9 +19,9 @@ public class ReportService {
 
         try {
 
-//            if (reportRepository.existsByArticleIdAndUserId(requestDto.articleId(), userInfo.getId())) {
-//                return;
-//            }
+            if (reportRepository.existsByArticleIdAndUserId(requestDto.articleId(), userInfo.getId())) {
+                return;
+            }
 
             var report = new Report();
             report.setUserId(userInfo.getId());

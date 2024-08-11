@@ -1,6 +1,7 @@
 package com.nelmin.my_log.content.service;
 
 import com.nelmin.my_log.common.model.Report;
+import com.nelmin.my_log.common.model.User;
 import com.nelmin.my_log.common.service.EmailSender;
 import com.nelmin.my_log.content.model.Article;
 import com.nelmin.my_log.content.model.PrivateLink;
@@ -29,10 +30,12 @@ public class ContentProcessingService {
     private String supportEmail;
 
     private final Article.Repo articleRepo;
+    private final User.Repo userRepository;
     private final Reaction.Repo reactionRepo;
     private final PrivateLink.Repo privateLinkRepo;
     private final Report.Repo reportRepo;
     private final EmailSender emailSender;
+    private final RatingService ratingService;
 
     @Transactional
     @Scheduled(fixedDelay = 12L, timeUnit = TimeUnit.HOURS)
