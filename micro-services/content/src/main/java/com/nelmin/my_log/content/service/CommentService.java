@@ -14,6 +14,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -64,11 +66,22 @@ public class CommentService implements FillStatisticInfo<StatisticsResponseDto> 
     }
 
     @Transactional
-    public ListCommentResponseDto list(ListCommentRequestDto dto) {
-        var res = new ListCommentResponseDto();
+    public void delete(Long commentId) {
 
         try {
-            var pageRequest = PageRequest.of(dto.page(), dto.max(), Sort.by("id").descending());
+            commentRepo.deleteByIdAndUserId(commentId, userInfo.getId());
+        } catch (Exception ex) {
+            log.error("Error vote comment", ex);
+        }
+    }
+
+    @Transactional
+    public ListCommentResponseDto list(ListCommentRequestDto dto) {
+        var res = new ListCommentResponseDto();
+        var direction = Optional.ofNullable(dto.direction()).orElse(Sort.Direction.DESC);
+
+        try {
+            var pageRequest = PageRequest.of(dto.page(), dto.max(), Sort.by(direction, "id"));
             var page = commentRepo.findAllByArticleId(dto.contentId(), pageRequest);
 
             if (!page.isEmpty()) {

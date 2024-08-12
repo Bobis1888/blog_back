@@ -49,5 +49,6 @@ public class Comment {
 
         Page<Comment> findAllByArticleId(Long articleId, Pageable pageable);
         Long countByUserId(Long userid);
+        void deleteByIdAndUserId(Long id, Long userId);
     }
 }
