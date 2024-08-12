@@ -17,4 +17,16 @@ public class CommentDto {
     private String content;
     private LocalDateTime date;
     private Long rating;
+    private Actions actions;
+
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class Actions {
+        private Boolean canDelete = false;
+        private Boolean canVote = false;
+        private Boolean canEdit = false;
+        private Boolean canReport = false;
+    }
 }

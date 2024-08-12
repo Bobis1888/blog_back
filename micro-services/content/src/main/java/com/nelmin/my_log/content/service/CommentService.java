@@ -94,6 +94,13 @@ public class CommentService implements FillStatisticInfo<StatisticsResponseDto> 
                                     commentDto.setNickname(userService.resolveNickname(it.getUserId()));
                                     commentDto.setContent(it.getContent());
                                     commentDto.setRating(it.getRating());
+
+                                    var actions = new CommentDto.Actions();
+                                    actions.setCanDelete(it.getUserId().equals(userInfo.getId()));
+                                    actions.setCanEdit(actions.getCanDelete());
+                                    actions.setCanVote(!voteRepo.existsByCommentIdAndUserId(it.getId(), userInfo.getId()));
+                                    commentDto.setActions(actions);
+
                                     return commentDto;
                                 })
                                 .toList()

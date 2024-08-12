@@ -42,5 +42,6 @@ public class Vote {
     @Repository
     public interface Repo extends JpaRepository<Vote, Long> {
         Optional<Vote> findByCommentId(Long commentId);
+        Boolean existsByCommentIdAndUserId(Long id, Long userId);
     }
 }
