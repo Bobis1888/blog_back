@@ -30,4 +30,13 @@ public class Error {
         this.field = field;
         this.args = args;
     }
+
+    @Override
+    public String toString() {
+        return "Error{" +
+                "code='" + code + '\'' +
+                ", field='" + field + '\'' +
+                ", args=" + args +
+                '}';
+    }
 }

@@ -50,7 +50,7 @@ public class UserService {
         userRepository.save(user);
     }
 
-    @CacheEvict(value = "users", key = "#user.id")
+//    @CacheEvict(value = "users", key = "#user.id")
     @Transactional
     public void changeNickname(User user, String nickname) {
         var id = userRepository.getIdByNickName(nickname);
@@ -99,6 +99,10 @@ public class UserService {
                 .stream()
                 .map(User.UserId::getId)
                 .toList();
+    }
+
+    public Boolean exist(String login) {
+        return userRepository.existsByUsername(login);
     }
 
     @Transactional

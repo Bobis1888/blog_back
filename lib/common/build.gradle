@@ -42,7 +42,6 @@ dependencies {
 
 //    compileOnly 'org.springframework.security:spring-security-oauth2-resource-server'
 //    compileOnly 'org.springframework.security:spring-security-oauth2-jose'
-    compileOnly 'org.springframework.boot:spring-boot-starter-artemis'
 
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.5'
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.5'

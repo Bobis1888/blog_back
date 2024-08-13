@@ -17,7 +17,7 @@ import org.springframework.web.servlet.ModelAndView;
 @RequiredArgsConstructor
 public class RegistrationController {
 
-    @Value("${server.url:127.0.0.1}")
+    @Value("${server.url:http://127.0.0.1}")
     private String serverUrl;
 
     private final RegistrationService registrationService;

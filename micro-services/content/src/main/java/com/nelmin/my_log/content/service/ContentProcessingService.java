@@ -2,7 +2,6 @@ package com.nelmin.my_log.content.service;
 
 import com.nelmin.my_log.common.model.Report;
 import com.nelmin.my_log.common.model.User;
-import com.nelmin.my_log.common.service.EmailSender;
 import com.nelmin.my_log.content.model.Article;
 import com.nelmin.my_log.content.model.PrivateLink;
 import com.nelmin.my_log.content.model.Reaction;
@@ -26,15 +25,11 @@ public class ContentProcessingService {
     @Value("${content.max_report_count:10}")
     private Long maxReportCount;
 
-    @Value("${content.report_email:support@my-log.ru}")
-    private String supportEmail;
-
     private final Article.Repo articleRepo;
     private final User.Repo userRepository;
     private final Reaction.Repo reactionRepo;
     private final PrivateLink.Repo privateLinkRepo;
     private final Report.Repo reportRepo;
-    private final EmailSender emailSender;
     private final RatingService ratingService;
 
     @Transactional
@@ -124,7 +119,6 @@ public class ContentProcessingService {
 
             var builder = new StringBuilder();
             articleToSave.forEach(it -> builder.append(it.getId()).append(", "));
-            emailSender.sendEmail(supportEmail, "Blocked articles", builder.toString());
 //            reportRepo.deleteAllByArticleIdIn(articleToSave.stream().map(Article::getId).toList());
         }
 

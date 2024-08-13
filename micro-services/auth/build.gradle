@@ -32,7 +32,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
     implementation 'org.springframework.session:spring-session-core'
 
-    implementation 'org.springframework.boot:spring-boot-starter-artemis'
+    implementation 'org.springframework.kafka:spring-kafka'
 
     implementation 'org.postgresql:postgresql'
     implementation 'org.liquibase:liquibase-core'

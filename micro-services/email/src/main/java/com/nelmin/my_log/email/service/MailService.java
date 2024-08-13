@@ -1,14 +1,13 @@
 package com.nelmin.my_log.email.service;
 
-import com.nelmin.my_log.common.dto.EmailMessage;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.jms.annotation.JmsListener;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 @Slf4j
 @Service
@@ -25,17 +24,13 @@ public class MailService {
 
     private final JavaMailSender javaMailSender;
 
-    @JmsListener(destination = "blog.email.send")
-    public void receiveMail(EmailMessage message) {
-
-        try {
-            sendMail(message.getRecipient(), message.getSubject(), message.getContent());
-        } catch (Exception ex) {
-            log.error("Error send message", ex);
-        }
-    }
-
     public void sendMail(String destination, String subject, String content) {
+
+        if (!StringUtils.hasText(destination)) {
+            log.info("Destination is empty, skip sending email");
+            return;
+        }
+
         log.info("Send email to {}", destination);
 
         if (emulator) {
@@ -49,7 +44,7 @@ public class MailService {
 
         try {
             message.setFrom(senderName);
-            message.setRecipients(MimeMessage.RecipientType.TO,destination);
+            message.setRecipients(MimeMessage.RecipientType.TO, destination);
             message.setSubject(subject);
             message.setContent(content, CONTENT_TYPE);
         } catch (MessagingException e) {

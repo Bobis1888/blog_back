@@ -1,6 +1,7 @@
 package com.nelmin.my_log.auth.controller;
 
 import com.nelmin.my_log.auth.dto.ChangeInfoRequestDto;
+import com.nelmin.my_log.auth.service.ChangeInfoService;
 import com.nelmin.my_log.common.bean.UserInfo;
 import com.nelmin.my_log.common.conf.JwtTokenUtils;
 import com.nelmin.my_log.auth.dto.AuthResponseDto;
@@ -24,10 +25,12 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AuthController {
 
+    private final UserInfo userInfo;
     private final AuthService authService;
     private final UserService userService;
     private final JwtTokenUtils jwtTokenUtils;
-    private final UserInfo userInfo;
+    private final ChangeInfoService changeInfoService;
+
 
     @PostMapping(value = "/login")
     public ResponseEntity<AuthResponseDto> login(@Valid @RequestBody LoginRequestDto loginRequestDto) {
@@ -92,7 +95,7 @@ public class AuthController {
     @Secured("ROLE_USER")
     @PostMapping(value = "/change-nickname")
     public ResponseEntity<SuccessDto> changeNickname(@Valid @RequestBody ChangeInfoRequestDto dto) {
-        var response = authService.changeNickname(dto);
+        var response = changeInfoService.changeNickname(dto);
 
         return ResponseEntity
                 .status(response.hasErrors() ? HttpStatus.BAD_REQUEST : HttpStatus.OK)
@@ -102,7 +105,7 @@ public class AuthController {
     @Secured("ROLE_USER")
     @PostMapping(value = "/change-description")
     public ResponseEntity<SuccessDto> changeDescription(@Valid @RequestBody ChangeInfoRequestDto dto) {
-        var response = authService.changeDescription(dto);
+        var response = changeInfoService.changeDescription(dto);
 
         return ResponseEntity
                 .status(response.hasErrors() ? HttpStatus.BAD_REQUEST : HttpStatus.OK)

@@ -19,8 +19,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
+
+import static com.nelmin.my_log.auth.service.EventsService.*;
 
 @Slf4j
 @Service
@@ -31,7 +34,7 @@ public class RegistrationService implements OAuthRegistrationService {
     private final User.Repo userRepository;
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
-    private final RegistrationEmailService registrationEmailService;
+    private final EventsService eventsService;
 
     @Transactional
     public AuthResponseDto registration(RegistrationRequestDto registrationRequestDto) {
@@ -52,12 +55,11 @@ public class RegistrationService implements OAuthRegistrationService {
 
         userRepository.save(user);
 
-        registrationEmailService.sendConfirmEmail(user.getUsername(), uuid);
-
         response.setSuccess(true);
         cache.put("registration_uuid_" + uuid, user.getUsername());
-
         log.info("Registered User {}", user.getUsername());
+        eventsService.sendEvent(REGISTRATION_EVENT_NAME, Map.of("email", user.getUsername(), "uuid", uuid));
+
         return response;
     }
 
@@ -78,7 +80,7 @@ public class RegistrationService implements OAuthRegistrationService {
             user.get().setPassword(passwordEncoder.encode(UUID.randomUUID().toString()));
             user.get().setEnabled(true);
             userRepository.save(user.get());
-            //TODO send email
+            eventsService.sendEvent(OAUTH_REGISTRATION_EVENT_NAME, Map.of("email", email));
         });
 
         return new UserInfo(user.get());
@@ -127,10 +129,11 @@ public class RegistrationService implements OAuthRegistrationService {
 
         var uuid = UUID.randomUUID().toString();
         cache.put("reset_uuid_" + uuid, user.get().getUsername());
-        registrationEmailService.sendResetEmail(user.get().getUsername(), uuid);
+        eventsService.sendEvent(RESET_PASSWORD_EVENT_NAME, Map.of("email", email, "uuid", uuid));
         response.setSuccess(true);
         return response;
     }
+
 
     @Transactional
     public ResetPasswordResponse changePassword(ChangePasswordRequestDto dto) {

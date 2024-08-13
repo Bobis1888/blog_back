@@ -137,6 +137,8 @@ public class User implements IUser {
         List<User> findAllByNickNameContains(String nickName, Pageable pageable);
 
         List<UserIdAndNickName> getIdsAndNickNamesByIdIn(List<Long> ids);
+
+        Boolean existsByUsername(String login);
     }
 
     public interface UserNickName {
