@@ -5,6 +5,7 @@ import com.nelmin.my_log.content.dto.ArticleDto;
 import com.nelmin.my_log.content.dto.ListContentRequestDto;
 import com.nelmin.my_log.content.dto.ListContentResponseDto;
 import com.nelmin.my_log.content.model.Article;
+import com.nelmin.my_log.content.model.Reaction;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -20,6 +21,8 @@ public class SuggestionsService {
 
     private final Article.Repo articleRepo;
     private final UserService userService;
+    private final ReactionsService reactionsService;
+    private final CommentService commentService;
 
     @Transactional
     public ListContentResponseDto suggestions(ListContentRequestDto requestDto) {
@@ -40,6 +43,12 @@ public class SuggestionsService {
                                     articleDto.setContent(null);
                                     articleDto.setAuthorName(names.get(it.getUserId()));
                                     articleDto.setCountViews(it.getCountViews());
+                                    articleDto.setCountComments(commentService.countCommentsByArticleId(it.getId()));
+                                    articleDto.setCountReactions(
+                                            reactionsService.countReactions(it.getId())
+                                                    .stream()
+                                                    .map(Reaction.CountReaction::getCount)
+                                                    .reduce(0L, Long::sum));
                                     return articleDto;
                                 })
                                 .toList()

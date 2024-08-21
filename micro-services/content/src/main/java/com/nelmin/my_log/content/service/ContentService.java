@@ -8,6 +8,7 @@ import com.nelmin.my_log.content.Utils;
 import com.nelmin.my_log.content.dto.*;
 import com.nelmin.my_log.content.model.Article;
 import com.nelmin.my_log.content.model.PrivateLink;
+import com.nelmin.my_log.content.model.Reaction;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,6 +36,8 @@ public class ContentService implements FillStatisticInfo<StatisticsResponseDto> 
     private final PrivateLink.Repo privateLinkRepo;
     private final SubscriptionsService subscriptionsService;
     private final PrivateLinkService privateLinkService;
+    private final ReactionsService reactionsService;
+    private final CommentService commentService;
 
     private static final String CLEAR_TAG_REGEXP = "[^#a-zA-Zа-яА-Я0-9_]";
 
@@ -341,6 +344,13 @@ public class ContentService implements FillStatisticInfo<StatisticsResponseDto> 
                 res.setContent(null);
                 res.setAuthorName(userService.resolveNickname(it.getUserId()));
                 res.setCountViews(it.getCountViews());
+
+                res.setCountComments(commentService.countCommentsByArticleId(it.getId()));
+                res.setCountReactions(
+                        reactionsService.countReactions(it.getId())
+                        .stream()
+                        .map(Reaction.CountReaction::getCount)
+                        .reduce(0L, Long::sum));
                 return res;
             }).toList());
         }

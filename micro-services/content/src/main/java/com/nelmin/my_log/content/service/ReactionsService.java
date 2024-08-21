@@ -10,9 +10,9 @@ import com.nelmin.my_log.content.model.Article;
 import com.nelmin.my_log.content.model.Reaction;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 import java.util.List;
 
@@ -70,6 +70,7 @@ public class ReactionsService implements FillContentInfo<ArticleDto>, FillStatis
     }
 
     @Transactional
+    @Cacheable(value = "default", key = "'countReactions:' + #articleId")
     public List<Reaction.CountReaction> countReactions(Long articleId) {
         return reactionRepo.countByArticleId(articleId);
     }

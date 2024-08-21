@@ -9,6 +9,7 @@ import com.nelmin.my_log.content.model.Comment;
 import com.nelmin.my_log.content.model.Vote;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -119,5 +120,10 @@ public class CommentService implements FillStatisticInfo<StatisticsResponseDto> 
     @Override
     public void fillStatisticInfo(StatisticsResponseDto response) {
         response.setComments(commentRepo.countByUserId(response.getUserid()));
+    }
+
+    @Cacheable(value = "default", key = "'countCommentsByArticleId:'+#articleId")
+    public Long countCommentsByArticleId(Long articleId) {
+        return commentRepo.countByArticleId(articleId);
     }
 }

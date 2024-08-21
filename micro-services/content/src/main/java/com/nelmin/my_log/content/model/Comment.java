@@ -47,6 +47,7 @@ public class Comment {
     @Repository
     public interface Repo extends JpaRepository<Comment, Long> {
 
+        Long countByArticleId(Long articleId);
         Page<Comment> findAllByArticleId(Long articleId, Pageable pageable);
         Long countByUserId(Long userid);
         void deleteByIdAndUserId(Long id, Long userId);
