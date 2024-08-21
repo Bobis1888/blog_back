@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.EnableKafka;
+import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.kafka.core.*;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 
@@ -36,7 +37,11 @@ public class AuthConfiguration {
 
     @Bean
     public NewTopic eventsTopic() {
-        return new NewTopic(eventsTopic, 1, (short) 1);
+        return TopicBuilder
+                .name(eventsTopic)
+                .partitions(1)
+                .replicas(1)
+                .build();
     }
 
     @Bean

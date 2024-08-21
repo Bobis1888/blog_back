@@ -39,6 +39,7 @@ public class SuggestionsService {
                                     var articleDto = new ArticleDto(it);
                                     articleDto.setContent(null);
                                     articleDto.setAuthorName(names.get(it.getUserId()));
+                                    articleDto.setCountViews(it.getCountViews());
                                     return articleDto;
                                 })
                                 .toList()

@@ -1,0 +1,22 @@
+{
+  "properties": [
+    {
+      "name": "spring.graylog.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enables or disables Graylog.",
+      "defaultValue": true
+    },
+    {
+      "name": "spring.graylog.host",
+      "type": "java.lang.String",
+      "description": "Graylog host.",
+      "defaultValue": "localhost"
+    },
+    {
+      "name": "spring.graylog.port",
+      "type": "java.lang.Integer",
+      "description": "Graylog port.",
+      "defaultValue": 12201
+    }
+  ]
+}

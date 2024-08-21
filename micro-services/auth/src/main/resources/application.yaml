@@ -23,14 +23,11 @@ spring:
       username: ${SPRING_SECURITY_USERNAME}
       password: ${SPRING_SECURITY_PASSWORD}
 
-auth.max.attempts: 3
-auth.block.time: 120 #minutes
-
-logging:
-  pattern:
-    console: "%blue(%d) %highlight(%-5level) %green(%t) %yellow(%c{1.}): %msg%n"
-    file: "%d %-5level %t %c{1.}: %msg%n"
-  level:
-    org.springframework.web.filter.CommonsRequestLoggingFilter: DEBUG
-    root: INFO
-    com.nelmin: DEBUG
+#logging:
+#  pattern:
+#    console: "%blue(%d) %highlight(%-5level) %green(%t) %yellow(%c{1.}): %msg%n"
+#    file: "%d %-5level %t %c{1.}: %msg%n"
+#  level:
+#    org.springframework.web.filter.CommonsRequestLoggingFilter: DEBUG
+#    root: INFO
+#    com.nelmin: DEBUG

@@ -8,7 +8,9 @@
 
 FROM openjdk:17.0.2-slim
 ARG APP_NAME=app
-WORKDIR /app
+WORKDIR /appsuggestions
+
+ENV TZ=Europe/Moscow
 
 #copy from builder stage
 #COPY --from=builder /home/gradle/back/micro-services/${APP_NAME}/build/libs/*.jar /app/${APP_NAME}.jar

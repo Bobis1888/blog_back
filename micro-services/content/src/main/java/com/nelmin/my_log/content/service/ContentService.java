@@ -340,6 +340,7 @@ public class ContentService implements FillStatisticInfo<StatisticsResponseDto> 
                 var res = new ArticleDto(it);
                 res.setContent(null);
                 res.setAuthorName(userService.resolveNickname(it.getUserId()));
+                res.setCountViews(it.getCountViews());
                 return res;
             }).toList());
         }

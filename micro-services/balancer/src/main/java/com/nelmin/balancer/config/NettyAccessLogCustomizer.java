@@ -4,6 +4,7 @@ import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.core.rolling.RollingFileAppender;
 import ch.qos.logback.core.util.FileSize;
 
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -28,6 +29,7 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 
+@Slf4j
 @Component
 @ConditionalOnProperty(prefix = "logging.access", name = "name")
 public class NettyAccessLogCustomizer implements WebServerFactoryCustomizer<NettyReactiveWebServerFactory> {
@@ -75,7 +77,7 @@ public class NettyAccessLogCustomizer implements WebServerFactoryCustomizer<Nett
             matches.add(m.group(2));
         }
 
-        System.out.println(msgPattern + " " +matches);
+        log.info("{} {}", msgPattern, matches);
 
         atKeys.set(matches);
         at.set(msgPattern);

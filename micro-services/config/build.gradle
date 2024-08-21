@@ -23,6 +23,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 
+	implementation project(":lib:logging")
+
 //	implementation 'org.springframework.cloud:spring-cloud-config-monitor'
 
 //	implementation "org.springframework.vault:spring-vault-core"

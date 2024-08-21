@@ -21,6 +21,8 @@ public class ArticleDto extends HasError {
     private LocalDateTime publishedDate;
     private String authorName;
     private Long countViews = 0L;
+    private Long countComments = 0L;
+    private Long countReactions = 0L;
     private List<ReactionDto> reactions;
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private List<String> tags = new ArrayList<>();
