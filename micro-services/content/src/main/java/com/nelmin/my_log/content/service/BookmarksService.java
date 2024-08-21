@@ -117,6 +117,7 @@ public class BookmarksService implements FillContentInfo<ArticleDto>, FillStatis
                         var res = new ArticleDto(it);
                         res.setIsSaved(true);
                         res.setAuthorName(userService.resolveNickname(it.getUserId()));
+                        res.setCountViews(it.getCountViews());
                         fillContentInfo(res);
                         return res;
                     })
