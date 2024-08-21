@@ -8,7 +8,7 @@
 
 FROM openjdk:17.0.2-slim
 ARG APP_NAME=app
-WORKDIR /appsuggestions
+WORKDIR /app
 
 ENV TZ=Europe/Moscow
 
