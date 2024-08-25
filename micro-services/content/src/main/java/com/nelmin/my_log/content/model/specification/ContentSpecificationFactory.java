@@ -76,14 +76,14 @@ public class ContentSpecificationFactory {
 
             if (requestDto.direction() == Sort.Direction.DESC) {
                 orders = List.of(
-                        cb.desc(join.get(ArticleStatistic_.VIEWS)),
                         cb.desc(join.get(ArticleStatistic_.REACTIONS)),
+                        cb.desc(join.get(ArticleStatistic_.VIEWS)),
                         cb.desc(root.get(Article_.PUBLISHED_DATE))
                 );
             } else {
                 orders = List.of(
-                        cb.asc(join.get(ArticleStatistic_.VIEWS)),
                         cb.asc(join.get(ArticleStatistic_.REACTIONS)),
+                        cb.asc(join.get(ArticleStatistic_.VIEWS)),
                         cb.asc(root.get(Article_.PUBLISHED_DATE))
                 );
             }
