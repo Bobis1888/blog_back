@@ -22,10 +22,13 @@ repositories {
 }
 
 dependencies {
+    implementation 'org.jetbrains:annotations:24.0.0'
     compileOnly 'org.projectlombok:lombok'
     implementation 'org.springframework.boot:spring-boot-starter-web'
 
     annotationProcessor 'org.projectlombok:lombok'
+    annotationProcessor 'org.hibernate.orm:hibernate-jpamodelgen'
+
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 
     implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client:4.1.1'

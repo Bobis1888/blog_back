@@ -1,4 +1,4 @@
-package com.nelmin.my_log.content.dto;
+package com.nelmin.my_log.content.dto.pub_sub;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotNull;

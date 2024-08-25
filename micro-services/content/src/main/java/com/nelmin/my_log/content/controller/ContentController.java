@@ -1,8 +1,8 @@
 package com.nelmin.my_log.content.controller;
 
 import com.nelmin.my_log.common.dto.SuccessDto;
-import com.nelmin.my_log.common.service.FillContentInfo;
-import com.nelmin.my_log.content.dto.*;
+import com.nelmin.my_log.common.service.FillInfo;
+import com.nelmin.my_log.content.dto.common.*;
 import com.nelmin.my_log.content.service.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +21,8 @@ public class ContentController {
 
     private final ContentService contentService;
     private final BookmarksService bookmarksService;
-    private final List<FillContentInfo<ArticleDto>> fillInfoList;
+    private final List<FillInfo<ArticleDto>> fillInfoList;
+    private final ActionService actionService;
 
     // TODO split create/edit
     @Secured("ROLE_USER")
@@ -91,28 +92,7 @@ public class ContentController {
     public ResponseEntity<ListContentResponseDto> list(@Valid @RequestBody ListContentRequestDto dto) {
         ListContentResponseDto response = contentService.list(dto);
 
-        return ResponseEntity
-                .status(response.hasErrors() ? HttpStatus.BAD_REQUEST : HttpStatus.OK)
-                .body(response);
-    }
-
-    @PostMapping("/list-from-authors")
-    public ResponseEntity<ListContentResponseDto> listFromAuthors(@Valid @RequestBody ListContentRequestDto dto) {
-        ListContentResponseDto response = contentService.listFromAuthors(dto);
-
-        return ResponseEntity
-                .status(response.hasErrors() ? HttpStatus.BAD_REQUEST : HttpStatus.OK)
-                .body(response);
-    }
-
-    @Secured("ROLE_USER")
-    @PostMapping("/all")
-    public ResponseEntity<ListContentResponseDto> all(@Valid @RequestBody ListContentRequestDto dto) {
-        ListContentResponseDto response = contentService.all(dto);
-
-        if (!response.hasErrors()) {
-            fillInfoList.forEach(it -> response.getList().forEach(it::fillContentInfo));
-        }
+        actionService.fillActions(response);
 
         return ResponseEntity
                 .status(response.hasErrors() ? HttpStatus.BAD_REQUEST : HttpStatus.OK)
@@ -143,17 +123,6 @@ public class ContentController {
     @DeleteMapping("/bookmark/{id}")
     public ResponseEntity<SuccessDto> removeFromBookmarks(@Valid @PathVariable Long id) {
         var response = bookmarksService.removeFromBookmarks(id);
-
-        return ResponseEntity
-                .status(response.hasErrors() ? HttpStatus.BAD_REQUEST : HttpStatus.OK)
-                .body(response);
-    }
-
-    //TODO bookmark/list
-    @Secured("ROLE_USER")
-    @PostMapping("/bookmarks")
-    public ResponseEntity<BookmarksResponseDto> bookmarks(@Valid @RequestBody BookmarksRequestDto requestDto) {
-        var response = bookmarksService.list(requestDto);
 
         return ResponseEntity
                 .status(response.hasErrors() ? HttpStatus.BAD_REQUEST : HttpStatus.OK)

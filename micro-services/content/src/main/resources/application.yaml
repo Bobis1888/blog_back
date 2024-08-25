@@ -7,6 +7,7 @@ eureka:
   instance.prefer-ip-address: true
 
 spring:
+  jpa.show-sql: true
   application:
     name: content
   profiles:

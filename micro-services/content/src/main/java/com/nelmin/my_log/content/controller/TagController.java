@@ -1,7 +1,7 @@
 package com.nelmin.my_log.content.controller;
 
-import com.nelmin.my_log.content.dto.TagsRequestDto;
-import com.nelmin.my_log.content.dto.TagsResponseDto;
+import com.nelmin.my_log.content.dto.tag.TagsRequestDto;
+import com.nelmin.my_log.content.dto.tag.TagsResponseDto;
 import com.nelmin.my_log.content.service.TagService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

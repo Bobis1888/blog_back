@@ -1,4 +1,4 @@
-package com.nelmin.my_log.content.dto;
+package com.nelmin.my_log.content.dto.common;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.nelmin.my_log.common.dto.HasError;

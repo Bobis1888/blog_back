@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <changeSet author="nelmin" id="user_statistic+view" dbms="postgresql" runOnChange="true">
+        <dropView viewName="user_statistic" ifExists="true"/>
+        <createView viewName="user_statistic"  replaceIfExists="true" fullDefinition="false">
+            SELECT ur.id                       AS id,
+                   ur.id                       AS user_id,
+                   ur.nick_name                AS nickname,
+                   COALESCE(stat.articles, 0)  AS articles,
+                   COALESCE(stat.views, 0)     AS views,
+                   COALESCE(stat.reactions, 0) AS reactions,
+                   COALESCE(stat.comments, 0)  AS comments,
+                   COALESCE(subs.count, 0)     AS subscribers
+
+            FROM "user" ur
+                     LEFT JOIN (SELECT ac.user_id,
+                                       count(ac.article_id) AS articles,
+                                       sum(ac.views)        AS views,
+                                       sum(ac.reactions)    AS reactions,
+                                       sum(ac.comments)     AS comments
+                                FROM article_statistic ac
+                                GROUP BY ac.user_id) stat
+                               ON ur.id = stat.user_id
+                     LEFT JOIN (SELECT sn.author_id, count(sn.id) AS count
+                                FROM subscription sn
+                                GROUP BY sn.author_id) subs
+                               ON ur.id = subs.author_id
+        </createView>
+    </changeSet>
+</databaseChangeLog>

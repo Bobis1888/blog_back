@@ -2,10 +2,8 @@ package com.nelmin.my_log.content.service;
 
 import com.nelmin.my_log.common.bean.UserInfo;
 import com.nelmin.my_log.common.dto.SuccessDto;
-import com.nelmin.my_log.common.service.FillContentInfo;
-import com.nelmin.my_log.common.service.FillStatisticInfo;
-import com.nelmin.my_log.content.dto.ArticleDto;
-import com.nelmin.my_log.content.dto.StatisticsResponseDto;
+import com.nelmin.my_log.common.service.FillInfo;
+import com.nelmin.my_log.content.dto.common.ArticleDto;
 import com.nelmin.my_log.content.model.Article;
 import com.nelmin.my_log.content.model.Reaction;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +17,7 @@ import java.util.List;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class ReactionsService implements FillContentInfo<ArticleDto>, FillStatisticInfo<StatisticsResponseDto> {
+public class ReactionsService implements FillInfo<ArticleDto> {
 
     private final UserInfo userInfo;
     private final Reaction.Repo reactionRepo;
@@ -73,13 +71,6 @@ public class ReactionsService implements FillContentInfo<ArticleDto>, FillStatis
     @Cacheable(value = "default", key = "'countReactions:' + #articleId")
     public List<Reaction.CountReaction> countReactions(Long articleId) {
         return reactionRepo.countByArticleId(articleId);
-    }
-
-    @Override
-    @Transactional
-    public void fillStatisticInfo(StatisticsResponseDto response) {
-        var userId = response.getUserid();
-        response.setReactions(reactionRepo.countByUserId(userId).stream().mapToLong(Reaction.CountReaction::getCount).sum());
     }
 
     @Override

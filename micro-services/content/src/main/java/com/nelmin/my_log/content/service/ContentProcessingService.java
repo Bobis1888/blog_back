@@ -1,7 +1,6 @@
 package com.nelmin.my_log.content.service;
 
 import com.nelmin.my_log.common.model.Report;
-import com.nelmin.my_log.common.model.User;
 import com.nelmin.my_log.content.model.Article;
 import com.nelmin.my_log.content.model.PrivateLink;
 import com.nelmin.my_log.content.model.Reaction;
@@ -26,11 +25,9 @@ public class ContentProcessingService {
     private Long maxReportCount;
 
     private final Article.Repo articleRepo;
-    private final User.Repo userRepository;
     private final Reaction.Repo reactionRepo;
     private final PrivateLink.Repo privateLinkRepo;
     private final Report.Repo reportRepo;
-    private final RatingService ratingService;
 
     @Transactional
     @Scheduled(fixedDelay = 12L, timeUnit = TimeUnit.HOURS)

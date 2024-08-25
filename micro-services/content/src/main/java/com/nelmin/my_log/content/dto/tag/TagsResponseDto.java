@@ -1,4 +1,4 @@
-package com.nelmin.my_log.content.dto;
+package com.nelmin.my_log.content.dto.tag;
 
 import java.util.List;
 

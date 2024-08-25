@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <changeSet author="nelmin" id="article_bookmarks+view" dbms="postgresql" runOnChange="true">
+        <dropView viewName="article_statistic" ifExists="true"/>
+        <createView viewName="article_bookmark" replaceIfExists="true" fullDefinition="false">
+            SELECT b.id  as bookmark_id,
+                   b.user_id as user_id,
+                   art.id as article_id
+            FROM article art
+            INNER JOIN bookmark b
+            ON art.id = b.article_id;
+        </createView>
+    </changeSet>
+</databaseChangeLog>

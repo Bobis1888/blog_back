@@ -2,11 +2,11 @@ package com.nelmin.my_log.content.service;
 
 import com.nelmin.my_log.common.bean.UserInfo;
 import com.nelmin.my_log.common.dto.SuccessDto;
-import com.nelmin.my_log.common.service.FillStatisticInfo;
 import com.nelmin.my_log.common.service.UserService;
 import com.nelmin.my_log.content.Utils;
-import com.nelmin.my_log.content.dto.*;
+import com.nelmin.my_log.content.dto.common.*;
 import com.nelmin.my_log.content.model.Article;
+import com.nelmin.my_log.content.model.specification.ContentSpecificationFactory;
 import com.nelmin.my_log.content.model.PrivateLink;
 import com.nelmin.my_log.content.model.Reaction;
 import lombok.NonNull;
@@ -28,16 +28,16 @@ import static com.nelmin.my_log.content.model.Article.Status.*;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class ContentService implements FillStatisticInfo<StatisticsResponseDto> {
+public class ContentService {
 
     private final Article.Repo articleRepo;
     private final UserInfo userInfo;
     private final UserService userService;
     private final PrivateLink.Repo privateLinkRepo;
-    private final SubscriptionsService subscriptionsService;
     private final PrivateLinkService privateLinkService;
     private final ReactionsService reactionsService;
     private final CommentService commentService;
+    private final ContentSpecificationFactory contentSpecificationFactory;
 
     private static final String CLEAR_TAG_REGEXP = "[^#a-zA-Zа-яА-Я0-9_]";
 
@@ -90,18 +90,18 @@ public class ContentService implements FillStatisticInfo<StatisticsResponseDto> 
         if (dto.tags() != null) {
             article.setTags(dto.tags().stream().map(it -> {
 
-                if (it == null || it.length() < 2) {
-                    return null;
-                }
+                        if (it == null || it.length() < 2) {
+                            return null;
+                        }
 
-                it = it.replaceAll(CLEAR_TAG_REGEXP, "");
+                        it = it.replaceAll(CLEAR_TAG_REGEXP, "");
 
-                if (!it.startsWith("#")) {
-                    it = "#" + it;
-                }
+                        if (!it.startsWith("#")) {
+                            it = "#" + it;
+                        }
 
-                return it;
-            }).filter(Objects::nonNull)
+                        return it;
+                    }).filter(Objects::nonNull)
                     .collect(Collectors.toSet()));
         }
 
@@ -271,72 +271,28 @@ public class ContentService implements FillStatisticInfo<StatisticsResponseDto> 
     }
 
     @Transactional
-    public ListContentResponseDto all(ListContentRequestDto requestDto) {
-        return search(
-                List.of(userInfo.getId()),
-                Arrays.stream(values()).filter(it -> it != DELETED).map(Enum::name).toList(),
-                null,
-                null,
-                createPageRequest(requestDto));
-    }
-
-    @Transactional
-    public ListContentResponseDto listFromAuthors(ListContentRequestDto requestDto) {
-        var userIds = subscriptionsService.subscriptions();
-
-        if (userIds == null || userIds.isEmpty()) {
-            return new ListContentResponseDto(new ArrayList<>(), 0L, 0);
-        }
-
-        return search(
-                userIds,
-                List.of(PUBLISHED.name()),
-                null,
-                null,
-                createPageRequest(requestDto));
-    }
-
-    //TODO refactor
-    @Transactional
     public ListContentResponseDto list(ListContentRequestDto requestDto) {
-        List<Long> userIds = new ArrayList<>();
-        String query = null;
-        String tags = null;
+        var search = Optional.ofNullable(requestDto.getSearch())
+                .orElse(new ListContentRequestDto.Search());
 
-        if (requestDto.getSearch() != null) {
-            var search = requestDto.getSearch();
+        var specRequest = new ContentSpecificationFactory.SpecificationRequestDto(
+                requestDto.getType(),
+                search.getQuery(),
+                search.getExclude(),
+                search.getStartDate(),
+                search.getEndDate(),
+                requestDto.getDirection()
+        );
 
-            if (StringUtils.hasText(search.getQuery())) {
-                query = search.getQuery();
-            }
+        var spec = contentSpecificationFactory.getSPecification(specRequest);
+        PageRequest pageRequest = createPageRequest(requestDto);
+        Page<Article> page = articleRepo.findAll(spec, pageRequest);
 
-            if (StringUtils.hasText(search.getAuthor())) {
-                userIds = userService.resolveUserIds(search.getAuthor());
-            }
-
-            if (search.getTags() != null && !search.getTags().isEmpty()) {
-                tags = String.join("|", search.getTags());
-            }
-        }
-
-        return search(userIds, List.of(PUBLISHED.name()), tags, query, createPageRequest(requestDto));
+        return pageToDto(page);
     }
 
-    private ListContentResponseDto search(List<Long> userIds, List<String> statuses, String tags, String query, PageRequest pageRequest) {
+    private ListContentResponseDto pageToDto(@NonNull Page<Article> page) {
         List<ArticleDto> resList = new ArrayList<>();
-
-        Page<Article> page = null;
-
-        // TODO refactor Specification
-        if (StringUtils.hasText(tags)) {
-            page = articleRepo.findAllByTags(statuses, tags, pageRequest);
-        } else if (!userIds.isEmpty()) {
-            page = articleRepo.findAllByUserIds(userIds, statuses, pageRequest);
-        } else if (StringUtils.hasText(query)) {
-            page = articleRepo.findAllByContent(statuses, query, pageRequest);
-        } else {
-            page = articleRepo.findAllByStatus(statuses, pageRequest);
-        }
 
         if (!page.isEmpty()) {
             resList.addAll(page.getContent().stream().map(it -> {
@@ -348,9 +304,9 @@ public class ContentService implements FillStatisticInfo<StatisticsResponseDto> 
                 res.setCountComments(commentService.countCommentsByArticleId(it.getId()));
                 res.setCountReactions(
                         reactionsService.countReactions(it.getId())
-                        .stream()
-                        .map(Reaction.CountReaction::getCount)
-                        .reduce(0L, Long::sum));
+                                .stream()
+                                .map(Reaction.CountReaction::getCount)
+                                .reduce(0L, Long::sum));
                 return res;
             }).toList());
         }
@@ -387,22 +343,24 @@ public class ContentService implements FillStatisticInfo<StatisticsResponseDto> 
         return response;
     }
 
-    @Override
-    public void fillStatisticInfo(@NonNull StatisticsResponseDto response) {
-        response.setArticles(articleRepo.countByStatusAndUserId(PUBLISHED, response.getUserid()));
-    }
-
-    private PageRequest createPageRequest(ListContentRequestDto requestDto) {
-        String[] sortBy = null;
+    private PageRequest createPageRequest(@NonNull ListContentRequestDto requestDto) {
+        String[] sortBy;
+        Sort sort = null;
 
         if (requestDto.getSortBy() != null && !requestDto.getSortBy().isEmpty()) {
             sortBy = Utils.getSortProperties(requestDto.getSortBy(), Article.class);
+
+            if (sortBy.length != 0) {
+                sort = Sort.by(
+                        Optional.ofNullable(requestDto.getDirection()).orElse(Sort.Direction.DESC),
+                        sortBy);
+            }
         }
 
-        if (sortBy == null || sortBy.length == 0) {
-            sortBy = new String[]{"id"};
+        if (sort == null) {
+            return PageRequest.of(requestDto.getPage(), requestDto.getMax());
+        } else {
+            return PageRequest.of(requestDto.getPage(), requestDto.getMax(), sort);
         }
-
-        return PageRequest.of(requestDto.getPage(), requestDto.getMax(), Sort.by(requestDto.getDirection(), sortBy));
     }
 }

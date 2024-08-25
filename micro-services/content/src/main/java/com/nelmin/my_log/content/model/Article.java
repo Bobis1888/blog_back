@@ -8,10 +8,10 @@ import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -57,6 +57,7 @@ public class Article {
     @Column(name = "status", nullable = false)
     private Status status = Status.DRAFT;
 
+    // MOVE OUT
     @Column(name = "count_views", nullable = false)
     private Long countViews = 0L;
 
@@ -66,7 +67,14 @@ public class Article {
     @LastModifiedDate
     private LocalDateTime updatedDate;
 
+    @Column(name = "published_date")
     private LocalDateTime publishedDate;
+
+    @OneToMany(fetch = FetchType.LAZY)
+    private List<Bookmark> bookmark;
+
+    @OneToOne(fetch = FetchType.LAZY, mappedBy = "article")
+    private ArticleStatistic statistic;
 
     public void setTags(Set<String> tags) {
 
@@ -88,67 +96,10 @@ public class Article {
 
     // TODO Specification
     @Repository
-    public interface Repo extends JpaRepository<Article, Long> {
+    public interface Repo extends JpaRepository<Article, Long>, JpaSpecificationExecutor<Article> {
         Optional<Article> findByIdAndUserId(Long id, Long userId);
 
         Page<ArticleId> getIdsByStatusIn(List<Status> status, Pageable pageable);
-
-        @Query(
-                value = "select * from article a where a.id in (select b.article_id from bookmark b where b.user_id = :userId)",
-                countQuery = "select count(*) from article a where a.id in (select b.article_id from bookmark b where b.user_id = :userId)",
-                nativeQuery = true
-        )
-        Page<Article> findAllInBookmarks(
-                @Param("userId") Long userId,
-                Pageable pageable);
-
-        @Query(
-                value = "select * from article a where a.id in (select b.article_id from bookmark b where b.user_id = :userId) and " +
-                        "(a.title ~* :query  or a.content ~* :query)",
-                countQuery = "select count(*) from article a where a.id in (select b.article_id from bookmark b where b.user_id = :userId) and " +
-                        "(a.title ~* :query  or a.content ~* :query)",
-                nativeQuery = true
-        )
-        Page<Article> findAllInBookmarks(
-                @Param("userId") Long userId,
-                @Param("query") String query,
-                Pageable pageable);
-
-        @Query(
-                value = "select * from article a where a.status in :status and " +
-                        "(a.title ~* :query  or a.content ~* :query)",
-                countQuery = "select count(*) from article a where a.status in :status and " +
-                        "(a.title ~* :query  or a.content ~* :query)",
-                nativeQuery = true
-        )
-        Page<Article> findAllByContent(
-                @Param("status") Collection<String> status,
-                @Param("query") String query,
-                Pageable pageable);
-
-
-        @Query(
-                value = "select * from article a where a.status in :status and " +
-                        "(a.tags ~* :query)",
-                countQuery = "select count(*) from article a where a.status in :status and " +
-                        "(a.tags ~* :query)",
-                nativeQuery = true
-        )
-        Page<Article> findAllByTags(
-                @Param("status") Collection<String> status,
-                @Param("query") String query,
-                Pageable pageable);
-
-
-        @Query(
-                value = "select * from article a where a.status in :status and a.user_id in :userIds",
-                countQuery = "select count(*) from article a where a.status in :status and a.user_id in :userIds",
-                nativeQuery = true
-        )
-        Page<Article> findAllByUserIds(
-                @Param("userIds") Collection<Long> userIds,
-                @Param("status") Collection<String> status,
-                Pageable pageable);
 
         @Query(
                 value = "select * from article a where a.status in :status",
@@ -202,6 +153,7 @@ public class Article {
 
     public interface TagCount {
         String getTag();
+
         Long getCount();
     }
 

@@ -1,6 +1,6 @@
 package com.nelmin.my_log.content.controller;
 
-import com.nelmin.my_log.content.dto.StatisticsResponseDto;
+import com.nelmin.my_log.content.dto.common.StatisticsResponseDto;
 import com.nelmin.my_log.content.service.StatisticsService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -29,18 +29,9 @@ public class StatisticsController {
                 .body(response);
     }
 
-    @GetMapping("/statistics/{nickname}")
-    public ResponseEntity<StatisticsResponseDto> statistics(@PathVariable String nickname) {
-        var response = statisticsService.getStatistics(nickname);
-
-        return ResponseEntity
-                .status(response.hasErrors() ? HttpStatus.BAD_REQUEST : HttpStatus.OK)
-                .body(response);
-    }
-
     @PostMapping("/statistics/list")
-    public ResponseEntity<List<StatisticsResponseDto>> statisticList(@Valid @RequestBody List<String> nicknames) {
-        var response = statisticsService.getStatistics(nicknames);
+    public ResponseEntity<List<StatisticsResponseDto>> statisticList(@Valid @RequestBody List<Long> ids) {
+        var response = statisticsService.getStatistics(ids);
 
         return ResponseEntity
                 .status(response.isEmpty() ? HttpStatus.BAD_REQUEST : HttpStatus.OK)

@@ -1,9 +1,7 @@
 package com.nelmin.my_log.content.service;
 
 import com.nelmin.my_log.common.bean.UserInfo;
-import com.nelmin.my_log.common.service.FillStatisticInfo;
 import com.nelmin.my_log.common.service.UserService;
-import com.nelmin.my_log.content.dto.StatisticsResponseDto;
 import com.nelmin.my_log.content.dto.comment.*;
 import com.nelmin.my_log.content.model.Comment;
 import com.nelmin.my_log.content.model.Vote;
@@ -20,7 +18,7 @@ import java.util.Optional;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class CommentService implements FillStatisticInfo<StatisticsResponseDto> {
+public class CommentService {
 
     private final UserInfo userInfo;
     private final Comment.Repo commentRepo;
@@ -115,11 +113,6 @@ public class CommentService implements FillStatisticInfo<StatisticsResponseDto> 
         }
 
         return res;
-    }
-
-    @Override
-    public void fillStatisticInfo(StatisticsResponseDto response) {
-        response.setComments(commentRepo.countByUserId(response.getUserid()));
     }
 
     @Cacheable(value = "default", key = "'countCommentsByArticleId:'+#articleId")

@@ -1,4 +1,6 @@
 package com.nelmin.my_log.common.service;
 
-
-public interface FillInfo {}
+//TODO remove
+public interface FillInfo<T> {
+    void fillContentInfo(T response);
+}

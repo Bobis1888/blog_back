@@ -123,7 +123,8 @@ public class RegistrationService implements OAuthRegistrationService {
         var user = userRepository.findUserByUsername(email);
 
         if (user.isEmpty()) {
-            response.reject("invalid", "email");
+            log.error("User not found {}", email);
+            response.setSuccess(true);
             return response;
         }
 

@@ -1,8 +1,8 @@
 package com.nelmin.my_log.content.controller;
 
 import com.nelmin.my_log.common.dto.SuccessDto;
-import com.nelmin.my_log.content.dto.ListSubscriptionRequestDto;
-import com.nelmin.my_log.content.dto.ListSubscriptionResponseDto;
+import com.nelmin.my_log.content.dto.pub_sub.ListSubscriptionRequestDto;
+import com.nelmin.my_log.content.dto.pub_sub.ListSubscriptionResponseDto;
 import com.nelmin.my_log.content.service.SubscriptionsService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

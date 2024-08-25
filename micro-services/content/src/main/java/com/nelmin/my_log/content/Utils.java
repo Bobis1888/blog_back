@@ -9,7 +9,7 @@ public class Utils {
     public static String[] getSortProperties(List<String> properties, Class<?> clazz) {
         return properties.stream()
                 .filter(it -> ClassUtils.hasProperty(clazz, it))
-                .map(Utils::camelToSnake)
+//                .map(Utils::camelToSnake)
                 .toArray(String[]::new);
     }
 

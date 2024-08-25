@@ -1,4 +1,4 @@
-package com.nelmin.my_log.content.dto;
+package com.nelmin.my_log.content.dto.common;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

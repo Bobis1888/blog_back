@@ -1,4 +1,4 @@
-package com.nelmin.my_log.content.dto;
+package com.nelmin.my_log.content.dto.common;
 
 import com.nelmin.my_log.common.dto.HasError;
 import lombok.AllArgsConstructor;
@@ -10,7 +10,6 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class PublishContentResponseDto extends HasError {
+public class DeleteContentResponseDto extends HasError {
     private Boolean success;
-    private String link;
 }

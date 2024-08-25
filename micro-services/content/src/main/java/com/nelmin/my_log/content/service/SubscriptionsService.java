@@ -3,12 +3,10 @@ package com.nelmin.my_log.content.service;
 import com.nelmin.my_log.common.bean.UserInfo;
 import com.nelmin.my_log.common.dto.SuccessDto;
 import com.nelmin.my_log.common.exception.UserNotFoundException;
-import com.nelmin.my_log.common.service.FillStatisticInfo;
 import com.nelmin.my_log.common.service.UserService;
-import com.nelmin.my_log.content.dto.ListSubscriptionRequestDto;
-import com.nelmin.my_log.content.dto.ListSubscriptionResponseDto;
-import com.nelmin.my_log.content.dto.StatisticsResponseDto;
-import com.nelmin.my_log.content.dto.SubscriptionDto;
+import com.nelmin.my_log.content.dto.pub_sub.ListSubscriptionRequestDto;
+import com.nelmin.my_log.content.dto.pub_sub.ListSubscriptionResponseDto;
+import com.nelmin.my_log.content.dto.pub_sub.SubscriptionDto;
 import com.nelmin.my_log.content.model.Subscription;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -19,12 +17,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Objects;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class SubscriptionsService implements FillStatisticInfo<StatisticsResponseDto> {
+public class SubscriptionsService {
 
     private final UserInfo userInfo;
     private final UserService userService;
@@ -157,17 +154,6 @@ public class SubscriptionsService implements FillStatisticInfo<StatisticsRespons
                 .stream()
                 .map(Subscription.AuthorProjection::getAuthorId)
                 .toList();
-    }
-
-    @Override
-    public void fillStatisticInfo(StatisticsResponseDto response) {
-        response.setSubscribers(subscriptionRepo.countByAuthorId(response.getUserid()));
-        response.setSubscriptions(subscriptionRepo.countByUserId(response.getUserid()));
-
-        if (!Objects.equals(userInfo.getId(), response.getUserid())) {
-            response.setIsSubscriber(isSubscribed(userInfo.getId(), response.getUserid()));
-            response.setUserIsSubscribed(isSubscribed(response.getUserid()));
-        }
     }
 
     public Boolean isSubscribed(String authorNickname) {

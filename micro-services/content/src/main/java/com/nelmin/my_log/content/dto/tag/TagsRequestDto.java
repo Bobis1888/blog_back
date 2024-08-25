@@ -1,7 +1,6 @@
-package com.nelmin.my_log.content.dto;
+package com.nelmin.my_log.content.dto.tag;
 
 import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
