@@ -128,7 +128,7 @@ public class ContentSpecificationFactory {
     private Specification<Article> searchCriteria(@NonNull SpecificationRequestDto requestDto) {
         return (root, query, cb) -> {
 
-            var predicate = statusPredicate(requestDto, root, PUBLISHED);
+            Predicate predicate = statusPredicate(requestDto, root, PUBLISHED);
 
             predicate = startDateEndDatePredicate(predicate, requestDto, root, cb);
             predicate = excludeIdPredicate(predicate, requestDto, root, cb);
@@ -157,6 +157,7 @@ public class ContentSpecificationFactory {
                         subquery.where(cb.like(userRoot.get("nickName"), "%" + requestDto.query() + "%"));
 
                         predicate = cb.and(
+                                predicate,
                                 root.get(Article_.USER_ID).in(subquery)
                         );
                     } else {
