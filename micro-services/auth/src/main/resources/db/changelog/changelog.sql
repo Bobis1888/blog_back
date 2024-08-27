@@ -53,3 +53,6 @@ CREATE TABLE report
     created_date TIMESTAMP WITHOUT TIME ZONE,
     CONSTRAINT report_pkey PRIMARY KEY (id)
 );
+
+--changeset nelmin:2024-08-27-10-00
+ALTER TABLE public.user ADD COLUMN IF NOT EXISTS image_path varchar(255);

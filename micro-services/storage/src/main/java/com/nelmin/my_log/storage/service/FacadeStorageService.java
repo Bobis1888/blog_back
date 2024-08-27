@@ -2,12 +2,10 @@ package com.nelmin.my_log.storage.service;
 
 import com.nelmin.my_log.common.dto.HasError;
 import com.nelmin.my_log.common.dto.SuccessDto;
-import com.nelmin.my_log.storage.dto.FacadeStorageResponseDto;
-import com.nelmin.my_log.storage.dto.GetRequestDto;
-import com.nelmin.my_log.storage.dto.SaveRequestDto;
+import com.nelmin.my_log.storage.dto.*;
 import com.nelmin.my_log.storage.service.impl.IStorageService;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -17,22 +15,37 @@ import java.util.UUID;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class FacadeStorageService {
 
-    private final IStorageService storageService;
+    private final IStorageService tmpStorageService;
+    private final IStorageService longStorageService;
+
+    public FacadeStorageService(@Qualifier("tmpStorage") IStorageService tmpStorageService,
+                                @Qualifier("longStorage") IStorageService longStorageService) {
+        this.tmpStorageService = tmpStorageService;
+        this.longStorageService = longStorageService;
+    }
 
     @Transactional
-    public HasError save(MultipartFile file, String type) {
+    public HasError save(MultipartFile file, FileType type) {
         log.info("save file: {}", file.getOriginalFilename());
 
         try {
             String fileName = Optional.ofNullable(file.getOriginalFilename()).orElse("file");
             String contentType = Optional.ofNullable(file.getContentType()).orElse("application/octet-stream");
 
-            var req = new SaveRequestDto(type, fileName, contentType, file.getBytes(), UUID.randomUUID().toString());
+            var req = new SaveRequestDto(
+                    UUID.randomUUID().toString(),
+                    fileName,
+                    contentType,
+                    type,
+                    file.getBytes());
 
-            return storageService.save(req);
+            if (type.equals(FileType.AVATAR)) {
+                return longStorageService.save(req);
+            } else {
+                return tmpStorageService.save(req);
+            }
         } catch (Exception ex) {
             log.error("Error save file", ex);
             var res = new SuccessDto(false);
@@ -42,25 +55,19 @@ public class FacadeStorageService {
     }
 
     @Transactional
-    public FacadeStorageResponseDto get(String uuid) {
-        return get(uuid, null, null);
-    }
+    public FacadeStorageResponseDto get(String uuid, FileType type) {
 
-    @Transactional
-    public FacadeStorageResponseDto get(String uuid, String type, String nickname) {
         try {
-            var getReq = new GetRequestDto(type, uuid, nickname);
+            StorageResponseDto storage;
+            var req = new GetRequestDto(uuid, type);
 
-            var storage = storageService.get(getReq);
-            var res = new FacadeStorageResponseDto();
-
-            if (storage == null) {
-                res.reject("not_found", "file");
+            if (type == FileType.TMP) {
+                storage = tmpStorageService.get(req);
             } else {
-                res.setStorageItem(storage);
+                storage = longStorageService.get(req);
             }
 
-            return res;
+            return new FacadeStorageResponseDto(storage);
         } catch (Exception ex) {
             log.error("Error get file", ex);
             var res = new FacadeStorageResponseDto();

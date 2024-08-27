@@ -6,6 +6,10 @@ import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.concurrent.ConcurrentMapCache;
+import org.springframework.cache.support.SimpleCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.EnableKafka;
@@ -14,6 +18,7 @@ import org.springframework.kafka.core.*;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 
 import java.util.HashMap;
+import java.util.List;
 
 @EnableKafka
 @Configuration
@@ -50,7 +55,7 @@ public class AuthConfiguration {
         configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
-        configProps.put(JsonSerializer.TYPE_MAPPINGS, "auth-event:" + AuthEvent.class.getCanonicalName());
+        configProps.put(JsonSerializer.TYPE_MAPPINGS, "auth-events:" + AuthEvent.class.getCanonicalName());
 
         return new DefaultKafkaProducerFactory<>(configProps);
     }
@@ -58,5 +63,22 @@ public class AuthConfiguration {
     @Bean
     public KafkaTemplate<String, Object> kafkaTemplate() {
         return new KafkaTemplate<>(producerFactory());
+    }
+
+    @Bean
+    // TODO redis cache
+    public CacheManager cacheManager() {
+        SimpleCacheManager cacheManager = new SimpleCacheManager();
+        cacheManager.setCaches(
+                List.of(
+                        new ConcurrentMapCache("default")
+                )
+        );
+        return cacheManager;
+    }
+
+    @Bean
+    public Cache cache(CacheManager cacheManager) {
+        return cacheManager.getCache("default");
     }
 }

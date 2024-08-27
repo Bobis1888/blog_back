@@ -300,13 +300,8 @@ public class ContentService {
                 res.setContent(null);
                 res.setAuthorName(userService.resolveNickname(it.getUserId()));
                 res.setCountViews(it.getCountViews());
-
-                res.setCountComments(commentService.countCommentsByArticleId(it.getId()));
-                res.setCountReactions(
-                        reactionsService.countReactions(it.getId())
-                                .stream()
-                                .map(Reaction.CountReaction::getCount)
-                                .reduce(0L, Long::sum));
+                res.setCountComments(it.getStatistic().getComments());
+                res.setCountReactions(it.getStatistic().getReactions());
                 return res;
             }).toList());
         }

@@ -68,7 +68,7 @@ public class ReactionsService implements FillInfo<ArticleDto> {
     }
 
     @Transactional
-    @Cacheable(value = "default", key = "'countReactions:' + #articleId")
+//    @Cacheable(value = "default", key = "'countReactions:' + #articleId")
     public List<Reaction.CountReaction> countReactions(Long articleId) {
         return reactionRepo.countByArticleId(articleId);
     }

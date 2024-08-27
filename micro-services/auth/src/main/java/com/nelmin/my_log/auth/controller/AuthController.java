@@ -92,10 +92,22 @@ public class AuthController {
                 .body(response);
     }
 
+    // TODO refactor /change-* methods
+
     @Secured("ROLE_USER")
     @PostMapping(value = "/change-nickname")
     public ResponseEntity<SuccessDto> changeNickname(@Valid @RequestBody ChangeInfoRequestDto dto) {
         var response = changeInfoService.changeNickname(dto);
+
+        return ResponseEntity
+                .status(response.hasErrors() ? HttpStatus.BAD_REQUEST : HttpStatus.OK)
+                .body(response);
+    }
+
+    @Secured("ROLE_USER")
+    @PostMapping(value = "/change-image-path")
+    public ResponseEntity<SuccessDto> changeImagePath(@Valid @RequestBody ChangeInfoRequestDto dto) {
+        var response = changeInfoService.changeImagePath(dto);
 
         return ResponseEntity
                 .status(response.hasErrors() ? HttpStatus.BAD_REQUEST : HttpStatus.OK)

@@ -114,9 +114,4 @@ public class CommentService {
 
         return res;
     }
-
-    @Cacheable(value = "default", key = "'countCommentsByArticleId:'+#articleId")
-    public Long countCommentsByArticleId(Long articleId) {
-        return commentRepo.countByArticleId(articleId);
-    }
 }

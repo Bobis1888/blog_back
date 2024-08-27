@@ -6,10 +6,6 @@ import com.nelmin.my_log.common.service.OAuthRegistrationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.cache.Cache;
-import org.springframework.cache.CacheManager;
-import org.springframework.cache.concurrent.ConcurrentMapCache;
-import org.springframework.cache.support.SimpleCacheManager;
 import org.springframework.context.annotation.*;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
@@ -22,7 +18,6 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @Configuration
@@ -54,28 +49,6 @@ public class CommonConfiguration implements WebMvcConfigurer {
         filter.setIncludeHeaders(false);
         filter.setIncludeClientInfo(false);
         return filter;
-    }
-
-    @Bean
-    // TODO redis cache
-    public CacheManager cacheManager() {
-        SimpleCacheManager cacheManager = new SimpleCacheManager();
-        cacheManager.setCaches(
-                List.of(
-                        new ConcurrentMapCache("default")
-                )
-        );
-        return cacheManager;
-    }
-
-    @Bean
-    public Cache cache(CacheManager cacheManager) {
-        return cacheManager.getCache("default");
-    }
-
-    @Bean
-    public Cache usersCache(CacheManager cacheManager) {
-        return cacheManager.getCache("users");
     }
 
     /**

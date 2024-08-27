@@ -2,7 +2,9 @@ package com.nelmin.my_log.storage.controller;
 
 import com.nelmin.my_log.common.dto.HasError;
 import com.nelmin.my_log.storage.dto.FacadeStorageResponseDto;
+import com.nelmin.my_log.storage.dto.FileType;
 import com.nelmin.my_log.storage.service.FacadeStorageService;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.InvalidMediaTypeException;
 import org.springframework.http.MediaType;
@@ -22,16 +24,14 @@ public class StorageController {
 
     @Secured("ROLE_USER")
     @PostMapping("/upload")
-    public ResponseEntity<HasError> save(@RequestParam("file") MultipartFile file, @RequestParam("type") String type) {
-
+    public ResponseEntity<HasError> save(@RequestParam("file") MultipartFile file, @RequestParam(value = "type", defaultValue = "TMP") FileType type) {
         var res = facadeStorageService.save(file, type);
-
         return ResponseEntity.status(res.hasErrors() ? 400 : 200).body(res);
     }
 
     @GetMapping("/download")
-    public ResponseEntity<byte[]> get(@RequestParam("type") String type, @RequestParam("nickname") String nickname, @RequestParam("uuid") String uuid) {
-        var res = facadeStorageService.get(uuid, type, nickname);
+    public ResponseEntity<byte[]> get(@RequestParam(value = "uuid", defaultValue = "") String uuid, @RequestParam(value = "type", defaultValue = "") FileType type) {
+        var res = facadeStorageService.get(uuid, type);
 
         if (res.hasErrors()) {
             return ResponseEntity.notFound().build();
@@ -40,7 +40,7 @@ public class StorageController {
         return createDownloadResponse(res);
     }
 
-    private ResponseEntity<byte[]> createDownloadResponse(FacadeStorageResponseDto storage) {
+    private ResponseEntity<byte[]> createDownloadResponse(@NonNull FacadeStorageResponseDto storage) {
         byte[] file = storage.getStorageItem().file();
 
         if (file == null) {
