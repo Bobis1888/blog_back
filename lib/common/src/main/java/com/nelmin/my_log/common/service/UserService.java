@@ -8,7 +8,6 @@ import jakarta.annotation.PostConstruct;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -117,6 +116,7 @@ public class UserService {
             userInfoDto.setRegistrationDate(it.getRegistrationDate());
             userInfoDto.setEnabled(it.isEnabled());
             userInfoDto.setDescription(it.getDescription());
+            userInfoDto.setImagePath(it.getImagePath());
             userInfoDto.setIsPremiumUser(it.isPremiumUser());
             userInfoDto.setPremiumExpireDate(it.isPremiumUser() ? it.getPremium().getExpiredDate() : null);
         }, () -> userInfoDto.reject("notFound", "user"));
@@ -133,6 +133,7 @@ public class UserService {
             userInfoDto.setNickname(it.getNickName());
             userInfoDto.setRegistrationDate(it.getRegistrationDate());
             userInfoDto.setDescription(it.getDescription());
+            userInfoDto.setImagePath(it.getImagePath());
             userInfoDto.setIsPremiumUser(it.isPremiumUser());
         }, () -> userInfoDto.reject("notFound", "user"));
 
@@ -172,6 +173,7 @@ public class UserService {
                         userInfoDto.setNickname(it.getNickName());
                         userInfoDto.setRegistrationDate(it.getRegistrationDate());
                         userInfoDto.setDescription(it.getDescription());
+                        userInfoDto.setImagePath(it.getImagePath());
                         userInfoDto.setIsPremiumUser(it.isPremiumUser());
                         return userInfoDto;
                     })
@@ -180,5 +182,11 @@ public class UserService {
             log.error("Error public infos", ex);
             return List.of();
         }
+    }
+
+    @Transactional
+    public void changeImagePath(User user, String s) {
+        user.setImagePath(s);
+        userRepository.save(user);
     }
 }

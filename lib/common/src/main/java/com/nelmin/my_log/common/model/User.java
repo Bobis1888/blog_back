@@ -48,6 +48,8 @@ public class User implements IUser {
 
     private String description;
 
+    private String imagePath;
+
     @CreatedDate
     private LocalDateTime registrationDate;
 

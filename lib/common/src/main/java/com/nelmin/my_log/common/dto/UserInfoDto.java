@@ -20,6 +20,7 @@ public class UserInfoDto extends HasError {
     private LocalDateTime registrationDate;
     private Boolean enabled;
     private String description;
+    private String imagePath;
     private Boolean isPremiumUser;
     private LocalDateTime premiumExpireDate;
 }

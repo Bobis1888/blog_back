@@ -99,3 +99,6 @@ CREATE TABLE vote
     created_date TIMESTAMP WITHOUT TIME ZONE,
     CONSTRAINT vote_pkey PRIMARY KEY (id)
 );
+
+--changeset nelmin:2024-08-28-00-50
+ALTER TABLE public.article ALTER COLUMN pre_view TYPE VARCHAR(512);

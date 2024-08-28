@@ -53,7 +53,7 @@ public class ChangeInfoService {
     }
 
     @Transactional
-    public SuccessDto changeDescription(ChangeInfoRequestDto dto) {
+    public SuccessDto changeDescription(@NonNull ChangeInfoRequestDto dto) {
         var res = new SuccessDto(false);
 
         if (!StringUtils.hasText(dto.description())) {
@@ -62,6 +62,26 @@ public class ChangeInfoService {
             try {
                 User user = (User) userInfo.getCurrentUser();
                 userService.changeDescription(user, dto.description());
+                res.setSuccess(true);
+            } catch (Exception ex) {
+                log.error("Error change description", ex);
+                res.setSuccess(false);
+            }
+        }
+
+        return res;
+    }
+
+    @Transactional
+    public SuccessDto changeImagePath(@NonNull ChangeInfoRequestDto dto) {
+        var res = new SuccessDto(false);
+
+        if (!StringUtils.hasText(dto.imagePath())) {
+            res.reject("nullable", "image");
+        } else {
+            try {
+                User user = (User) userInfo.getCurrentUser();
+                userService.changeImagePath(user, dto.imagePath());
                 res.setSuccess(true);
             } catch (Exception ex) {
                 log.error("Error change description", ex);

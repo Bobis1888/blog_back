@@ -1,6 +1,7 @@
 package com.nelmin.my_log.storage.model;
 
 
+import com.nelmin.my_log.storage.dto.FileType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,6 +14,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Entity
@@ -33,7 +35,8 @@ public class Storage {
 
     private Long userId;
 
-    private String type;
+    @Enumerated(EnumType.STRING)
+    private FileType type;
 
     private String contentType;
 
@@ -47,8 +50,8 @@ public class Storage {
 
     @Repository
     public interface Repo extends JpaRepository<Storage, Long> {
-        Optional<Storage> findByTypeAndUserId(String type, Long userId);
+        void deleteByUserIdAndUuidIn(Long userId, List<String> uuids);
+        Optional<Storage> findByUserIdAndType(Long userId, FileType type);
         Optional<Storage> findByUuid(String uuid);
-        void deleteByTypeAndUserId(String type, Long userId);
     }
 }

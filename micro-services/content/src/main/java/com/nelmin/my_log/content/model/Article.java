@@ -73,7 +73,7 @@ public class Article {
     @OneToMany(fetch = FetchType.LAZY)
     private List<Bookmark> bookmark;
 
-    @OneToOne(fetch = FetchType.LAZY, mappedBy = "article")
+    @OneToOne(mappedBy = "article")
     private ArticleStatistic statistic;
 
     public void setTags(Set<String> tags) {
