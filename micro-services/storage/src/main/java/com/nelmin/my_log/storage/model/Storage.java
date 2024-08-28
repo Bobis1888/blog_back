@@ -14,6 +14,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Entity
@@ -49,6 +50,7 @@ public class Storage {
 
     @Repository
     public interface Repo extends JpaRepository<Storage, Long> {
+        void deleteByUserIdAndUuidIn(Long userId, List<String> uuids);
         Optional<Storage> findByUserIdAndType(Long userId, FileType type);
         Optional<Storage> findByUuid(String uuid);
     }

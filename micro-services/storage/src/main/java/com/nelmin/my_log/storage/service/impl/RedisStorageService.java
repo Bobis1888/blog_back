@@ -51,7 +51,7 @@ public class RedisStorageService implements IStorageService {
             Optional<RedisStorage> storage = Optional.empty();
 
             if (StringUtils.hasText(requestDto.uuid())) {
-                storage = storageRepo.findByUuid(requestDto.uuid());
+                storage = storageRepo.findById(requestDto.uuid());
             }
 
             var val = storage.orElseThrow(FileNotFoundException::new);

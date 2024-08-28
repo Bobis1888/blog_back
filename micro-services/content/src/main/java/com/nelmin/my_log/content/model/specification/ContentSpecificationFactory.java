@@ -1,6 +1,7 @@
 package com.nelmin.my_log.content.model.specification;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 
@@ -203,6 +204,16 @@ public class ContentSpecificationFactory {
             subquery.select(subscriptionRoot.get(Subscription_.AUTHOR_ID));
             subquery.where(cb.equal(subscriptionRoot.get(Subscription_.USER_ID), userInfo.getId()));
 
+            if (requestDto.direction() == Sort.Direction.DESC) {
+                query.orderBy(
+                        cb.desc(root.get(Article_.PUBLISHED_DATE))
+                );
+            } else {
+                query.orderBy(
+                        cb.asc(root.get(Article_.PUBLISHED_DATE))
+                );
+            }
+
             return cb.and(
                     root.get(Article_.STATUS).in(PUBLISHED),
                     root.get(Article_.USER_ID).in(subquery)
@@ -221,17 +232,20 @@ public class ContentSpecificationFactory {
                                                 @NonNull SpecificationRequestDto requestDto,
                                                 @NonNull Root<Article> root,
                                                 @NonNull CriteriaBuilder cb) {
+
         if (requestDto.startDate() != null) {
             predicate = cb.and(
                     predicate,
-                    cb.greaterThanOrEqualTo(root.get(Article_.PUBLISHED_DATE), requestDto.startDate())
+                    cb.greaterThanOrEqualTo(root.get(Article_.PUBLISHED_DATE),
+                            requestDto.startDate().atStartOfDay())
             );
         }
 
         if (requestDto.endDate() != null) {
             predicate = cb.and(
                     predicate,
-                    cb.lessThanOrEqualTo(root.get(Article_.PUBLISHED_DATE), requestDto.endDate())
+                    cb.lessThanOrEqualTo(root.get(Article_.PUBLISHED_DATE),
+                            requestDto.endDate().plusDays(1).atStartOfDay())
             );
         }
 

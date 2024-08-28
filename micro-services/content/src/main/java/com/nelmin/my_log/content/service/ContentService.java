@@ -8,7 +8,6 @@ import com.nelmin.my_log.content.dto.common.*;
 import com.nelmin.my_log.content.model.Article;
 import com.nelmin.my_log.content.model.specification.ContentSpecificationFactory;
 import com.nelmin.my_log.content.model.PrivateLink;
-import com.nelmin.my_log.content.model.Reaction;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,8 +34,7 @@ public class ContentService {
     private final UserService userService;
     private final PrivateLink.Repo privateLinkRepo;
     private final PrivateLinkService privateLinkService;
-    private final ReactionsService reactionsService;
-    private final CommentService commentService;
+    private final ContentProcessorService contentProcessorService;
     private final ContentSpecificationFactory contentSpecificationFactory;
 
     private static final String CLEAR_TAG_REGEXP = "[^#a-zA-Zа-яА-Я0-9_]";
@@ -74,18 +72,8 @@ public class ContentService {
         }
 
         article.setUserId(userInfo.getId());
-
-        // TODO validate html/sql injection
-        article.setContent(dto.content());
-
-        if (dto.preView() == null || !StringUtils.hasText(dto.preView()) || StringUtils.hasText(dto.preView()) && dto.preView().equals("auto")) {
-            var generatedPreview = dto.content().substring(0, Math.min(dto.content().length(), 255));
-            article.setPreView(generatedPreview);
-        } else {
-            article.setPreView(dto.preView());
-        }
-
         article.setTitle(dto.title());
+        contentProcessorService.process(article, dto.content());
 
         if (dto.tags() != null) {
             article.setTags(dto.tags().stream().map(it -> {

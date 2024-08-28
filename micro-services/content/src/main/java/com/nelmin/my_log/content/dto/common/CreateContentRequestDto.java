@@ -10,9 +10,6 @@ public record CreateContentRequestDto(
         @NotBlank(message = "nullable")
         @Size(max = 255, message = "invalidSize")
         String title,
-        @NotBlank(message = "nullable")
-        @Size(max = 255, message = "invalidSize")
-        String preView,
         List<String> tags,
         @NotBlank(message = "nullable")
         String content) {

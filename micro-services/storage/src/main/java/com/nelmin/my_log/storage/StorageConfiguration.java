@@ -1,20 +1,14 @@
 package com.nelmin.my_log.storage;
 
-import com.nelmin.my_log.storage.dto.SaveEvent;
+import com.nelmin.my_log.storage.dto.kafka.UpdateImages;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.cache.RedisCacheManagerBuilderCustomizer;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.cache.Cache;
-import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.cache.concurrent.ConcurrentMapCache;
-import org.springframework.cache.support.SimpleCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
-import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
@@ -23,7 +17,6 @@ import org.springframework.kafka.support.serializer.JsonDeserializer;
 
 import java.time.Duration;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @EnableCaching
@@ -51,7 +44,7 @@ public class StorageConfiguration {
         props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
-        props.put(JsonDeserializer.TYPE_MAPPINGS, "save-events:" + SaveEvent.class.getCanonicalName());
+        props.put(JsonDeserializer.TYPE_MAPPINGS, "image-events:" + UpdateImages.class.getCanonicalName());
         return new DefaultKafkaConsumerFactory<>(props);
     }
 
