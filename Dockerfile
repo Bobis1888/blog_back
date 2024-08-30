@@ -18,6 +18,6 @@ COPY --from=builder /home/gradle/back/micro-services/${APP_NAME}/build/libs/*.ja
 RUN apt-get update \
     && apt-get install -y --no-install-recommends curl jq
 
-ADD micro-services/${APP_NAME}/build/libs/*.jar /app/${APP_NAME}.jar
+#ADD micro-services/${APP_NAME}/build/libs/*.jar /app/${APP_NAME}.jar
 
 CMD java -jar ${APP_NAME}.jar
