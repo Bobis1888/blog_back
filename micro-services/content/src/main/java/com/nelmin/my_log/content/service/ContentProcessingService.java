@@ -52,7 +52,7 @@ public class ContentProcessingService {
                 reportRepo.deleteAllByArticleIdIn(ids);
 
                 log.info("Clear articles");
-                articleRepo.deleteAllByIdInBatch(ids);
+                articleRepo.deleteAllByIdIn(ids);
             } else {
                 log.info("No need to clear deleted article");
             }

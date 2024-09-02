@@ -145,6 +145,13 @@ public class Article {
                 nativeQuery = true
         )
         void increaseCountViews(Long id);
+
+        @Modifying
+        @Query(
+            value = "delete from article where id in :ids",
+            nativeQuery = true
+        )
+        void deleteAllByIdIn(@Param("ids") Collection<Long> ids);
     }
 
     public interface ArticleId {
