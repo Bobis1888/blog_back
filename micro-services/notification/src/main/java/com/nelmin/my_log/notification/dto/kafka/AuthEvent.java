@@ -1,4 +1,4 @@
-package com.nelmin.my_log.email.dto.kafka;
+package com.nelmin.my_log.notification.dto.kafka;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

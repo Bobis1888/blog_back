@@ -97,9 +97,13 @@ public class Article {
     // TODO Specification
     @Repository
     public interface Repo extends JpaRepository<Article, Long>, JpaSpecificationExecutor<Article> {
+        Boolean existsByUserIdAndId(Long userId, Long id);
+
         Optional<Article> findByIdAndUserId(Long id, Long userId);
 
         Page<ArticleId> getIdsByStatusIn(List<Status> status, Pageable pageable);
+
+        Optional<AuthorId> getUserIdById(Long id);
 
         @Query(
                 value = "select * from article a where a.status in :status",
@@ -123,21 +127,6 @@ public class Article {
         )
         List<TagCount> extractTags(@Param("limit") Integer limit, @Param("query") String query);
 
-        Long countByStatusAndUserId(Status status, Long userid);
-
-        @Query(
-                value = "SELECT * FROM article " +
-                        "LEFT JOIN (SELECT article_id, count(id) reactions FROM reaction GROUP BY article_id) lk " +
-                        "ON article.id = lk.article_id " +
-                        "WHERE article.status = 'PUBLISHED' order by lk.reactions desc nulls last, article.count_views desc nulls last",
-                countQuery = "SELECT count(*) FROM article " +
-                        "LEFT JOIN (SELECT article_id, count(id) reactions FROM reaction GROUP BY article_id) lk " +
-                        "ON article.id = lk.article_id " +
-                        "WHERE article.status = 'PUBLISHED'",
-                nativeQuery = true
-        )
-        Page<Article> findAllMostPopular(Pageable request);
-
 
         @Modifying
         @Query(
@@ -145,6 +134,23 @@ public class Article {
                 nativeQuery = true
         )
         void increaseCountViews(Long id);
+
+        @Modifying
+        @Query(
+            value = "delete from article where id in :ids",
+            nativeQuery = true
+        )
+        void deleteAllByIdIn(@Param("ids") Collection<Long> ids);
+
+        @Query(
+                value = "select title from article where id = :articleId",
+                nativeQuery = true
+        )
+        String getArticleTitleById(Long articleId);
+    }
+
+    public interface AuthorId {
+        Long getUserId();
     }
 
     public interface ArticleId {

@@ -1,4 +1,4 @@
-package com.nelmin.my_log.email.service;
+package com.nelmin.my_log.notification.service;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;

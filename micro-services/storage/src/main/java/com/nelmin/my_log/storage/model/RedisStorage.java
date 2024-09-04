@@ -6,7 +6,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 @Data
-@RedisHash(value = "storage", timeToLive = 15 * 60L)
+@RedisHash(value = "storage", timeToLive = 60L * 60L)
 public class RedisStorage {
     private String id;
     private Long userId;

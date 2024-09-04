@@ -1,4 +1,4 @@
-package com.nelmin.my_log.email.service;
+package com.nelmin.my_log.notification.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -120,8 +120,8 @@ services:
       - SPRING_SECURITY_USERNAME=$SPRING_SECURITY_USERNAME
       - SPRING_SECURITY_PASSWORD=$SPRING_SECURITY_PASSWORD
 
-  email:
-    container_name: email
+  notification:
+    container_name: notification
     network_mode: host
     depends_on:
       balancer:
@@ -135,10 +135,10 @@ services:
     build:
       context: .
       args:
-        APP_NAME: email
+        APP_NAME: notification
     restart: always
     environment:
-      - APP_NAME=email
+      - APP_NAME=notification
       - SPRING_ACTIVE_PROFILE=$SPRING_ACTIVE_PROFILE
       - SPRING_SECURITY_USERNAME=$SPRING_SECURITY_USERNAME
       - SPRING_SECURITY_PASSWORD=$SPRING_SECURITY_PASSWORD

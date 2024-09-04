@@ -51,6 +51,7 @@ public class Storage {
     @Repository
     public interface Repo extends JpaRepository<Storage, Long> {
         void deleteByUserIdAndUuidIn(Long userId, List<String> uuids);
+        void deleteAllByUuidIn(List<String> uuids);
         Optional<Storage> findByUserIdAndType(Long userId, FileType type);
         Optional<Storage> findByUuid(String uuid);
     }

@@ -1,5 +1,6 @@
 package com.nelmin.my_log.content;
 
+import com.nelmin.my_log.content.dto.kafka.ContentEvent;
 import com.nelmin.my_log.content.dto.kafka.UpdateImages;
 import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.admin.NewTopic;
@@ -45,13 +46,25 @@ public class ContentConfiguration {
                 .build();
     }
 
+    // TODO
+    @Bean
+    public NewTopic newTopics() {
+        return TopicBuilder
+                .name("image-events")
+                .partitions(1)
+                .replicas(1)
+                .build();
+    }
+
     @Bean
     public ProducerFactory<String, Object> producerFactory() {
         var configProps = new HashMap<String, Object>();
         configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
-        configProps.put(JsonSerializer.TYPE_MAPPINGS, "image-events:" + UpdateImages.class.getCanonicalName());
+        configProps.put(JsonSerializer.TYPE_MAPPINGS,
+                "image-events:" + UpdateImages.class.getCanonicalName() + "," +
+                "content-events:" + ContentEvent.class.getCanonicalName());
 
         return new DefaultKafkaProducerFactory<>(configProps);
     }
