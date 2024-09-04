@@ -69,7 +69,7 @@ public class NotificationService {
     }
 
     public void readAll() {
-        notificationRepo.updateIsRead(userInfo.getId(), true);
+        notificationRepo.updateAllByUserId(userInfo.getId(), true);
     }
 
     public Long countUnread() {

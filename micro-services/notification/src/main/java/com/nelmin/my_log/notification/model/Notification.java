@@ -11,6 +11,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
 
@@ -51,6 +54,11 @@ public class Notification {
 
         Long countByUserIdAndIsRead(Long id, boolean read);
 
-        void updateIsRead(Long id, boolean b);
+        @Modifying
+        @Query(
+                value = "update notification set is_read = :read where user_id = :userId",
+                nativeQuery = true
+        )
+        void updateAllByUserId(@Param("userId") Long userId, @Param("read") boolean b);
     }
 }
