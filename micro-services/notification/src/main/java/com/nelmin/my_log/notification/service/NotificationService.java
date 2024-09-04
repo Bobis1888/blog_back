@@ -59,6 +59,7 @@ public class NotificationService {
         notificationRepo.save(notification);
     }
 
+    @Transactional
     public void read(Long id) {
         var notification = notificationRepo.findById(id);
 
@@ -68,6 +69,7 @@ public class NotificationService {
         }
     }
 
+    @Transactional
     public void readAll() {
         notificationRepo.updateAllByUserId(userInfo.getId(), true);
     }
