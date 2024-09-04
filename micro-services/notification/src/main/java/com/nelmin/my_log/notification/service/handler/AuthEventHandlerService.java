@@ -1,6 +1,7 @@
-package com.nelmin.my_log.email.service;
+package com.nelmin.my_log.notification.service.handler;
 
-import com.nelmin.my_log.email.dto.kafka.AuthEvent;
+import com.nelmin.my_log.notification.dto.kafka.AuthEvent;
+import com.nelmin.my_log.notification.service.AuthEventService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaHandler;
@@ -11,7 +12,7 @@ import org.springframework.stereotype.Service;
 @Service
 @KafkaListener(topics = "auth-events")
 @RequiredArgsConstructor
-public class EventHandlerService {
+public class AuthEventHandlerService {
 
     private final AuthEventService mailService;
 

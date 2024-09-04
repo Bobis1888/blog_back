@@ -1,6 +1,7 @@
-package com.nelmin.my_log.email;
+package com.nelmin.my_log.notification;
 
-import com.nelmin.my_log.email.dto.kafka.AuthEvent;
+import com.nelmin.my_log.notification.dto.kafka.AuthEvent;
+import com.nelmin.my_log.notification.dto.kafka.ContentEvent;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,7 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Configuration
-public class EmailConfiguration {
+public class NotificationConfiguration {
 
     @Value("${spring.mail.host:}")
     private String emailHost;
@@ -61,7 +62,9 @@ public class EmailConfiguration {
         props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
-        props.put(JsonDeserializer.TYPE_MAPPINGS, "auth-events:" + AuthEvent.class.getCanonicalName());
+        props.put(JsonDeserializer.TYPE_MAPPINGS,
+                "auth-events:" + AuthEvent.class.getCanonicalName() + "," +
+                "content-events:" + ContentEvent.class.getCanonicalName());
         return new DefaultKafkaConsumerFactory<>(props);
     }
 

@@ -28,6 +28,7 @@ public class ContentProcessingService {
     private final Reaction.Repo reactionRepo;
     private final PrivateLink.Repo privateLinkRepo;
     private final Report.Repo reportRepo;
+    private final ContentProcessorService contentProcessorService;
 
     @Transactional
     @Scheduled(fixedDelay = 12L, timeUnit = TimeUnit.HOURS)
@@ -36,8 +37,9 @@ public class ContentProcessingService {
 
         try {
             var pageRequest = PageRequest.of(0, 1000);
-            var ids = articleRepo.getIdsByStatusIn(List.of(Article.Status.DELETED), pageRequest)
-                    .map(Article.ArticleId::getId).toList();
+            var articles = articleRepo.findAllByStatus(List.of(Article.Status.DELETED.name()), pageRequest);
+            var ids = articles.getContent().stream().map(Article::getId).toList();
+
             log.info("Ids to clear deleted article: {}", ids);
 
             if (!ids.isEmpty()) {
@@ -53,6 +55,7 @@ public class ContentProcessingService {
 
                 log.info("Clear articles");
                 articleRepo.deleteAllByIdIn(ids);
+                contentProcessorService.deleteImages(articles.getContent());
             } else {
                 log.info("No need to clear deleted article");
             }

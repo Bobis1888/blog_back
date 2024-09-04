@@ -17,8 +17,8 @@ import java.util.List;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@KafkaListener(topics = "content-events")
-public class UpdateImagesEvent {
+@KafkaListener(topics = "image-events")
+public class ImageEventsHandler {
 
     private final RedisStorage.Repo tmpStorage;
     private final Storage.Repo longStorage;
@@ -51,7 +51,12 @@ public class UpdateImagesEvent {
 
         try {
             longStorage.saveAll(saveList);
-            longStorage.deleteByUserIdAndUuidIn(event.userId(), event.remove());
+
+            if (event.userId() != null) {
+                longStorage.deleteByUserIdAndUuidIn(event.userId(), event.remove());
+            } else {
+                longStorage.deleteAllByUuidIn(event.remove());
+            }
         } catch (Exception ex) {
             log.error("Error update images", ex);
         }
