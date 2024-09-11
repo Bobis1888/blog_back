@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
+import java.util.Objects;
 import java.util.Optional;
 
 @Slf4j
@@ -31,11 +32,10 @@ public class CommentService {
     private final UserService userService;
     private final Vote.Repo voteRepo;
     private final ObjectMapper objectMapper;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
 
     @Value("${content.events.topic:content-events}")
     private String eventsTopic;
-
-    private final KafkaTemplate<String, Object> kafkaTemplate;
 
     @Transactional
     public CreateCommentResponseDto save(CreateCommentRequestDto dto) {
@@ -46,11 +46,20 @@ public class CommentService {
             comment.setUserId(userInfo.getId());
             comment.setContent(dto.comment());
             comment.setArticleId(dto.contentId());
-            commentRepo.save(comment);
+
+            if (dto.parentId() != null) {
+                commentRepo.findById(dto.parentId()).ifPresent(comment::setParent);
+            }
+
+            comment = commentRepo.save(comment);
             response.setSuccess(true);
 
             if (!contentRepo.existsByUserIdAndId(userInfo.getId(), comment.getArticleId())) {
-                sendEvent(comment);
+                sendEvent(comment, ContentEvent.Type.COMMENT);
+            }
+
+            if (comment.getParent() != null) {
+                sendEvent(comment, ContentEvent.Type.REPLY_COMMENT);
             }
         } catch (Exception ex) {
             log.error("Error save comment", ex);
@@ -112,9 +121,17 @@ public class CommentService {
 
                                     var actions = new CommentDto.Actions();
                                     actions.setCanDelete(it.getUserId().equals(userInfo.getId()));
-                                    actions.setCanEdit(actions.getCanDelete());
                                     actions.setCanVote(!voteRepo.existsByCommentIdAndUserId(it.getId(), userInfo.getId()));
+                                    actions.setCanReply(!Objects.equals(it.getUserId(), userInfo.getId()));
+                                    actions.setCanReport(!Objects.equals(it.getUserId(), userInfo.getId()));
                                     commentDto.setActions(actions);
+
+                                    if (it.getParent() != null) {
+                                        var parent = new CommentDto.ParentDto();
+                                        parent.setContent(it.getParent().getContent());
+                                        parent.setNickname(userService.resolveNickname(it.getParent().getUserId()));
+                                        commentDto.setParent(parent);
+                                    }
 
                                     return commentDto;
                                 })
@@ -131,8 +148,8 @@ public class CommentService {
         return res;
     }
 
-    private void sendEvent(Comment comment) {
-        String stringPayload = null;
+    private void sendEvent(Comment comment, ContentEvent.Type type) {
+        String stringPayload;
         var payload = new HashMap<String, String>();
 
         payload.put("userName", userService.resolveNickname(comment.getUserId()));
@@ -143,12 +160,20 @@ public class CommentService {
             stringPayload = objectMapper.writeValueAsString(payload);
         } catch (Exception ex) {
             log.error("Error serialize comment payload", ex);
+            return;
         }
 
         var event = new ContentEvent();
-        event.setType(ContentEvent.Type.COMMENT);
+        event.setType(type);
         event.setPayload(stringPayload);
-        contentRepo.getUserIdById(comment.getArticleId()).ifPresent(userId -> event.setUserId(userId.getUserId()));
+
+        if (type == ContentEvent.Type.COMMENT) {
+            contentRepo.getUserIdById(comment.getArticleId()).ifPresent(userId -> event.setUserId(userId.getUserId()));
+        }
+
+        if (type == ContentEvent.Type.REPLY_COMMENT) {
+            event.setUserId(comment.getParent().getUserId());
+        }
 
         kafkaTemplate.send(eventsTopic, event)
                 .thenAccept(producerRecord -> log.info("Event sent {}", comment));

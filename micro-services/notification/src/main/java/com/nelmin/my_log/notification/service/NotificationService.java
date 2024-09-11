@@ -10,6 +10,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -25,7 +26,7 @@ public class NotificationService {
     @Transactional
     public ListNotificationResponseDto list(ListNotificationRequestDto requestDto) {
         var res = new ArrayList<NotificationDto>();
-        var page = PageRequest.of(requestDto.page(), requestDto.max());
+        var page = PageRequest.of(requestDto.page(), requestDto.max(), Sort.by(Sort.Direction.ASC, "isRead"));
         var notifications = notificationRepo.findAllByUserId(userInfo.getId(), page);
 
         if (!notifications.isEmpty()) {

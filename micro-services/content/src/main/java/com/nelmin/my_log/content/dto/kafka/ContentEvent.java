@@ -15,6 +15,6 @@ public class ContentEvent {
     private String payload;
 
     public enum Type {
-        COMMENT, LIKE, SUBSCRIBE, REPORT
+        COMMENT, REPLY_COMMENT, LIKE, SUBSCRIBE, REPORT
     }
 }

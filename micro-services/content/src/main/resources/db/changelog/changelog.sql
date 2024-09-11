@@ -102,3 +102,6 @@ CREATE TABLE vote
 
 --changeset nelmin:2024-08-28-00-50
 ALTER TABLE public.article ALTER COLUMN pre_view TYPE VARCHAR(512);
+
+--changeset nelmin:2024-09-11-23-00
+ALTER TABLE public.comment ADD COLUMN IF NOT EXISTS parent_id BIGINT;

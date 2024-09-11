@@ -27,7 +27,7 @@ import java.time.LocalDateTime;
 public class Notification {
 
     public enum Type {
-        COMMENT, LIKE, SUBSCRIBE, REPORT
+        COMMENT, REPLY_COMMENT, LIKE, SUBSCRIBE, REPORT
     }
 
     @Id

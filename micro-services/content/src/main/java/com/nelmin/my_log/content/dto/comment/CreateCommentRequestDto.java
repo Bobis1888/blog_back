@@ -9,6 +9,7 @@ public record CreateCommentRequestDto(
         @NotBlank(message = "nullable")
         String comment,
         @NotNull(message = "nullable")
-        Long contentId
+        Long contentId,
+        Long parentId
 ) {
 }

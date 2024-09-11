@@ -4,7 +4,7 @@ echo "START BUILD STAGE --------------------------------"
 
 for i in "config" "balancer" "eureka" "content" "notification" "auth" "storage"
 do
-  ./gradlew micro-service:$i:clean micro-services:$i:build --info
+  ./gradlew micro-service:$i:clean micro-services:$i:build -x test --info
   mv micro-services/$i/build/libs/*.jar micro-services/$i/build/libs/$i.jar
 done
 

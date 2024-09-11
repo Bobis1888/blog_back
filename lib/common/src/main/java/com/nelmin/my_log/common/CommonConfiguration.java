@@ -60,6 +60,7 @@ public class CommonConfiguration implements WebMvcConfigurer {
      */
     @Bean
     @Scope(value = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
+    @ConditionalOnMissingBean
     public UserInfo userInfo() {
         var auth = SecurityContextHolder.getContext().getAuthentication();
         var principal = auth != null ? auth.getPrincipal() : null;
