@@ -1,5 +1,6 @@
 package com.nelmin.my_log.content.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,7 +14,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Entity
 @Getter
@@ -40,6 +40,11 @@ public class Comment {
 
     @Column(name = "rating")
     private Long rating;
+
+    @ManyToOne
+    @JsonIgnore
+    @JoinColumn(referencedColumnName = "id", name = "parent_id")
+    private Comment parent;
 
     @CreatedDate
     private LocalDateTime createdDate;
