@@ -22,34 +22,27 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-webflux'
-    implementation 'org.springframework.session:spring-session-core'
-
-    compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
-    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
-    annotationProcessor 'org.hibernate.orm:hibernate-jpamodelgen'
+    compileOnly 'org.projectlombok:lombok'
+    compileOnly 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client:4.1.1'
 
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
     annotationProcessor 'org.projectlombok:lombok'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'io.projectreactor:reactor-test'
 
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.boot:spring-boot-starter-validation'
-    implementation 'org.springframework.boot:spring-boot-starter-security'
-    implementation 'org.springframework.boot:spring-boot-starter-cache'
-    implementation 'org.postgresql:postgresql'
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+//    implementation 'io.springfox:springfox-boot-starter'
+//    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter'
 
-    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+
+//    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 
 //    compileOnly 'org.springframework.security:spring-security-oauth2-resource-server'
 //    compileOnly 'org.springframework.security:spring-security-oauth2-jose'
 
-    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.5'
-    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.5'
-    implementation 'io.jsonwebtoken:jjwt-api:0.12.5'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'io.projectreactor:reactor-test'
 }
 
 tasks.named('test') {

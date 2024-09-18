@@ -1,7 +1,7 @@
 package com.nelmin.my_log.content.controller;
 
 import com.nelmin.my_log.common.dto.SuccessDto;
-import com.nelmin.my_log.common.service.FillInfo;
+import com.nelmin.my_log.content.service.FillInfo;
 import com.nelmin.my_log.content.dto.common.*;
 import com.nelmin.my_log.content.service.*;
 import jakarta.validation.Valid;
@@ -24,20 +24,10 @@ public class ContentController {
     private final List<FillInfo<ArticleDto>> fillInfoList;
     private final ActionService actionService;
 
-    // TODO split create/edit
     @Secured("ROLE_USER")
     @PostMapping("/save")
     public ResponseEntity<CreateContentResponseDto> create(@Valid @RequestBody CreateContentRequestDto dto) {
         CreateContentResponseDto response = contentService.save(dto);
-        return ResponseEntity
-                .status(response.hasErrors() ? HttpStatus.BAD_REQUEST : HttpStatus.OK)
-                .body(response);
-    }
-
-    @Secured("ROLE_USER")
-    @PutMapping("/save/{id}")
-    public ResponseEntity<CreateContentResponseDto> save(@Valid@PathVariable Long id, @Valid @RequestBody CreateContentRequestDto dto) {
-        CreateContentResponseDto response = contentService.update(id, dto);
         return ResponseEntity
                 .status(response.hasErrors() ? HttpStatus.BAD_REQUEST : HttpStatus.OK)
                 .body(response);

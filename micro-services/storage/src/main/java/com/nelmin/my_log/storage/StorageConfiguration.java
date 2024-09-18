@@ -8,6 +8,7 @@ import org.springframework.boot.autoconfigure.cache.RedisCacheManagerBuilderCust
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
@@ -21,7 +22,8 @@ import java.util.Map;
 
 @EnableCaching
 @Configuration
-@EnableRedisRepositories(basePackages = "com.nelmin.my_log.storage", considerNestedRepositories = true)
+@EnableJpaRepositories(considerNestedRepositories = true)
+@EnableRedisRepositories(considerNestedRepositories = true)
 public class StorageConfiguration {
 
 //    @Bean

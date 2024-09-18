@@ -1,6 +1,5 @@
 package com.nelmin.my_log.storage.service.impl;
 
-import com.nelmin.my_log.common.bean.UserInfo;
 import com.nelmin.my_log.common.dto.HasError;
 import com.nelmin.my_log.common.dto.SuccessDto;
 import com.nelmin.my_log.storage.dto.GetRequestDto;
@@ -9,6 +8,7 @@ import com.nelmin.my_log.storage.dto.SaveResponseDto;
 import com.nelmin.my_log.storage.dto.StorageResponseDto;
 import com.nelmin.my_log.storage.exception.FileNotFoundException;
 import com.nelmin.my_log.storage.model.RedisStorage;
+import com.nelmin.my_log.user_info.core.UserInfo;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

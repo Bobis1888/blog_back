@@ -42,6 +42,7 @@ dependencies {
     implementation 'org.liquibase:liquibase-core'
 
     implementation project(":lib:common")
+    implementation project(":lib:user-info")
     implementation project(":lib:logging")
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'

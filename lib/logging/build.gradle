@@ -28,7 +28,7 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok'
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 
-    implementation("de.siegmar:logback-gelf:6.0.1")
+    implementation "de.siegmar:logback-gelf:6.0.1"
     implementation 'org.springframework.boot:spring-boot-starter'
     implementation 'io.micrometer:micrometer-tracing-bridge-brave'
 

@@ -60,5 +60,7 @@ public class Notification {
                 nativeQuery = true
         )
         void updateAllByUserId(@Param("userId") Long userId, @Param("read") boolean b);
+
+        void deleteAllByCreatedDateIsBeforeAndIsRead(LocalDateTime dateTime, boolean read);
     }
 }

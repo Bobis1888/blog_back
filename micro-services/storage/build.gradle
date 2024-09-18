@@ -52,6 +52,7 @@ dependencies {
     implementation 'io.jsonwebtoken:jjwt-api:0.12.5'
 
     implementation project(":lib:common")
+    implementation project(":lib:user-info")
     implementation project(":lib:logging")
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
