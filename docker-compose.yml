@@ -72,8 +72,8 @@ services:
       - SPRING_SECURITY_USERNAME=$SPRING_SECURITY_USERNAME
       - SPRING_SECURITY_PASSWORD=$SPRING_SECURITY_PASSWORD
 
-  auth:
-    container_name: auth
+  user:
+    container_name: user
     network_mode: host
     depends_on:
       balancer:
@@ -89,10 +89,10 @@ services:
     build:
       context: .
       args:
-        APP_NAME: auth
+        APP_NAME: user
     restart: always
     environment:
-      - APP_NAME=auth
+      - APP_NAME=user
       - SPRING_ACTIVE_PROFILE=$SPRING_ACTIVE_PROFILE
       - SPRING_SECURITY_USERNAME=$SPRING_SECURITY_USERNAME
       - SPRING_SECURITY_PASSWORD=$SPRING_SECURITY_PASSWORD
@@ -162,6 +162,52 @@ services:
     restart: always
     environment:
       - APP_NAME=storage
+      - SPRING_ACTIVE_PROFILE=$SPRING_ACTIVE_PROFILE
+      - SPRING_SECURITY_USERNAME=$SPRING_SECURITY_USERNAME
+      - SPRING_SECURITY_PASSWORD=$SPRING_SECURITY_PASSWORD
+
+  statistic:
+    container_name: statistic
+    network_mode: host
+    depends_on:
+      balancer:
+        condition: service_healthy
+    healthcheck:
+      test: curl --fail --silent localhost:8083/actuator/health | grep UP || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 25s
+    build:
+      context: .
+      args:
+        APP_NAME: statistic
+    restart: always
+    environment:
+      - APP_NAME=statistic
+      - SPRING_ACTIVE_PROFILE=$SPRING_ACTIVE_PROFILE
+      - SPRING_SECURITY_USERNAME=$SPRING_SECURITY_USERNAME
+      - SPRING_SECURITY_PASSWORD=$SPRING_SECURITY_PASSWORD
+
+  subscription:
+    container_name: subscription
+    network_mode: host
+    depends_on:
+      balancer:
+        condition: service_healthy
+    healthcheck:
+      test: curl --fail --silent localhost:8083/actuator/health | grep UP || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 25s
+    build:
+      context: .
+      args:
+        APP_NAME: subscription
+    restart: always
+    environment:
+      - APP_NAME=subscription
       - SPRING_ACTIVE_PROFILE=$SPRING_ACTIVE_PROFILE
       - SPRING_SECURITY_USERNAME=$SPRING_SECURITY_USERNAME
       - SPRING_SECURITY_PASSWORD=$SPRING_SECURITY_PASSWORD

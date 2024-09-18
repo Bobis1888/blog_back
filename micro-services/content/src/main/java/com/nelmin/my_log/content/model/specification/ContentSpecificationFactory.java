@@ -1,19 +1,21 @@
 package com.nelmin.my_log.content.model.specification;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
-import com.nelmin.my_log.common.bean.UserInfo;
-import com.nelmin.my_log.common.model.User;
+import com.nelmin.my_log.content.dto.common.ListSubscriptionRequestDto;
+import com.nelmin.my_log.content.dto.common.ListSubscriptionResponseDto;
+import com.nelmin.my_log.content.dto.common.UserInfoDto;
 import com.nelmin.my_log.content.model.*;
+import com.nelmin.my_log.content.service.CommonHttpClient;
+import com.nelmin.my_log.user_info.core.UserInfo;
 import jakarta.persistence.criteria.*;
 import lombok.NonNull;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -26,6 +28,7 @@ import static com.nelmin.my_log.content.model.Article.Status.*;
 public class ContentSpecificationFactory {
 
     private final UserInfo userInfo;
+    private final CommonHttpClient httpClient;
 
     public enum RequestType {
         TOP,
@@ -151,15 +154,22 @@ public class ContentSpecificationFactory {
                 if (specificSearch) {
 
                     if (requestDto.query().startsWith("@")) {
-                        Subquery<Long> subquery = query.subquery(Long.class);
-                        Root<User> userRoot = subquery.from(User.class);
 
-                        subquery.select(userRoot.get("id"));
-                        subquery.where(cb.like(userRoot.get("nickName"), "%" + requestDto.query() + "%"));
+                        var response = httpClient.exchange(
+                                "user/info/" + requestDto.query().substring(1),
+                                HttpMethod.GET,
+                                List.class);
+
+                        var ids = new ArrayList<Long>();
+
+                        response.ifPresent(it ->
+                                ids.addAll(it.stream()
+                                        .map(userMap -> ((Map) userMap).get("id"))
+                                        .toList()));
 
                         predicate = cb.and(
                                 predicate,
-                                root.get(Article_.USER_ID).in(subquery)
+                                root.get(Article_.USER_ID).in(ids)
                         );
                     } else {
                         var regex = String.join("|", requestDto.query().split(","));
@@ -198,11 +208,30 @@ public class ContentSpecificationFactory {
      */
     private Specification<Article> subscriptionsCriteria(@NonNull SpecificationRequestDto requestDto) {
         return (root, query, cb) -> {
-            Subquery<Long> subquery = query.subquery(Long.class);
-            Root<Subscription> subscriptionRoot = subquery.from(Subscription.class);
 
-            subquery.select(subscriptionRoot.get(Subscription_.AUTHOR_ID));
-            subquery.where(cb.equal(subscriptionRoot.get(Subscription_.USER_ID), userInfo.getId()));
+            var response = httpClient.exchange(
+                    "subscription/list",
+                    HttpMethod.POST,
+                    new ListSubscriptionRequestDto(ListSubscriptionRequestDto.Type.SUBSCRIPTIONS, 100, 0),
+                    ListSubscriptionResponseDto.class);
+
+            var list = new ArrayList<Long>();
+
+            response.ifPresent(it -> {
+
+                if (Optional.ofNullable(it.totalRows()).orElse(0) < 1 || it.list() == null) {
+                    return;
+                }
+
+                list.addAll(
+                                it
+                                        .list()
+                                        .stream()
+                                        .mapToLong(ListSubscriptionResponseDto.SubscriptionDto::userId)
+                                        .boxed()
+                                        .toList());
+                    }
+            );
 
             if (requestDto.direction() == Sort.Direction.DESC) {
                 query.orderBy(
@@ -216,7 +245,7 @@ public class ContentSpecificationFactory {
 
             return cb.and(
                     root.get(Article_.STATUS).in(PUBLISHED),
-                    root.get(Article_.USER_ID).in(subquery)
+                    root.get(Article_.USER_ID).in(list)
             );
         };
     }

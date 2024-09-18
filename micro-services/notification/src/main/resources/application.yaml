@@ -12,6 +12,7 @@ spring:
   profiles:
     active: ${SPRING_ACTIVE_PROFILE}
 
+
   config.import: 'optional:configserver:'
   cloud:
     config:
@@ -21,3 +22,5 @@ spring:
       fail-fast: false
       username: ${SPRING_SECURITY_USERNAME}
       password: ${SPRING_SECURITY_PASSWORD}
+  jpa:
+    show-sql: true

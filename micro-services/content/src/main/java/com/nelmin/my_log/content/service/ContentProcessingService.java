@@ -1,6 +1,5 @@
 package com.nelmin.my_log.content.service;
 
-import com.nelmin.my_log.common.model.Report;
 import com.nelmin.my_log.content.model.Article;
 import com.nelmin.my_log.content.model.PrivateLink;
 import com.nelmin.my_log.content.model.Reaction;
@@ -27,7 +26,6 @@ public class ContentProcessingService {
     private final Article.Repo articleRepo;
     private final Reaction.Repo reactionRepo;
     private final PrivateLink.Repo privateLinkRepo;
-    private final Report.Repo reportRepo;
     private final ContentProcessorService contentProcessorService;
 
     @Transactional
@@ -49,9 +47,6 @@ public class ContentProcessingService {
 
                 log.info("Clear reactions");
                 reactionRepo.deleteAllByArticleIdIn(ids);
-
-                log.info("Clear reports");
-                reportRepo.deleteAllByArticleIdIn(ids);
 
                 log.info("Clear articles");
                 articleRepo.deleteAllByIdIn(ids);
@@ -96,32 +91,4 @@ public class ContentProcessingService {
         log.info("End to process pending article");
     }
 
-    @Transactional
-    @Scheduled(fixedDelay = 2L, timeUnit = TimeUnit.HOURS)
-    public void processReport() {
-        log.info("Start to process report");
-        var articleToSave = new ArrayList<Article>();
-
-        reportRepo.countReport().forEach(it -> {
-
-            if (it.getCount() >= maxReportCount) {
-                articleRepo.findById(it.getId()).ifPresent(article -> {
-                    article.setStatus(Article.Status.BLOCKED);
-                    article.setPublishedDate(null);
-                    articleToSave.add(article);
-                });
-            }
-        });
-
-        if (!articleToSave.isEmpty()) {
-            log.info("Found {} articles to block", articleToSave.size());
-            articleRepo.saveAll(articleToSave);
-
-            var builder = new StringBuilder();
-            articleToSave.forEach(it -> builder.append(it.getId()).append(", "));
-//            reportRepo.deleteAllByArticleIdIn(articleToSave.stream().map(Article::getId).toList());
-        }
-
-        log.info("End to process report");
-    }
 }

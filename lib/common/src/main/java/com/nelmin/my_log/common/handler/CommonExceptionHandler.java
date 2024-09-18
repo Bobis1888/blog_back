@@ -1,16 +1,15 @@
 package com.nelmin.my_log.common.handler;
 
-import com.nelmin.my_log.common.bean.UserInfo;
 import com.nelmin.my_log.common.dto.Error;
 import com.nelmin.my_log.common.dto.ExceptionResponse;
 import com.nelmin.my_log.common.exception.CommonException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -23,11 +22,10 @@ import java.util.HashMap;
 import java.util.stream.Collectors;
 
 @Slf4j
+@Primary
 @ControllerAdvice
 @RequiredArgsConstructor
 public class CommonExceptionHandler extends ResponseEntityExceptionHandler {
-
-    private final UserInfo userInfo;
 
     @ExceptionHandler(CommonException.class)
     protected ResponseEntity<Object> handleExceptionInternal(CommonException exception, WebRequest webRequest) {
@@ -36,22 +34,6 @@ public class CommonExceptionHandler extends ResponseEntityExceptionHandler {
         response.setDateTime(LocalDateTime.now());
         response.setMessage(exception.getMessage());
         return new ResponseEntity<>(response, exception.getStatus());
-    }
-
-    @ExceptionHandler(AccessDeniedException.class)
-    protected ResponseEntity<Object> handleExceptionInternal(AccessDeniedException exception, WebRequest webRequest) {
-        log(((ServletWebRequest) webRequest).getRequest().getRequestURI(), exception.getMessage());
-        ExceptionResponse response = new ExceptionResponse();
-        response.setDateTime(LocalDateTime.now());
-        response.setMessage(exception.getMessage());
-
-        HttpStatus status = HttpStatus.UNAUTHORIZED;
-
-        if (userInfo.isAuthorized()) {
-            status = HttpStatus.FORBIDDEN;
-        }
-
-        return new ResponseEntity<>(response, status);
     }
 
     private void log(String path, String message) {

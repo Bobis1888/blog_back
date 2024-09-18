@@ -1,16 +1,14 @@
 package com.nelmin.my_log.content.service;
 
-import com.nelmin.my_log.common.bean.UserInfo;
-import com.nelmin.my_log.common.model.Report;
-import com.nelmin.my_log.common.model.User;
-import com.nelmin.my_log.common.service.FillInfo;
-import com.nelmin.my_log.content.dto.common.Actions;
+import com.nelmin.my_log.content.dto.action.Actions;
+import com.nelmin.my_log.content.dto.action.SubscriptionActions;
 import com.nelmin.my_log.content.dto.common.ArticleDto;
 import com.nelmin.my_log.content.dto.common.ListContentResponseDto;
 import com.nelmin.my_log.content.model.Article;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+import com.nelmin.my_log.user_info.core.UserInfo;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,9 +20,7 @@ import java.util.Objects;
 public class ActionService implements FillInfo<ArticleDto> {
 
     private final UserInfo userInfo;
-    private final User.Repo userRepo;
-    private final SubscriptionsService subscriptionsService;
-    private final Report.Repo reportRepo;
+    private final CommonHttpClient httpClient;
 
     public void fillActions(@NonNull ListContentResponseDto responseDto) {
         try {
@@ -37,21 +33,18 @@ public class ActionService implements FillInfo<ArticleDto> {
     @Override
     public void fillContentInfo(@NonNull ArticleDto article) {
         try {
-            userRepo.getIdByNickName(article.getAuthorName()).ifPresent(it -> {
-                var userId = it.getId();
-                var currentUserIsOwner = Objects.equals(userId, userInfo.getId());
-                getActions(article, currentUserIsOwner);
-            });
+            var currentUserIsOwner = Objects.equals(article.getAuthorId(), userInfo.getId());
+            getActions(article, currentUserIsOwner, true);
         } catch (Exception ex) {
             log.error("Error fill info", ex);
         }
     }
 
     private void getActions(ArticleDto article) {
-        getActions(article, article.getAuthorName().equals(userInfo.getNickname()));
+        getActions(article, article.getAuthorId().equals(userInfo.getId()), false);
     }
 
-    private void getActions(ArticleDto article, Boolean currentUserIsOwner) {
+    private void getActions(ArticleDto article, Boolean currentUserIsOwner, Boolean deep) {
         var status = Article.Status.valueOf(article.getStatus().toUpperCase());
 
         var actions = new Actions();
@@ -69,12 +62,19 @@ public class ActionService implements FillInfo<ArticleDto> {
 
         } else if (status == Article.Status.PUBLISHED) {
 
+            if (userInfo.isAuthorized() && deep) {
+                var response = httpClient.exchange("subscription/actions?userIds=" + article.getAuthorId(), HttpMethod.GET, SubscriptionActions.class);
 
-            if (userInfo.isAuthorized()) {
-                var subscribed = subscriptionsService.isSubscribed(article.getAuthorName());
-                actions.setCanSubscribe(!subscribed);
-                actions.setCanUnsubscribe(subscribed);
-                actions.setCanReport(!reportRepo.existsByArticleIdAndUserId(article.getId(), userInfo.getId()));
+                response.ifPresent(it -> {
+                    var action = it.list().isEmpty() ? null : it.list().get(0);
+
+                    if (action != null) {
+                        actions.setCanSubscribe(action.canSubscribe());
+                        actions.setCanUnsubscribe(action.canUnsubscribe());
+                    }
+                });
+
+                actions.setCanReport(true);
             }
         }
 

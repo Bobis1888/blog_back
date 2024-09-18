@@ -1,14 +1,12 @@
 package com.nelmin.my_log.content.service;
 
-import com.nelmin.my_log.common.bean.UserInfo;
 import com.nelmin.my_log.common.dto.SuccessDto;
-import com.nelmin.my_log.common.service.FillInfo;
 import com.nelmin.my_log.content.dto.common.ArticleDto;
 import com.nelmin.my_log.content.model.Article;
 import com.nelmin.my_log.content.model.Reaction;
+import com.nelmin.my_log.user_info.core.UserInfo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

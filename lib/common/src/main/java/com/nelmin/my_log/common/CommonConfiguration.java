@@ -1,30 +1,21 @@
 package com.nelmin.my_log.common;
 
-import com.nelmin.my_log.common.abstracts.AnonymousUser;
-import com.nelmin.my_log.common.bean.UserInfo;
-import com.nelmin.my_log.common.service.OAuthRegistrationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.*;
-import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.filter.CommonsRequestLoggingFilter;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 
 import java.util.List;
 
 @Slf4j
 @Configuration
 @RequiredArgsConstructor
-@EnableJpaAuditing
-@EnableJpaRepositories(basePackages = "com.nelmin", considerNestedRepositories = true)
-@ComponentScan(basePackages = "com.nelmin")
 public class CommonConfiguration implements WebMvcConfigurer {
 
     private final List<HandlerInterceptor> interceptorList;
@@ -51,33 +42,10 @@ public class CommonConfiguration implements WebMvcConfigurer {
         return filter;
     }
 
-    /**
-     * The proxyMode attribute is necessary because at the moment of the instantiation of the web application context,
-     * there is no active request. Spring creates a proxy to be injected as a dependency,
-     * and instantiates the target bean when it is needed in a request.
-     *
-     * @return UserInfo
-     */
     @Bean
-    @Scope(value = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
+    @LoadBalanced
     @ConditionalOnMissingBean
-    public UserInfo userInfo() {
-        var auth = SecurityContextHolder.getContext().getAuthentication();
-        var principal = auth != null ? auth.getPrincipal() : null;
-
-        if (principal == null || auth instanceof AnonymousAuthenticationToken || principal instanceof AnonymousUser) {
-            return new UserInfo(new AnonymousUser());
-        }
-
-        return (UserInfo) auth.getPrincipal();
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public OAuthRegistrationService defaultRegService() {
-        return jwt -> {
-            log.debug("Have no any OAuthRegistrationService implementation");
-            return null;
-        };
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
     }
 }

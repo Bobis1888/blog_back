@@ -1,19 +1,19 @@
 package com.nelmin.my_log.content.service;
 
-import com.nelmin.my_log.common.bean.UserInfo;
 import com.nelmin.my_log.common.dto.SuccessDto;
-import com.nelmin.my_log.common.service.UserService;
 import com.nelmin.my_log.content.Utils;
 import com.nelmin.my_log.content.dto.common.*;
 import com.nelmin.my_log.content.model.Article;
 import com.nelmin.my_log.content.model.specification.ContentSpecificationFactory;
 import com.nelmin.my_log.content.model.PrivateLink;
+import com.nelmin.my_log.user_info.core.UserInfo;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -29,21 +29,15 @@ import static com.nelmin.my_log.content.model.Article.Status.*;
 @RequiredArgsConstructor
 public class ContentService {
 
-    private final Article.Repo articleRepo;
     private final UserInfo userInfo;
-    private final UserService userService;
+    private final Article.Repo articleRepo;
+    private final CommonHttpClient commonHttpClient;
     private final PrivateLink.Repo privateLinkRepo;
     private final PrivateLinkService privateLinkService;
     private final ContentProcessorService contentProcessorService;
     private final ContentSpecificationFactory contentSpecificationFactory;
 
     private static final String CLEAR_TAG_REGEXP = "[^#a-zA-Zа-яА-Я0-9_]";
-
-    @Transactional
-    public CreateContentResponseDto update(@NonNull Long id, @NonNull CreateContentRequestDto dto) {
-        //TODO
-        throw new UnsupportedOperationException();
-    }
 
     @Transactional
     public CreateContentResponseDto save(@NonNull CreateContentRequestDto dto) {
@@ -169,7 +163,10 @@ public class ContentService {
             res.setTags(article.get().getTags());
             res.setPreView(article.get().getPreView());
             res.setCountViews(article.get().getCountViews());
-            res.setAuthorName(userService.resolveNickname(article.get().getUserId()));
+            res.setAuthorId(article.get().getUserId());
+
+            resolveNicknames(article.get().getUserId().toString())
+                    .ifPresent(map -> res.setAuthorName(String.valueOf(map.get(article.get().getUserId().toString()))));
 
             if (List.of(PUBLISHED, PRIVATE_PUBLISHED).contains(article.get().getStatus()) && !article.get().getUserId().equals(userInfo.getId())) {
 
@@ -283,10 +280,18 @@ public class ContentService {
         List<ArticleDto> resList = new ArrayList<>();
 
         if (!page.isEmpty()) {
+            String ids = page.getContent()
+                    .stream()
+                    .map(it -> it.getUserId().toString())
+                    .collect(Collectors.joining(","));
+
+            var response = resolveNicknames(ids);
+
             resList.addAll(page.getContent().stream().map(it -> {
                 var res = new ArticleDto(it);
                 res.setContent(null);
-                res.setAuthorName(userService.resolveNickname(it.getUserId()));
+                res.setAuthorId(it.getUserId());
+                response.ifPresent(map -> res.setAuthorName(String.valueOf(map.get(it.getUserId().toString()))));
                 res.setCountViews(it.getCountViews());
                 res.setCountComments(it.getStatistic().getComments());
                 res.setCountReactions(it.getStatistic().getReactions());
@@ -345,5 +350,9 @@ public class ContentService {
         } else {
             return PageRequest.of(requestDto.getPage(), requestDto.getMax(), sort);
         }
+    }
+
+    private Optional<Map> resolveNicknames(String ids) {
+        return commonHttpClient.exchange("user/info/resolve_nicknames?ids=" + ids, HttpMethod.GET, Map.class);
     }
 }

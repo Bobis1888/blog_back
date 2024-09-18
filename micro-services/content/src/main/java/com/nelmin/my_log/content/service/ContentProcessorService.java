@@ -1,8 +1,8 @@
 package com.nelmin.my_log.content.service;
 
-import com.nelmin.my_log.common.bean.UserInfo;
 import com.nelmin.my_log.content.dto.kafka.UpdateImages;
 import com.nelmin.my_log.content.model.Article;
+import com.nelmin.my_log.user_info.core.UserInfo;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

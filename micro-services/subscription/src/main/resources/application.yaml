@@ -1,0 +1,23 @@
+server:
+  port: 8086
+  address: 0.0.0.0
+
+eureka:
+  client.serviceUrl.defaultZone: http://127.0.0.1:8761/eureka/
+  instance.prefer-ip-address: true
+
+spring:
+  application:
+    name: subscription
+  profiles:
+    active: ${SPRING_ACTIVE_PROFILE}
+
+  config.import: 'optional:configserver:'
+  cloud:
+    config:
+      discovery:
+        enabled: true
+        service-id: configserver
+      fail-fast: false
+      username: ${SPRING_SECURITY_USERNAME}
+      password: ${SPRING_SECURITY_PASSWORD}

@@ -2,6 +2,7 @@ package com.nelmin.my_log.content.dto.common;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.nelmin.my_log.common.dto.HasError;
+import com.nelmin.my_log.content.dto.action.Actions;
 import com.nelmin.my_log.content.model.Article;
 import lombok.*;
 
@@ -20,6 +21,7 @@ public class ArticleDto extends HasError {
     private String content;
     private LocalDateTime publishedDate;
     private String authorName;
+    private Long authorId;
     private Long countViews = 0L;
     private Long countComments = 0L;
     private Long countReactions = 0L;

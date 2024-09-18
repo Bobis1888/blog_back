@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 public class CommentDto {
     private Long id;
     private String nickname;
+    private Long userId;
     private String content;
     private LocalDateTime date;
     private Long rating;

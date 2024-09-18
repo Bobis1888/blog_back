@@ -105,3 +105,6 @@ ALTER TABLE public.article ALTER COLUMN pre_view TYPE VARCHAR(512);
 
 --changeset nelmin:2024-09-11-23-00
 ALTER TABLE public.comment ADD COLUMN IF NOT EXISTS parent_id BIGINT;
+
+--changeset nelmin:2024-09-18-23-00
+ALTER TABLE public.comment DROP CONSTRAINT IF EXISTS comment_article_id_fkey;
