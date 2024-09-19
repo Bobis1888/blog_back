@@ -6,8 +6,10 @@ import com.nelmin.my_log.user_info.core.UserInfo;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jsoup.Jsoup;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
@@ -27,23 +29,47 @@ public class ContentProcessorService {
     private final UserInfo userInfo;
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
+    @Transactional
     public void process(@NonNull Article article, @NonNull String newContent) {
         newContent = newContent.replaceAll(REGEX, "");
         String oldContent = article.getContent();
         article.setContent(newContent);
+        String generatedPreview = "";
 
-        var generatedPreview = newContent.substring(0, Math.min(newContent.length(), PREVIEW_LENGTH));
-        article.setPreView(generatedPreview.replaceAll(REGEX, ""));
+        var doc = Jsoup.parse(newContent);
+        var list = doc.select("p");
+
+        if (!list.isEmpty()) {
+            var first = list.get(0);
+
+            if (first.toString().length() < PREVIEW_LENGTH) {
+                generatedPreview = first.toString();
+            }
+
+            if (list.size() > 1 && generatedPreview.length() < PREVIEW_LENGTH) {
+                var second = list.get(1);
+
+                if ((second.text().length() + generatedPreview.length()) < PREVIEW_LENGTH) {
+                    generatedPreview += second.toString();
+                }
+            }
+        }
+
+        if (!StringUtils.hasText(generatedPreview)) {
+            generatedPreview = newContent.substring(0, Math.min(newContent.length(), PREVIEW_LENGTH));
+        }
+
+        article.setPreView(generatedPreview);
 
         List<String> newImages = new ArrayList<>();
         List<String> removeImages = new ArrayList<>();
 
+        // TODO Jsoup
         var matcher = IMG_REGEX.matcher(newContent);
 
         while (matcher.find()) {
             newImages.add(matcher.group());
         }
-
 
         if (StringUtils.hasText(oldContent)) {
             matcher = IMG_REGEX.matcher(oldContent);
