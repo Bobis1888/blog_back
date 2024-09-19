@@ -33,7 +33,7 @@ public class NotificationService {
     @Transactional
     public ListNotificationResponseDto list(ListNotificationRequestDto requestDto) {
         var res = new ArrayList<NotificationDto>();
-        var page = PageRequest.of(requestDto.page(), requestDto.max(), Sort.by(Sort.Direction.ASC, "isRead"));
+        var page = PageRequest.of(requestDto.page(), requestDto.max(), Sort.by(Sort.Direction.DESC, "createdDate"));
         var notifications = notificationRepo.findAllByUserId(userInfo.getId(), page);
 
         if (!notifications.isEmpty()) {

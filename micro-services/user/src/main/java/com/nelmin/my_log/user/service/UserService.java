@@ -4,7 +4,6 @@ import com.nelmin.my_log.user.dto.UserInfoDto;
 import com.nelmin.my_log.user.model.User;
 import com.nelmin.my_log.user_info.core.UserInfo;
 import jakarta.annotation.PostConstruct;
-import jakarta.validation.Valid;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -110,6 +109,14 @@ public class UserService {
         }, () -> userInfoDto.reject("notFound", "user"));
 
         return userInfoDto;
+    }
+
+    @Transactional
+    public UserInfoDto publicInfo(Long id) {
+        var dto = info(id);
+        dto.setEmail(null);
+        dto.setPremiumExpireDate(null);
+        return dto;
     }
 
     @Transactional

@@ -31,6 +31,12 @@ public class InfoController {
         return ResponseEntity.status(response.hasErrors() ? HttpStatus.BAD_REQUEST : HttpStatus.OK).body(response);
     }
 
+    @GetMapping(value = "/public_info/{id}")
+    public ResponseEntity<UserInfoDto> publicInfo(@Valid @PathVariable Long id) {
+        var response = userService.publicInfo(id);
+        return ResponseEntity.status(response.hasErrors() ? HttpStatus.BAD_REQUEST : HttpStatus.OK).body(response);
+    }
+
     @GetMapping(value = "/info/{nickname}")
     public ResponseEntity<List<UserInfoDto>> infos(@Valid @PathVariable String nickname) {
         var response = userService.publicInfo(nickname);
