@@ -29,7 +29,7 @@ public class AuthEventService {
 
     // TODO refactor
     public void sendConfirmEmail(String email, String uuid) {
-        String link = resolveUrl("api/auth/confirm?uuid=" + uuid);
+        String link = resolveUrl("api/user/auth/confirm?uuid=" + uuid);
         emailSender.sendMail(
                 email,
                 "Подтвердите регистрацию на сайте",
