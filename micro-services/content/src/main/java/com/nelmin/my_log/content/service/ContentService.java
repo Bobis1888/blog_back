@@ -165,6 +165,7 @@ public class ContentService {
             res.setCountViews(article.get().getCountViews());
             res.setAuthorId(article.get().getUserId());
 
+            // TODO remove
             resolveNicknames(article.get().getUserId().toString())
                     .ifPresent(map -> res.setAuthorName(String.valueOf(map.get(article.get().getUserId().toString()))));
 

@@ -60,7 +60,7 @@ public class ActionService implements FillInfo<ArticleDto> {
                     Article.Status.PUBLISHED,
                     Article.Status.PENDING).contains(status));
 
-        } else if (status == Article.Status.PUBLISHED) {
+        } else if (List.of(Article.Status.PUBLISHED, Article.Status.PRIVATE_PUBLISHED).contains(status)) {
 
             if (userInfo.isAuthorized() && deep) {
                 var response = httpClient.exchange("subscription/actions?userIds=" + article.getAuthorId(), HttpMethod.GET, SubscriptionActions.class);
