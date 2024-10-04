@@ -115,6 +115,8 @@ public class UserService {
     public UserInfoDto publicInfo(Long id) {
         var dto = info(id);
         dto.setEmail(null);
+        dto.setEnabled(null);
+        dto.setIsBlocked(null);
         dto.setPremiumExpireDate(null);
         return dto;
     }
