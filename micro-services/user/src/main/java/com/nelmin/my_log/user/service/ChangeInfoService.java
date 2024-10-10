@@ -29,6 +29,11 @@ public class ChangeInfoService {
             return res;
         }
 
+        if (dto.nickname().length() < 3 || dto.nickname().length() > 35) {
+            res.reject("invalid", "nickname");
+            return res;
+        }
+
         try {
             User user = (User) userInfo.getCurrentUser();
 
